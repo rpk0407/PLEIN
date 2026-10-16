@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buybackPct, splitWeek, teamPct, frNumber } from '../public/js/formula.js';
+import { buybackPct, buybackTenths, fillCost, frNumber, splitWeek, teamPct } from '../public/js/formula.js';
 
 test('buyback rate is 20 × the diesel price, rounded to 0.1 point', () => {
   assert.equal(buybackPct(2.3283), 46.6); // official survey of 9 Oct 2026
@@ -8,6 +8,26 @@ test('buyback rate is 20 × the diesel price, rounded to 0.1 point', () => {
   assert.equal(buybackPct(2.356), 47.1); // official survey of 2 Oct 2026
   assert.equal(buybackPct(2.2), 44);
   assert.equal(buybackPct(2.346), 46.9);
+});
+
+test('exact halves round up, never down by float error', () => {
+  assert.equal(buybackPct(2.1725), 43.5); // 20 × 2.1725 = 43.45 → 43.5 (float arithmetic gives 43.4)
+  assert.equal(buybackPct(2.3225), 46.5);
+  assert.equal(buybackPct(2.3425), 46.9);
+});
+
+test('every four-decimal price from 1.5000 to 3.2000 matches integer arithmetic', () => {
+  for (let k = 15000; k <= 32000; k += 1) {
+    const expected = Math.min(600, Math.max(300, Math.floor((20 * k + 500) / 1000)));
+    assert.equal(buybackTenths(k / 10000), expected, `price ${k / 10000}`);
+    assert.equal(teamPct(k / 10000), (900 - expected) / 10, `team at ${k / 10000}`);
+  }
+});
+
+test('a fill-up costs price × litres, to the cent', () => {
+  assert.equal(fillCost(2.3283, 50), 116.42); // 116.415 rounds up
+  assert.equal(fillCost(2.346, 50), 117.3);
+  assert.equal(fillCost(1.5, 40), 60);
 });
 
 test('the rate never leaves the 30–60 % band', () => {

@@ -32,7 +32,9 @@ the reasoning (psychology, copy deck, visual system, the lines we don't cross), 
    - Every communication fair, clear and not misleading, consistent with the fiche (MiCA arts 7 and 14).
      Whether a bonding-curve launch makes the founders "offerors" under MiCA is open for the lawyer.
    - No raffle and nothing tied to buying or holding $PLEIN: contests are free, judged on skill by a
-     jury, adults only, with written rules (`public/reglement-concours.html`).
+     jury, adults only, with written rules. **The Saturday contest is off the site** until the lawyer
+     has answered whether a prize for a post showing the $PLEIN mark counts as paid promotion; its
+     draft rules (`public/reglement-concours.html`) are not linked from anywhere.
    - No political symbol, party, union or movement; no fuel brand; no real person's face.
    - The food-aid partner is named only once the agreement is signed. 18+ only. No cookies, no trackers.
    - The formula changes only with four weeks' public notice.
@@ -43,8 +45,11 @@ the reasoning (psychology, copy deck, visual system, the lines we don't cross), 
 
 ## The mechanism
 
-- Every buy and sell of $PLEIN on Jupiter pays a 1 % fee: 0.5 % to Jupiter, 0.5 % to the creator
-  ("la station"). The station's share fills **le réservoir**, a multisig that needs both founders.
+- On the official pool, every buy and sell of $PLEIN pays a 1 % fee: 0.5 % to Jupiter, 0.5 % to the
+  creator ("la station"), as Jupiter Studio publishes it (Tier 2 until the first ticket shows it).
+  The station's share lands on the **creator wallet**, is claimed every week and moved into **le
+  réservoir**, a multisig whose signers and threshold are published before opening. Never write that
+  "nothing leaves without both signatures" for the fees: until they are claimed, they are not in it.
 - **Saturday split** (source of truth: `public/js/formula.js`, tested in `test/formula.test.mjs`):
   buyback and burn = 20 × official diesel price in €/L, rounded to 0.1 point, kept within 30–60 %;
   food aid = 10 %, fixed; team = the rest. When diesel rises, the team's share is what shrinks
@@ -69,10 +74,11 @@ public/                  everything served
   js/formula.js          the buyback formula and weekly split (shared with tests)
   js/mint.js             Solana address shape check (base58, 32 bytes)
   js/typo.js             French non-breaking spaces for runtime text
+  js/clock.js            Paris time: next Saturday 18:00 as a real instant, countdown text
   js/fiche.js            fills the fact sheet from config.js and live.json
   fiche-plein.html       the fact sheet: rule, fees, wallets, commitments, risks (draft)
   mentions-legales.html  legal notice (draft)
-  reglement-concours.html  contest rules (draft)
+  reglement-concours.html  contest rules (draft, not linked: the contest is off until the lawyer answers)
   css/fonts.css, fonts/  self-hosted brand fonts (OFL), no third-party font requests
   css/page.css           styles of the three secondary pages
   og.png, favicon.svg, plein.ics (Saturday 18:00 calendar)
@@ -82,7 +88,8 @@ api/                     Vercel Node functions; files starting with _ are not en
   stations.js            GET /api/stations?cp=75011&fuel=gazole&tank=50 → three cheapest stations
 scripts/dev.mjs          local server: public/ + api/, like Vercel (npm run dev, PORT=3000)
 scripts/check-feed.mjs   probes the live feed and the two endpoints (npm run check:feed; runs in CI)
-test/                    node --test suites: formula, address check, typography, no-signing guard
+test/                    node --test suites: formula, clock, address check, typography, config and
+                         live.json shapes, the two endpoints on a stubbed feed, the no-signing guard
 design/                  Claude Design source of the site and kit, previews, tokens (see design/README.md)
 brand/                   PNG exports of the social kit and the og card source
 docs/                    thesis.md (design thesis), playbook.md (launch playbook, partly superseded),
@@ -108,7 +115,16 @@ npm run check:feed    # needs network: checks the official feed still has the fi
 - **Phase:** the station is open when `live.json` holds a well-formed contract and the clock has
   passed `launchAt`. Before that: countdown to the opening, contract slot "publié ici samedi à 18:00",
   copy buttons disabled, pump closed, dashboard pending. Open pages re-read `live.json` every 15 s
-  from five minutes before the opening, every minute once open, every five minutes otherwise.
+  from five minutes before the opening, every minute once open, every five minutes otherwise. If the
+  contract changes after a visitor opened the pump, the page reloads rather than keep a swap widget
+  set up on the old mint.
+- **Dashboard honesty:** `null` shows as a dash; the tag reads "Relevé du …" only when `asOf` is set,
+  otherwise "En attente du premier relevé". A light's label states a fact ("Création révoquée") only
+  once its state is `ok`; until then it names what is checked ("Autorité de création").
+- **Ticker:** it says "Gazole en direct" only after `/api/diesel` answers; until then it shows the
+  official weekly survey, labelled as such.
+- **Atelier links:** a totem prefilled from URL parameters carries a notice that it is a visitor's
+  card, not a message from the station.
 - `/api/*` failing is normal offline (the page keeps its printed fallbacks). The sandbox this repo
   was built in could not reach the feed; CI can.
 - Check both widths after any layout change (1440 and 390); the page must never scroll sideways.
@@ -116,12 +132,15 @@ npm run check:feed    # needs network: checks the official feed still has the fi
 
 ## Status, tiered
 
-**Tier 1, verified here:** the formula and weekly split (tests, including the example ticket
-3 412,00 → 1 607,05 / 341,20 / 1 463,75 at €2.356); French number formatting and typography; the
-address check; the no-signing guard (proven to fail on a planted signing call and key array); the
-page at 1440 and 390 px with no sideways scroll; the pre-opening state; the contract appearing at
-the opening without a reload, and a malformed wallet being refused (simulated with the all-ones
-system address as a visibly fake placeholder); the three secondary pages at both widths.
+**Tier 1, verified here:** the formula and weekly split in integer arithmetic (every four-decimal
+price from €1.50 to €3.20, exact halves rounding up, and the example ticket 3 412,00 → 1 607,05 /
+341,20 / 1 463,75 at €2.356); the Paris countdown across the 25 October clock change; French number
+formatting and typography; the address check; the no-signing guard (it catches the 15 signing and
+key-material cases an independent review planted); the endpoints' arithmetic and département
+fallback on a stubbed feed; the page at 1440 and 390 px with no sideways scroll; the pre-opening
+state; in a simulated opening (the all-ones system address as a visibly fake placeholder): the
+contract appearing without a reload, a malformed wallet refused, dated dashboard readings, a 9-digit
+burn count, and the reload when the contract changes under an open swap widget.
 
 **Tier 2, built but unverified:**
 - Official feed field names in `api/_feed.js` (CI `check:feed` is the probe).
@@ -134,6 +153,8 @@ system address as a visibly fake placeholder); the three secondary pages at both
 - The official survey of 9 October 2026, €2.3283/L (quoted by Le Figaro and Selectra), now in
   `config.js`: confirm it against the ministry's weekly note.
 - `vercel.json` (Other preset, `outputDirectory: public`, headers): confirm on the first deploy.
+- The no-signing guard is a tripwire on names and shapes, not a proof (it does not catch a generic
+  Anchor `.rpc()` call, for instance); anything touching a wallet still needs a human review.
 
 **Tier 3, design:** the psychology in `docs/thesis.md` (reappraisal, symbolic control, costly
 signals, the weekly loop). Its section "How we'll know it works" lists the metrics; there is no data yet.
@@ -141,11 +162,11 @@ signals, the weekly loop). Its section "How we'll know it works" lists the metri
 ## Open decisions for the team
 
 Marked `[entre crochets]` in the three draft pages: the publishing company (a legal person, which
-MiCA requires of an offeror), contacts, the host's details, the contest's prizes, jury, eligibility
-and entry hashtag, what happens if Solana or Jupiter is down on a Saturday, the multisig tool and
-threshold, the backup if a founder cannot sign, and whether to add cookie-free analytics. Also the
-lawyer's question in the contest rules: can a prize for a post showing the $PLEIN mark count as paid
-promotion?
+MiCA requires of an offeror), contacts, the host's details, what happens if Solana or Jupiter is down
+on a Saturday, the multisig tool, signers and threshold, the recovery procedure if a key is lost
+(with a strict 2-of-2, one lost key freezes the réservoir for good), and whether to add cookie-free
+analytics. The contest (prizes, jury, eligibility, entry by e-mail or a neutral hashtag, an Atelier
+export without the station's mark) waits for the lawyer's answer on paid promotion.
 
 ## Roadmap
 

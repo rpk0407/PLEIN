@@ -18,7 +18,14 @@ const TYPES = {
 };
 
 async function serveStatic(pathname, res) {
-  let file = normalize(join(publicDir, decodeURIComponent(pathname)));
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' }).end('Adresse invalide');
+    return;
+  }
+  let file = normalize(join(publicDir, decoded));
   if (!file.startsWith(publicDir)) {
     res.writeHead(403).end();
     return;

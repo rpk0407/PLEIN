@@ -1,7 +1,7 @@
 // GET /api/stations?cp=69003&fuel=gazole&tank=50
-// The three cheapest stations for a postcode, the local average and the spread, from the
-// official feed. If a postcode has fewer than three stations, the search widens to its
-// département (same first two digits).
+// The three cheapest stations for a postcode, with the average, cheapest and dearest price of
+// every station in the area, from the official feed. If a postcode has fewer than three
+// stations, the search widens to its département (first two digits; three for overseas).
 import { FIELDS, STATION_FIELDS, coordinates, queryRecords, saneClause, send, toEuros } from './_feed.js';
 
 function query(req) {
@@ -18,13 +18,34 @@ function relative(updated) {
   return `mis à jour il y a ${Math.round(hours / 24)} j`;
 }
 
-async function fetchArea(where, field, updated) {
+/** Postcode prefix of the département: 13001 → "13", 97400 → "974". */
+export function departementPrefix(cp) {
+  return /^9[78]/.test(cp) ? cp.slice(0, 3) : cp.slice(0, 2);
+}
+
+/** Count, average, cheapest and dearest price over every station in the area. */
+async function areaStats(where, field) {
+  const data = await queryRecords({
+    select: `count(${field}) as count, avg(${field}) as average, min(${field}) as min, max(${field}) as max`,
+    where: `${where} and ${saneClause(field)}`,
+    limit: '1',
+  });
+  const row = data?.results?.[0] || {};
+  return {
+    count: Number(row.count) || 0,
+    average: toEuros(row.average),
+    min: toEuros(row.min),
+    max: toEuros(row.max),
+  };
+}
+
+async function cheapest(where, field, updated) {
   const s = STATION_FIELDS;
   const data = await queryRecords({
     select: [s.id, s.postcode, s.city, s.address, s.geo, field, updated].join(','),
     where: `${where} and ${saneClause(field)}`,
     order_by: `${field} asc`,
-    limit: '100',
+    limit: '3',
   });
   return data?.results || [];
 }
@@ -39,45 +60,47 @@ export default async function handler(req, res) {
 
   const { price: field, updated } = FIELDS[fuel];
   try {
-    let rows = await fetchArea(`${STATION_FIELDS.postcode} = "${cp}"`, field, updated);
     let area = 'postcode';
-    if (rows.length < 3) {
-      rows = await fetchArea(`startswith(${STATION_FIELDS.postcode}, "${cp.slice(0, 2)}")`, field, updated);
+    let where = `${STATION_FIELDS.postcode} = "${cp}"`;
+    let stats = await areaStats(where, field);
+    if (stats.count < 3) {
       area = 'departement';
+      where = `startswith(${STATION_FIELDS.postcode}, "${departementPrefix(cp)}")`;
+      stats = await areaStats(where, field);
     }
-    const priced = rows
+    if (stats.count === 0 || stats.average == null) return send(res, 404, { error: 'no_stations', cp, fuel }, 300);
+
+    const rows = await cheapest(where, field, updated);
+    const stations = rows
       .map((r) => ({ r, price: toEuros(r[field]) }))
       .filter((x) => x.price != null)
-      .sort((a, b) => a.price - b.price);
-    if (priced.length === 0) return send(res, 404, { error: 'no_stations', cp, fuel }, 300);
+      .map(({ r, price }) => {
+        const { lat, lon } = coordinates(r);
+        return {
+          id: r[STATION_FIELDS.id],
+          address: r[STATION_FIELDS.address] || '',
+          city: r[STATION_FIELDS.city] || '',
+          postcode: r[STATION_FIELDS.postcode] || '',
+          price: Math.round(price * 1000) / 1000,
+          saving: Math.round((stats.average - price) * tank * 100) / 100,
+          updatedAt: r[updated] || null,
+          updatedLabel: relative(r[updated]),
+          lat,
+          lon,
+        };
+      });
+    if (stations.length === 0) return send(res, 404, { error: 'no_stations', cp, fuel }, 300);
 
-    const prices = priced.map((x) => x.price);
-    const average = prices.reduce((a, b) => a + b, 0) / prices.length;
-    const max = prices[prices.length - 1];
-    const stations = priced.slice(0, 3).map(({ r, price }) => {
-      const { lat, lon } = coordinates(r);
-      return {
-        id: r[STATION_FIELDS.id],
-        address: r[STATION_FIELDS.address] || '',
-        city: r[STATION_FIELDS.city] || '',
-        postcode: r[STATION_FIELDS.postcode] || '',
-        price: Math.round(price * 1000) / 1000,
-        saving: Math.round((average - price) * tank * 100) / 100,
-        updatedAt: r[updated] || null,
-        updatedLabel: relative(r[updated]),
-        lat,
-        lon,
-      };
-    });
     send(res, 200, {
       cp,
       fuel,
       tank,
       area,
-      count: prices.length,
-      average: Math.round(average * 1000) / 1000,
-      max,
-      spread: Math.round((max - prices[0]) * 1000) / 1000,
+      count: stats.count,
+      average: Math.round(stats.average * 1000) / 1000,
+      min: stats.min,
+      max: stats.max,
+      spread: Math.round((stats.max - stats.min) * 1000) / 1000,
       stations,
       source: 'prix-carburants.gouv.fr · data.economie.gouv.fr (Licence Ouverte)',
     }, 600);

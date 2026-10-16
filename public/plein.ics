@@ -28,7 +28,7 @@ DTSTAMP:20261016T200000Z
 DTSTART;TZID=Europe/Paris:20261017T180000
 DTEND;TZID=Europe/Paris:20261017T183000
 SUMMARY:Ouverture de la Station $PLEIN
-DESCRIPTION:Le contrat officiel est publié sur le site à 18:00\, et nulle part ailleurs en premier.
+DESCRIPTION:Le seul contrat officiel est celui publié sur le site de la station\, à partir de 18:00.
 END:VEVENT
 BEGIN:VEVENT
 UID:plein-du-samedi@station-plein

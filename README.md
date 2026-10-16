@@ -44,7 +44,8 @@ At 18:00:
 - [ ] Paste it into `public/live.json` → `"contract"`, commit, push. Open pages show it within
       15 seconds, without a reload. Until then they read *Ouverture imminente*.
 - [ ] Check the home page, the copy button, the fiche and the Solscan link.
-- [ ] Add the public wallets to `live.json` as they are created (réservoir, aid, founders).
+- [ ] Add the public wallets to `live.json` as they are created: the creator wallet (where Jupiter
+      Studio pays the fees), the réservoir multisig, food aid, founders.
 
 At 19:00: measure top-10 concentration and bundled buys, set the dashboard lights in `live.json`.
 
@@ -52,9 +53,11 @@ At 19:00: measure top-10 concentration and bundled buys, set the dashboard light
 
 - [ ] When the ministry publishes the new weekly survey: update `official` in `public/config.js`
       (price with its decimals, week, source), `npm test`, push.
-- [ ] Saturday 17:45 the price is frozen. 18:00 the buyback runs from the multisig, signed by both
-      founders. 19:00 burn. 19:05 the ticket.
-- [ ] Update the dashboard in `public/live.json` from on-chain reads, never from estimates.
+- [ ] Before Saturday: claim the week's fees from the creator wallet into the multisig.
+- [ ] Saturday 17:45 the price is frozen. 18:00 the buyback runs from the multisig, signed by its
+      signers in their own wallets. 19:00 burn. 19:05 the ticket.
+- [ ] Update the dashboard in `public/live.json` from on-chain reads, never from estimates, and set
+      `asOf` to the time of the reading.
 
 ## What's in here
 

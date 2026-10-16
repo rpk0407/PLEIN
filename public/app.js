@@ -5,9 +5,10 @@
 //   data-on-submit           form submit                data-post="…"     text once the station is open
 // Settings come from /config.js (set once). The contract, wallets and dashboard come from
 // /live.json, re-read while the page is open, so the contract appears at 18:00 without a reload.
-import { buybackPct, teamPct, frNumber } from './js/formula.js';
+import { buybackPct, fillCost, frNumber, teamPct } from './js/formula.js';
 import { isSolanaAddress } from './js/mint.js';
 import { NBSP as NB, typo } from './js/typo.js';
+import { formatCountdown, nextPleinAt } from './js/clock.js';
 
 const C = window.PLEIN_CONFIG || {};
 C.contract = '';
@@ -28,8 +29,12 @@ const CHIP_ON = { background: '#FFA733', color: '#0B0C0E', borderColor: '#FFA733
 const CHIP_OFF = { background: '#171B21', color: '#F1F4F6', borderColor: '#3A414C' };
 
 const params = new URLSearchParams(location.search);
+const priceInput = $('#gazole');
 const state = {
-  price: C.official?.gazole ?? 2.356,
+  // without config.js, keep the figure printed in the page rather than invent one
+  price: C.official?.gazole ?? (Number(priceInput?.value) || 2.3283),
+  // a totem prefilled from a shared link is labelled as a visitor's card, not the station's
+  visitorCard: ['l1', 'v1', 'l2', 'v2'].some((key) => params.has(key)),
   fuel: 'gazole',
   tank: 50,
   cp: '',
@@ -69,27 +74,6 @@ async function copyText(text) {
 }
 
 // ---------------------------------------------------------------- countdown (Europe/Paris)
-const parisFormat = new Intl.DateTimeFormat('en-GB', {
-  timeZone: 'Europe/Paris', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
-});
-function parisWeekSeconds(time) {
-  const p = Object.fromEntries(parisFormat.formatToParts(new Date(time)).map((x) => [x.type, x.value]));
-  const dow = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[p.weekday] ?? 0;
-  return dow * 86400 + Number(p.hour) * 3600 + Number(p.minute) * 60 + Number(p.second);
-}
-function secondsToNextPlein(time) {
-  let delta = 6 * 86400 + 18 * 3600 - parisWeekSeconds(time);
-  if (delta <= 0) delta += 7 * 86400;
-  return delta;
-}
-function formatCountdown(total) {
-  const z = (n) => String(n).padStart(2, '0');
-  const d = Math.floor(total / 86400);
-  const h = Math.floor((total % 86400) / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  return `${d > 0 ? `${d}J ` : ''}${z(h)}:${z(m)}:${z(s)}`;
-}
 let lastOpen = null;
 let nextLiveAt = 0;
 function tick() {
@@ -102,10 +86,10 @@ function tick() {
   let text;
   let label;
   if (open) {
-    text = formatCountdown(secondsToNextPlein(now));
+    text = formatCountdown((nextPleinAt(now) - now) / 1000);
     label = 'Plein dans';
   } else if (now < LAUNCH_AT) {
-    text = formatCountdown(Math.round((LAUNCH_AT - now) / 1000));
+    text = formatCountdown((LAUNCH_AT - now) / 1000);
     label = 'Ouverture dans';
   } else {
     text = 'imminente';
@@ -135,7 +119,13 @@ async function loadLiveState() {
     const live = JSON.parse(text);
     liveText = text;
     // an address is shown only if it is well-formed; a typo'd or pasted-wrong value stays hidden
-    C.contract = isSolanaAddress(live.contract) ? live.contract : '';
+    const contract = isSolanaAddress(live.contract) ? live.contract : '';
+    if (pluginRequested && contract !== C.contract) {
+      // the swap widget was set up with the previous contract: start clean rather than trade it
+      location.reload();
+      return;
+    }
+    C.contract = contract;
     C.wallets = Object.fromEntries(Object.entries(live.wallets || {}).filter(([, a]) => isSolanaAddress(a)));
     if (live.dashboard) C.dashboard = live.dashboard;
     lastOpen = isOpen();
@@ -166,7 +156,7 @@ function applyPhase() {
   });
   setIf('pumpClosed', !open);
   setIf('pumpLive', open);
-  setText('dashTag', open ? 'En direct' : 'Les compteurs s’allument à l’ouverture');
+  renderDashTag();
 
   const links = C.links || {};
   if (links.xHandle) {
@@ -177,14 +167,20 @@ function applyPhase() {
     $$('[data-link="telegram"]').forEach((a) => { a.href = links.telegram; });
     setText('telegramLabel', 'Telegram');
   }
-  if (open) {
-    $$('[data-link="dexscreener"]').forEach((a) => { a.href = `https://dexscreener.com/solana/${C.contract}`; });
-    $$('[data-link="solscan"]').forEach((a) => { a.href = `https://solscan.io/token/${C.contract}`; });
-    $$('[data-link="jupiter"]').forEach((a) => { a.href = `https://jup.ag/swap/USDC-${C.contract}`; });
-  }
-  Object.entries(C.wallets || {}).forEach(([key, address]) => {
-    if (!address) return;
-    $$(`[data-wallet="${key}"]`).forEach((el) => { el.textContent = address; });
+  const tokenLinks = {
+    dexscreener: `https://dexscreener.com/solana/${C.contract}`,
+    solscan: `https://solscan.io/token/${C.contract}`,
+    jupiter: `https://jup.ag/swap/USDC-${C.contract}`,
+  };
+  Object.entries(tokenLinks).forEach(([key, href]) => {
+    $$(`[data-link="${key}"]`).forEach((a) => {
+      if (a.dataset.hrefPre === undefined) a.dataset.hrefPre = a.getAttribute('href') || '';
+      a.setAttribute('href', open ? href : a.dataset.hrefPre); // a withdrawn contract leaves no link behind
+    });
+  });
+  $$('[data-wallet]').forEach((el) => {
+    if (el.dataset.walletPre === undefined) el.dataset.walletPre = el.textContent;
+    el.textContent = (C.wallets || {})[el.dataset.wallet] || el.dataset.walletPre;
   });
 }
 
@@ -206,21 +202,23 @@ function applyOfficial() {
     el.style.left = `${(((price - min) / (max - min)) * 100).toFixed(1)}%`;
   });
   $$('[data-official-aria]').forEach((el) => {
-    el.setAttribute('aria-label', `Totem de la station : gazole ${fr(price, 3)} euros le litre au relevé officiel, rachat ${fr(pct, 1)} % ce samedi, et le compte à rebours jusqu’au prochain plein`);
+    el.setAttribute('aria-label', `Totem de la station : gazole ${fr(price, 3)} euros le litre au relevé officiel, rachat ${fr(pct, 1)} % au dernier relevé, et le compte à rebours jusqu’au prochain plein`);
   });
 }
-function showLive(gazole) {
+/** The ticker says "en direct" only once the live feed has answered; until then it shows the official survey. */
+function showFuel(gazole, live) {
+  $$('[data-live-label]').forEach((el) => { el.textContent = live ? 'Gazole en direct' : 'Gazole · relevé officiel'; });
   $$('[data-live="gazole"]').forEach((el) => { el.textContent = `${fr(gazole, 3)}${NB}€/L`; });
-  $$('[data-live="fill50"]').forEach((el) => put(el, `${fr(gazole * 50, 2)} €`));
+  $$('[data-live="fill50"]').forEach((el) => put(el, `${fr(fillCost(gazole, 50), 2)} €`));
 }
 async function loadLive() {
   try {
     const res = await fetch('/api/diesel', { headers: { accept: 'application/json' } });
     if (!res.ok) return;
     const data = await res.json();
-    if (data?.live?.gazole) showLive(data.live.gazole);
+    if (data?.live?.gazole) showFuel(data.live.gazole, true);
   } catch {
-    // keep the fallback printed in the page
+    // keep the official figure printed in the page
   }
 }
 
@@ -235,27 +233,70 @@ const VOYANT_STYLE = {
   warn: { stroke: '#FFA733', bg: 'rgba(255, 167, 51, 0.12)', glow: '0 0 18px rgba(255, 167, 51, 0.38)', detail: '#FFB95E', border: '#4A3A20' },
   pending: { stroke: '#8A939E', bg: 'rgba(138, 147, 158, 0.10)', glow: 'none', detail: '#8A939E', border: '#1E242C' },
 };
+const dateFormat = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+});
+function renderDashTag() {
+  const asOf = Date.parse(C.dashboard?.asOf || '');
+  let text = 'Les compteurs s’allument à l’ouverture';
+  if (isOpen()) {
+    if (Number.isFinite(asOf)) {
+      const p = Object.fromEntries(dateFormat.formatToParts(new Date(asOf)).map((x) => [x.type, x.value]));
+      text = `Relevé du ${p.day} ${p.month} à ${p.hour}:${p.minute}`;
+    } else {
+      text = 'En attente du premier relevé';
+    }
+  }
+  setText('dashTag', text);
+}
+// The odometer grows a group of three drums when the count passes 99 999 999.
+let odometerParts = null;
+function renderOdometer(value) {
+  const odo = $('[data-odometer]');
+  if (!odo) return;
+  if (!odometerParts) {
+    const kids = Array.from(odo.children);
+    odometerParts = {
+      cell: kids.find((el) => el.textContent.trim() !== '')?.cloneNode(true),
+      gap: kids.find((el) => el.textContent.trim() === '')?.cloneNode(true),
+    };
+    if (!odometerParts.cell || !odometerParts.gap) return;
+  }
+  const known = value != null && Number.isFinite(Number(value));
+  const digits = known ? String(Math.max(0, Math.floor(Number(value)))).padStart(8, '0').split('') : Array(8).fill('–');
+  const nodes = [];
+  digits.forEach((digit, i) => {
+    if (i > 0 && (digits.length - i) % 3 === 0) nodes.push(odometerParts.gap.cloneNode(true));
+    const cell = odometerParts.cell.cloneNode(true);
+    cell.textContent = digit;
+    nodes.push(cell);
+  });
+  odo.replaceChildren(...nodes);
+  odo.setAttribute('aria-label', known ? `Compteur : ${fr(Number(value), 0)} $PLEIN brûlés` : 'Compteur : pas encore relevé');
+}
 function applyDashboard() {
   const d = C.dashboard || {};
+  const dash = (key, text) => $$(`[data-dash="${key}"]`).forEach((el) => put(el, text));
+  // null means "not measured yet": a dash, never a zero
   if (d.reservoirUsdc != null) {
-    $$('[data-dash="reservoir"]').forEach((el) => { el.textContent = fr(d.reservoirUsdc, 0); });
+    dash('reservoir', fr(d.reservoirUsdc, 0));
     $$('[data-needle="reservoir"]').forEach((el) => el.setAttribute('d', NEEDLE(d.reservoirUsdc / (d.gaugeFullUsdc || 5000))));
-    const planned = (d.reservoirUsdc * buybackPct(C.official?.gazole ?? state.price)) / 100;
-    $$('[data-dash="planned"]').forEach((el) => { el.textContent = fr(planned, 0); });
+    dash('planned', fr((d.reservoirUsdc * buybackPct(C.official?.gazole ?? state.price)) / 100, 0));
+  } else {
+    dash('reservoir', '—');
+    dash('planned', '—');
+    $$('[data-needle="reservoir"]').forEach((el) => el.setAttribute('d', NEEDLE(0)));
   }
   if (d.volume24hUsd != null) {
     const k = d.volume24hUsd / 1000;
-    $$('[data-dash="volume"]').forEach((el) => put(el, k >= 1 ? `${fr(k, 0)} k` : fr(d.volume24hUsd, 0)));
+    dash('volume', k >= 1 ? `${fr(k, 0)} k` : fr(d.volume24hUsd, 0));
     $$('[data-needle="volume"]').forEach((el) => el.setAttribute('d', NEEDLE(d.volume24hUsd / 250000)));
-  }
-  if (d.burned != null) {
-    const digits = String(Math.max(0, Math.floor(d.burned))).padStart(8, '0').slice(-8).split('');
-    const cells = $$('[data-odometer] > span').filter((el) => el.textContent.trim() !== '');
-    cells.forEach((cell, i) => { cell.textContent = digits[i] ?? '0'; });
-    $$('[data-odometer]').forEach((el) => el.setAttribute('aria-label', `Compteur : ${fr(d.burned, 0)} $PLEIN brûlés`));
   } else {
-    $$('[data-odometer]').forEach((el) => el.setAttribute('aria-label', 'Compteur : pas encore de burn'));
+    dash('volume', '—');
+    $$('[data-needle="volume"]').forEach((el) => el.setAttribute('d', NEEDLE(0)));
   }
+  if ('burned' in d) renderOdometer(d.burned);
+  renderDashTag();
   Object.entries(d.voyants || {}).forEach(([key, v]) => {
     const li = $(`[data-voyant="${key}"]`);
     if (!li) return;
@@ -321,9 +362,11 @@ function renderStations(data) {
     list.appendChild(node);
   });
   const best = data.stations[0].price;
-  setText('resultsTitle', `${data.stations.length} stations · ${data.cp} · ${FUEL_LABEL[data.fuel] || data.fuel}`);
+  const n = data.stations.length;
+  const where = data.area === 'departement' ? 'Dans ton département' : 'Dans ton code postal';
+  setText('resultsTitle', `${n} station${n > 1 ? 's' : ''} · ${data.cp} · ${FUEL_LABEL[data.fuel] || data.fuel}`);
   setText('resultsTag', 'En direct · données officielles');
-  setText('spreadLine', `Dans ton secteur, ${fr(data.spread, 3)} €/L d’écart entre la station la moins chère et la plus chère : ${fr(data.spread * state.tank, 2)} € sur un plein de ${state.tank} L.`);
+  setText('spreadLine', `${where}, ${fr(data.spread, 3)} €/L d’écart entre la station la moins chère et la plus chère : ${fr(data.spread * state.tank, 2)} € sur un plein de ${state.tank} L.`);
   setText('bestPrice', fr(best, 3));
   setIf('hasResults', true);
   state.results = data;
@@ -357,6 +400,7 @@ function renderAtelier() {
   setIf('isTotem', state.format === 'totem');
   setIf('isPanneau', state.format === 'panneau');
   setIf('isTicket', state.format === 'ticket');
+  setIf('visitorCard', state.visitorCard);
   const led = LEDS[state.led];
   $$('[data-led-target]').forEach((el) => {
     el.style.color = led.hex;
@@ -670,18 +714,20 @@ const handlers = {
     state.v2 = state.v1;
     state.l1 = el.dataset.l;
     state.v1 = el.dataset.v;
+    state.visitorCard = false; // the totem on screen is now the viewer's own
     renderAtelier();
   },
-  onL1(event) { state.l1 = event.target.value.toUpperCase(); renderAtelier(); },
-  onV1(event) { state.v1 = event.target.value; renderAtelier(); },
-  onL2(event) { state.l2 = event.target.value.toUpperCase(); renderAtelier(); },
-  onV2(event) { state.v2 = event.target.value; renderAtelier(); },
+  onL1(event) { state.l1 = event.target.value.toUpperCase(); state.visitorCard = false; renderAtelier(); },
+  onV1(event) { state.v1 = event.target.value; state.visitorCard = false; renderAtelier(); },
+  onL2(event) { state.l2 = event.target.value.toUpperCase(); state.visitorCard = false; renderAtelier(); },
+  onV2(event) { state.v2 = event.target.value; state.visitorCard = false; renderAtelier(); },
   downloadPng,
   async copyLink(event, el) {
+    if (el.dataset.label === undefined) el.dataset.label = el.textContent;
     const ok = await copyText(atelierLink());
-    const label = el.textContent;
     el.textContent = ok ? 'Lien copié' : 'Copie impossible';
-    setTimeout(() => { el.textContent = label; }, 2000);
+    clearTimeout(Number(el.dataset.timer));
+    el.dataset.timer = String(setTimeout(() => { el.textContent = el.dataset.label; }, 2000));
   },
   async shareCard() {
     const best = state.results?.stations?.[0]?.price;
@@ -722,9 +768,8 @@ $$('[data-on-input]').forEach((el) => el.addEventListener('input', (event) => ha
 $$('[data-on-submit]').forEach((el) => el.addEventListener('submit', (event) => handlers[el.dataset.onSubmit]?.(event, el)));
 
 // ---------------------------------------------------------------- start
-const priceInput = $('#gazole');
 if (priceInput) priceInput.value = String(state.price);
-if (C.liveFallback?.gazole) showLive(C.liveFallback.gazole);
+if (C.official?.gazole) showFuel(C.official.gazole, false);
 applyOfficial();
 applyDashboard();
 renderSplit();

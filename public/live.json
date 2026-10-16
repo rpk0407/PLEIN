@@ -1,25 +1,27 @@
 {
-  "_readme": "What changes: the contract at 18:00 on launch day, the wallets at opening, the dashboard every week. Public addresses only, never keys. The page shows an address only if it is a well-formed Solana address (public/js/mint.js). Dashboard numbers: null = not measured yet, shown as pending; fill them from on-chain reads, never by hand-typing a guess. Voyant state is 'ok', 'warn' or 'pending'.",
+  "_readme": "What changes: the contract at 18:00 on launch day, the wallets as they are created, the dashboard after each reading. Public addresses only, never keys; the page shows an address only if it is a well-formed Solana address (public/js/mint.js). Dashboard: null = not measured yet, shown as a dash; fill numbers from on-chain readings only and set asOf to the reading's time (ISO 8601). burned is 0 until the first burn. Voyant state is 'ok', 'warn' or 'pending'; write a label as a fact ('Création révoquée') only once state is 'ok'.",
   "contract": "",
   "wallets": {
+    "creator": "",
     "reservoir": "",
     "aid": "",
     "founder1": "",
     "founder2": ""
   },
   "dashboard": {
+    "asOf": null,
     "reservoirUsdc": null,
     "gaugeFullUsdc": 5000,
     "volume24hUsd": null,
-    "burned": null,
+    "burned": 0,
     "voyants": {
-      "team": { "state": "pending", "label": "Équipe : 0 %", "detail": "vérifié à l’ouverture" },
-      "mint": { "state": "pending", "label": "Création révoquée", "detail": "vérifié à l’ouverture" },
-      "freeze": { "state": "pending", "label": "Gel révoqué", "detail": "vérifié à l’ouverture" },
-      "lp": { "state": "pending", "label": "Liquidité verrouillée", "detail": "vérifié à la cotation" },
-      "top10": { "state": "pending", "label": "Top 10 des wallets", "detail": "mesuré à 19:00" },
-      "bundles": { "state": "pending", "label": "Achats groupés", "detail": "mesuré à 19:00" }
+      "team": { "state": "pending", "label": "Jetons de l’équipe : 0 %", "detail": "vérifié à l’ouverture" },
+      "mint": { "state": "pending", "label": "Autorité de création", "detail": "vérifiée à l’ouverture" },
+      "freeze": { "state": "pending", "label": "Autorité de gel", "detail": "vérifiée à l’ouverture" },
+      "lp": { "state": "pending", "label": "Verrouillage de la liquidité", "detail": "vérifié après la migration de la pool" },
+      "top10": { "state": "pending", "label": "Top 10 des wallets", "detail": "mesuré samedi à 19:00" },
+      "bundles": { "state": "pending", "label": "Achats groupés", "detail": "mesuré samedi à 19:00" }
     },
-    "ct": { "state": "pending", "verdict": "À l’ouverture", "note": "publié samedi à 19:00" }
+    "ct": { "state": "pending", "verdict": "En attente", "note": "premier contrôle samedi à 19:00" }
   }
 }

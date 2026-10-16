@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { NBSP, typo } from '../public/js/typo.js';
+import { NBSP, NNBSP, typo } from '../public/js/typo.js';
 
-const show = (s) => s.replaceAll(NBSP, '~');
+const show = (s) => s.replaceAll(NBSP, '~').replaceAll(NNBSP, '^');
 
 test('no break before French high punctuation, percent and euro', () => {
   assert.equal(show(typo('Équipe : 0 %')), 'Équipe~: 0~%'); // a normal space after the colon may break
@@ -17,6 +17,14 @@ test('numbers keep their unit', () => {
   assert.equal(show(typo('24 k de volume')), '24~k de volume');
   assert.equal(show(typo('18 ans et plus')), '18~ans et plus');
   assert.equal(show(typo('20 × 2,356 €')), '20~× 2,356~€');
+});
+
+test('thousands take a narrow no-break space, amounts keep their currency', () => {
+  assert.equal(show(typo('3 412,00 USDC')), '3^412,00~USDC');
+  assert.equal(show(typo('12 480 551 brûlés')), '12^480^551 brûlés');
+  assert.equal(show(typo('48 200 $')), '48^200~$');
+  assert.equal(show(typo('des $PLEIN')), 'des $PLEIN');
+  assert.equal(show(typo('en 12 tranches')), 'en 12 tranches');
 });
 
 test('times, words and already-correct text are left alone', () => {

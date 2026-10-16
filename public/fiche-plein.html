@@ -45,9 +45,10 @@
   <p><strong>Ce que $PLEIN ne donne pas&nbsp;:</strong> aucun dividende, aucun vote, aucun remboursement, aucune part de société, aucune créance sur l’équipe. Ce n’est pas un placement, ni une assurance contre le prix du carburant. Son prix peut tomber à zéro.</p>
 
   <h2><span class="borne">2</span>D’où viennent les frais</h2>
-  <p>Chaque achat et chaque vente de $PLEIN sur Jupiter paie 1&nbsp;% de frais&nbsp;: 0,5&nbsp;% pour Jupiter, 0,5&nbsp;% pour la station. La part de la station s’accumule dans <strong>le réservoir</strong>, un coffre multisig&nbsp;: rien n’en sort sans la signature des deux fondateurs.</p>
-  <p>Au lancement, les frais anti-sniper de Jupiter Studio reviennent aussi à la station. Ils iront en totalité au premier rachat <span class="todo">[montant publié après le lancement]</span>.</p>
-  <p class="doux">La pompe du site ne prend rien de plus&nbsp;: frais de la station sur l’échange, 0&nbsp;%.</p>
+  <p>Sur la pool officielle, chaque achat et chaque vente de $PLEIN paie 1&nbsp;% de frais&nbsp;: 0,5&nbsp;% pour Jupiter, 0,5&nbsp;% pour la station. C’est le partage annoncé par Jupiter Studio&nbsp;; le ticket du samedi montre ce qui arrive vraiment.</p>
+  <p>La part de la station arrive d’abord sur le <strong>wallet créateur</strong>, publié plus bas. Elle est réclamée chaque semaine et versée dans <strong>le réservoir</strong>, un coffre multisig, avant le plein.</p>
+  <p>Si Jupiter Studio verse bien au créateur les frais anti-sniper du lancement, ils iront en totalité au premier rachat <span class="todo">[montant publié après le lancement]</span>.</p>
+  <p class="doux">La pompe du site n’ajoute aucun frais&nbsp;: seul s’applique le 1&nbsp;% de la pool.</p>
 
   <h2><span class="borne">3</span>La règle du samedi</h2>
   <div class="encart">
@@ -56,7 +57,7 @@
   <ul>
     <li><strong>Le prix&nbsp;:</strong> le dernier relevé hebdomadaire officiel du prix moyen du gazole en France (DGEC, ministère chargé de l’énergie) publié avant le samedi 17:45, heure où il est figé. Le relevé paraît en début de semaine pour la semaine précédente&nbsp;: il a donc quelques jours. Pas le prix en direct, pas le curseur du site.</li>
     <li><strong>Le calcul&nbsp;:</strong> 20&nbsp;× le prix en euros par litre, arrondi au dixième de point, jamais moins de 30&nbsp;%, jamais plus de 60&nbsp;%.</li>
-    <li><strong>L’aide alimentaire&nbsp;:</strong> 10&nbsp;%, fixe, versés en euros à une association. Son nom est publié dès que la convention est signée, avec chaque reçu. Sans partenaire, ces 10&nbsp;% attendent dans un wallet publié et ne vont jamais à l’équipe.</li>
+    <li><strong>L’aide alimentaire&nbsp;:</strong> 10&nbsp;%, fixes, versés en euros à une association. Son nom est publié dès que la convention est signée, avec chaque reçu. Sans partenaire, ces 10&nbsp;% attendent dans un wallet publié et ne vont jamais à l’équipe.</li>
     <li><strong>L’équipe&nbsp;:</strong> le reste. Quand le gazole monte, c’est la part de l’équipe qui baisse.</li>
   </ul>
   <p>Cette semaine&nbsp;: <strong data-official="formula">20&nbsp;× 2,328&nbsp;€ = 46,6&nbsp;%</strong>, équipe <strong data-official="team">43,4&nbsp;%</strong>. <span class="doux" data-official="source">Relevé hebdomadaire officiel du 9 octobre 2026</span>.</p>
@@ -86,14 +87,15 @@
   <p>Un ticket sort chaque samedi, même quand le réservoir est presque vide. <span class="todo">[À décider&nbsp;: si Solana ou Jupiter est indisponible samedi, le rachat est reporté à quand, et comment c’est annoncé&nbsp;?]</span></p>
 
   <h2><span class="borne">4</span>Où va chaque centime</h2>
-  <p>Les wallets sont publics. Chaque rachat, chaque burn et chaque versement d’aide renvoie vers sa transaction.</p>
+  <p>Les wallets sont publics. Chaque rachat et chaque burn renvoie vers sa transaction&nbsp;; chaque don, vers son reçu.</p>
   <ul class="wallets">
+    <li><span class="role">Wallet créateur (frais)</span><span class="mono" data-wallet="creator">publié à l’ouverture</span></li>
     <li><span class="role">Le réservoir (multisig)</span><span class="mono" data-wallet="reservoir">publié à l’ouverture</span></li>
     <li><span class="role">Aide alimentaire</span><span class="mono" data-wallet="aid">publié à l’ouverture</span></li>
     <li><span class="role">Fondateur 1</span><span class="mono" data-wallet="founder1">publié à l’ouverture</span></li>
     <li><span class="role">Fondateur 2</span><span class="mono" data-wallet="founder2">publié à l’ouverture</span></li>
   </ul>
-  <p class="doux">Les signataires du multisig&nbsp;: <span class="todo">[outil de multisig et seuil, par exemple 2 signatures sur 2]</span>. Liquidité après la cotation&nbsp;: <span class="todo">[verrouillage réel de la liquidité, vérifié sur la chaîne après la migration, avec le lien]</span>.</p>
+  <p class="doux">Les signataires du multisig&nbsp;: <span class="todo">[outil, signataires et seuil, publiés avant l’ouverture]</span>. Liquidité après la cotation&nbsp;: <span class="todo">[verrouillage réel de la liquidité, vérifié sur la chaîne après la migration, avec le lien]</span>.</p>
 
   <h2><span class="borne">5</span>Les sept lignes continues</h2>
   <ol>
@@ -115,7 +117,7 @@
     <li><strong>Les outils peuvent tomber.</strong> Solana, Jupiter ou le pool de liquidité peuvent connaître une panne ou une faille.</li>
     <li><strong>Les imitations existent.</strong> De faux contrats circulent dès les premières minutes. Vérifie l’adresse ici, et nulle part ailleurs.</li>
     <li><strong>Les règles peuvent changer.</strong> La formule, avec quatre semaines de préavis. La loi, sans préavis&nbsp;: la réglementation des crypto-actifs évolue en France et dans l’Union européenne.</li>
-    <li><strong>Les fondateurs sont deux.</strong> Le coffre exige leurs deux signatures&nbsp;; si l’un d’eux ne peut plus signer, le rachat s’arrête jusqu’à ce qu’une solution soit publiée <span class="todo">[à décider&nbsp;: procédure de secours]</span>.</li>
+    <li><strong>Les clés peuvent se perdre.</strong> Si le coffre exige plusieurs signatures et que l’une manque, ses fonds restent bloqués. Le seuil et la procédure de secours sont publiés avant l’ouverture <span class="todo">[à décider]</span>.</li>
   </ul>
   <p class="doux">Rien ici n’est un conseil en investissement. Réservé aux majeurs.</p>
 
@@ -125,11 +127,10 @@
 <footer>
   <div class="route" aria-hidden="true"></div>
   <div class="pied">
-    <span>Station $PLEIN · ouverte 24/7</span>
+    <span>Station $PLEIN</span>
     <nav aria-label="Informations">
       <a href="/">Accueil</a>
       <a href="/mentions-legales.html">Mentions légales</a>
-      <a href="/reglement-concours.html">Règlement du concours</a>
     </nav>
   </div>
 </footer>

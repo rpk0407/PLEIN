@@ -19,9 +19,6 @@ window.PLEIN_CONFIG = {
     source: 'Relevé hebdomadaire officiel du 9 octobre 2026',
   },
 
-  // Fallback live average, replaced at runtime by /api/diesel when the feed answers.
-  liveFallback: { gazole: 2.346 },
-
   // Official channels. Leave empty until the accounts exist.
   links: {
     xHandle: '',        // e.g. 'stationplein' (without @)
