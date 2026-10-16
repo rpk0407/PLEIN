@@ -2,7 +2,7 @@
 // The three cheapest stations for a postcode, the local average and the spread, from the
 // official feed. If a postcode has fewer than three stations, the search widens to its
 // département (same first two digits).
-import { FIELDS, SANE_MAX, SANE_MIN, STATION_FIELDS, coordinates, queryRecords, send, toEuros } from './_feed.js';
+import { FIELDS, STATION_FIELDS, coordinates, queryRecords, saneClause, send, toEuros } from './_feed.js';
 
 function query(req) {
   if (req.query) return req.query;
@@ -22,7 +22,7 @@ async function fetchArea(where, field, updated) {
   const s = STATION_FIELDS;
   const data = await queryRecords({
     select: [s.id, s.postcode, s.city, s.address, s.geo, field, updated].join(','),
-    where: `${where} and ${field} >= ${SANE_MIN} and ${field} <= ${SANE_MAX}`,
+    where: `${where} and ${saneClause(field)}`,
     order_by: `${field} asc`,
     limit: '100',
   });

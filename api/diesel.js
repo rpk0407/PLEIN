@@ -1,13 +1,13 @@
 // GET /api/diesel → live national average prices from the official station feed.
 // This is the "live" number for the ticker. The buyback itself uses the DGEC weekly figure
 // in public/config.js, which a person checks and updates every week.
-import { FIELDS, SANE_MAX, SANE_MIN, queryRecords, send, toEuros } from './_feed.js';
+import { FIELDS, queryRecords, saneClause, send, toEuros } from './_feed.js';
 
 async function average(fuel) {
   const field = FIELDS[fuel].price;
   const data = await queryRecords({
     select: `avg(${field}) as average, count(${field}) as stations`,
-    where: `${field} >= ${SANE_MIN} and ${field} <= ${SANE_MAX}`,
+    where: saneClause(field),
     limit: '1',
   });
   const row = data?.results?.[0] || {};

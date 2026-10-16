@@ -18,6 +18,15 @@ export const STATION_FIELDS = { id: 'id', postcode: 'cp', city: 'ville', address
 export const SANE_MIN = 1;
 export const SANE_MAX = 4;
 
+/**
+ * Filter clause keeping plausible prices only, whichever unit the feed uses this year:
+ * €/L (2.356) or thousandths (2356). Without the second branch, a switch to thousandths
+ * would silently filter out every station.
+ */
+export function saneClause(field) {
+  return `((${field} >= ${SANE_MIN} and ${field} <= ${SANE_MAX}) or (${field} >= ${SANE_MIN * 1000} and ${field} <= ${SANE_MAX * 1000}))`;
+}
+
 /** The feed has published prices both in €/L (2.356) and in thousandths (2356). */
 export function toEuros(value) {
   const n = Number(value);
