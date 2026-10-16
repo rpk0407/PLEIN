@@ -1,0 +1,25 @@
+{
+  "_readme": "What changes: the contract at 18:00 on launch day, the wallets at opening, the dashboard every week. Public addresses only, never keys. The page shows an address only if it is a well-formed Solana address (public/js/mint.js). Dashboard numbers: null = not measured yet, shown as pending; fill them from on-chain reads, never by hand-typing a guess. Voyant state is 'ok', 'warn' or 'pending'.",
+  "contract": "",
+  "wallets": {
+    "reservoir": "",
+    "aid": "",
+    "founder1": "",
+    "founder2": ""
+  },
+  "dashboard": {
+    "reservoirUsdc": null,
+    "gaugeFullUsdc": 5000,
+    "volume24hUsd": null,
+    "burned": null,
+    "voyants": {
+      "team": { "state": "pending", "label": "Équipe : 0 %", "detail": "vérifié à l’ouverture" },
+      "mint": { "state": "pending", "label": "Création révoquée", "detail": "vérifié à l’ouverture" },
+      "freeze": { "state": "pending", "label": "Gel révoqué", "detail": "vérifié à l’ouverture" },
+      "lp": { "state": "pending", "label": "Liquidité verrouillée", "detail": "vérifié à la cotation" },
+      "top10": { "state": "pending", "label": "Top 10 des wallets", "detail": "mesuré à 19:00" },
+      "bundles": { "state": "pending", "label": "Achats groupés", "detail": "mesuré à 19:00" }
+    },
+    "ct": { "state": "pending", "verdict": "À l’ouverture", "note": "publié samedi à 19:00" }
+  }
+}

@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * 1' # Monday 07:00 UTC: catch changes to the official fuel feed
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tests (formula, addresses, typography, no-signing guard)
+        run: npm test
+
+  feed:
+    # A probe of an outside service, not a gate: it reports when the ministry's feed changes shape.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Official fuel feed still matches what api/ reads
+        run: npm run check:feed

@@ -1,0 +1,115 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-16T14:29:00Z"
+  },
+  "title": "$PLEIN launch kit",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 10100,
+      "title": "Site · desktop",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Site-phone.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 390,
+      "h": 15300,
+      "title": "Site · phone",
+      "is_interactive": true
+    },
+    "Preouverture.dc.html": {
+      "x": 1990,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Before launch · phone, until Saturday 18:00"
+    },
+    "Plein-en-cours.dc.html": {
+      "x": 2460,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Saturday plein, live · 18:00 to 19:05 (example figures)"
+    },
+    "X-banner.dc.html": {
+      "x": 3980,
+      "y": 0,
+      "w": 1500,
+      "h": 500,
+      "title": "X banner 1500×500"
+    },
+    "Logo.dc.html": {
+      "x": 3980,
+      "y": 620,
+      "w": 400,
+      "h": 400,
+      "title": "Profile picture 400×400"
+    },
+    "Launch-post.dc.html": {
+      "x": 4460,
+      "y": 620,
+      "w": 1200,
+      "h": 675,
+      "title": "Launch post · Saturday 18:00"
+    },
+    "Receipt.dc.html": {
+      "x": 3980,
+      "y": 1415,
+      "w": 1080,
+      "h": 1350,
+      "title": "Weekly ticket · template"
+    },
+    "Totem-du-jour.dc.html": {
+      "x": 5140,
+      "y": 1415,
+      "w": 1080,
+      "h": 1350,
+      "title": "Daily totem · 08:00 post template"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Site-phone.dc.html",
+    "Preouverture.dc.html",
+    "Plein-en-cours.dc.html",
+    "X-banner.dc.html",
+    "Logo.dc.html",
+    "Launch-post.dc.html",
+    "Receipt.dc.html",
+    "Totem-du-jour.dc.html"
+  ],
+  "notes": {
+    "site": {
+      "x": 0,
+      "y": -300,
+      "text": "Site",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "states": {
+      "x": 1990,
+      "y": -300,
+      "text": "Live states",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "social": {
+      "x": 3980,
+      "y": -300,
+      "text": "Social kit",
+      "kind": "title1",
+      "maxW": 2240
+    }
+  },
+  "designSystems": []
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<link rel="stylesheet" href="/css/fonts.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#07090C;color:#F1F4F6;font-family:'Barlow',sans-serif}
+.glow{position:absolute;left:0;right:0;top:-260px;height:560px;background:radial-gradient(ellipse at 50% 0%,rgba(214,230,255,.17),rgba(214,230,255,0) 62%)}
+.auvent{position:absolute;left:56px;right:56px;top:22px;height:6px;border-radius:0 0 3px 3px;background:#F1F4F6;box-shadow:0 0 30px 4px rgba(225,238,255,.6)}
+.left{position:absolute;left:72px;top:74px;width:660px}
+.kicker{display:flex;align-items:center;gap:12px;font:500 17px/1 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:#A7AFB9}
+.kicker i{width:11px;height:11px;border-radius:50%;background:#FFA733;box-shadow:0 0 12px rgba(255,167,51,.7)}
+h1{margin:22px 0 0;font:800 92px/.9 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:-.005em}
+h1 span{display:block;color:#3CF08A;text-shadow:0 0 40px rgba(60,240,138,.38)}
+p{margin:22px 0 0;font-size:24px;line-height:1.42;color:#A7AFB9;max-width:600px}
+.chips{display:flex;gap:12px;margin-top:24px}
+.chip{padding:10px 16px;border-radius:10px;border:1px solid #3A414C;background:#0F1216;font:600 18px/1 'IBM Plex Mono',monospace;color:#F1F4F6;white-space:nowrap}
+.chip b{color:#FFA733;font-weight:600}
+.totem{position:absolute;left:784px;top:70px;width:350px;height:430px;border-radius:22px;background:#151A20;border:2px solid #2C333D;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.head{height:78px;border-radius:12px;background:#F1F4F6;color:#0B0D10;display:grid;place-items:center;font:800 46px/1 'Barlow Condensed',sans-serif;letter-spacing:.02em}
+.row{flex:1;border-radius:12px;background:#030405;padding:0 20px;display:flex;align-items:center;justify-content:space-between}
+.row .l{font:700 30px/1 'Barlow Condensed',sans-serif;letter-spacing:.04em}
+.row .v{font:900 60px/1 'Doto',monospace}
+.r{color:#3CF08A;text-shadow:0 0 16px rgba(60,240,138,.6)}
+.a{color:#FFA733;text-shadow:0 0 16px rgba(255,167,51,.6)}
+.foot{height:46px;border-radius:10px;background:#FFA733;color:#0B0C0E;display:grid;place-items:center;font:800 24px/1 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase}
+.pied{position:absolute;left:904px;top:500px;width:110px;height:60px;display:flex;justify-content:space-between}
+.pied i{width:22px;background:#1A1F26}
+.road{position:absolute;left:0;right:0;bottom:0;height:70px;background:#0A0C0F;border-top:3px solid rgba(241,244,246,.5)}
+.road::after{content:'';position:absolute;left:0;right:0;top:32px;height:6px;background:repeating-linear-gradient(90deg,rgba(241,244,246,.72) 0 64px,transparent 64px 128px)}
+</style></head>
+<body>
+<div class="glow"></div><div class="auvent"></div>
+<div class="left">
+  <div class="kicker"><i></i>Station $PLEIN · Solana</div>
+  <h1>Quand le gazole monte,<span>$PLEIN rachète.</span></h1>
+  <p>Chaque samedi à 18:00, une part des frais rachète et brûle des $PLEIN. La part suit le prix officiel du gazole.</p>
+  <div class="chips"><span class="chip">rachat = <b>20&nbsp;×</b> gazole</span><span class="chip">30–60&nbsp;%</span><span class="chip">10&nbsp;% aide alimentaire</span></div>
+</div>
+<div class="totem">
+  <div class="head">STATION $PLEIN</div>
+  <div class="row"><span class="l">RACHAT</span><span class="v r">20×</span></div>
+  <div class="row"><span class="l">SAMEDI</span><span class="v a" style="font-size:54px">18:00</span></div>
+  <div class="foot">Tout est publié</div>
+</div>
+<div class="pied"><i></i><i></i></div>
+<div class="road"></div>
+</body></html>

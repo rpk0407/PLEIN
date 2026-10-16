@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Station $PLEIN · site</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&amp;family=Barlow:wght@400;500;600;700&amp;family=Doto:wght@700;900&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0;background:#07090C}
+a{color:#FFA733}a:hover{color:#F1F4F6}
+@keyframes defile{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes ledin{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+@keyframes pouls{0%,100%{opacity:1}50%{opacity:.35}}
+.sorties{display:flex}
+.pompe-bar{display:none}
+@media (max-width:820px){.sorties{display:none}.pompe-bar{display:flex}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="background: #07090C; color: #F1F4F6; font-family: 'Barlow', 'Helvetica Neue', Arial, sans-serif; font-size: 17px; line-height: 1.55; overflow-x: hidden;">
+
+<header style="position: relative; z-index: 2; background: #0C0F13;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px;">
+    <a href="#top" aria-label="Station $PLEIN, accueil" style="display: flex; align-items: center; gap: 12px; min-height: 44px; color: #F1F4F6; text-decoration: none;">
+      <svg width="26" height="38" viewBox="0 0 26 38" aria-hidden="true"><rect x="1" y="1" width="24" height="31" rx="3" style="fill: #171B21; stroke: #3A414C; stroke-width: 1.5;"></rect><rect x="4" y="4" width="18" height="5" rx="1" style="fill: #F1F4F6;"></rect><rect x="4" y="11.5" width="18" height="5" rx="1" style="fill: #FF3D2E;"></rect><rect x="4" y="18.5" width="18" height="5" rx="1" style="fill: #3CF08A;"></rect><rect x="4" y="25.5" width="18" height="3.5" rx="1" style="fill: #FFA733;"></rect><rect x="10" y="32" width="6" height="6" style="fill: #3A414C;"></rect></svg>
+      <span style="display: flex; flex-direction: column; line-height: 1;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #A7AFB9;">Station</span>
+        <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 27px; letter-spacing: 0.03em;">$PLEIN</span>
+      </span>
+    </a>
+    <nav aria-label="Sorties" class="sorties" style="flex-wrap: wrap; align-items: center; gap: 2px 18px;">
+      <a href="#peage" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #C9D0D8; text-decoration: none; font-weight: 500; font-size: 15px;"><span style="min-width: 21px; height: 21px; box-sizing: border-box; border: 1.5px solid #F1F4F6; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #1D4FA3; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;">1</span>Péage</a>
+      <a href="#bord" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #C9D0D8; text-decoration: none; font-weight: 500; font-size: 15px;"><span style="min-width: 21px; height: 21px; box-sizing: border-box; border: 1.5px solid #F1F4F6; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #1D4FA3; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;">2</span>Tableau de bord</a>
+      <a href="#samedi" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #C9D0D8; text-decoration: none; font-weight: 500; font-size: 15px;"><span style="min-width: 21px; height: 21px; box-sizing: border-box; border: 1.5px solid #F1F4F6; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #1D4FA3; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;">3</span>Samedi</a>
+      <a href="#mon-plein" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #C9D0D8; text-decoration: none; font-weight: 500; font-size: 15px;"><span style="min-width: 21px; height: 21px; box-sizing: border-box; border: 1.5px solid #F1F4F6; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #1D4FA3; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;">4</span>Mon Plein</a>
+      <a href="#atelier" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #C9D0D8; text-decoration: none; font-weight: 500; font-size: 15px;"><span style="min-width: 21px; height: 21px; box-sizing: border-box; border: 1.5px solid #F1F4F6; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #1D4FA3; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;">5</span>Atelier</a>
+      <a href="#lignes" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #C9D0D8; text-decoration: none; font-weight: 500; font-size: 15px;"><span style="min-width: 21px; height: 21px; box-sizing: border-box; border: 1.5px solid #F1F4F6; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #1D4FA3; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;">6</span>Lignes</a>
+      <a href="#aire" style="display: flex; align-items: center; gap: 8px; min-height: 44px; color: #C9D0D8; text-decoration: none; font-weight: 500; font-size: 15px;"><span style="min-width: 21px; height: 21px; box-sizing: border-box; border: 1.5px solid #F1F4F6; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: #1D4FA3; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px;">7</span>Aire de repos</a>
+    </nav>
+    <button type="button" onClick="{{openPump}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 0 26px rgba(255, 167, 51, 0.28);">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"></path><path d="M3 21h12"></path><path d="M6.5 8h5"></path><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg>
+      Faire le plein
+    </button>
+  </div>
+  <div aria-hidden="true" style="height: 3px; margin: 0 4%; border-radius: 2px; background: #F1F4F6; box-shadow: 0 0 18px 2px rgba(225, 238, 255, 0.55), 0 16px 70px 12px rgba(225, 238, 255, 0.12);"></div>
+</header>
+
+<div role="region" aria-label="Bandeau d’information" style="background: #030405; border-bottom: 1px solid #1A1F26; overflow: hidden;">
+  <div style="display: flex; width: max-content; animation: defile 52s linear infinite;">
+    <p style="margin: 0; display: flex; align-items: center; gap: 30px; padding: 12px 15px; font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 700; font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; color: #A7AFB9;">
+      <span>Gazole en direct <span style="color: #FF3D2E; text-shadow: 0 0 10px rgba(255, 61, 46, 0.55);">2,346 €/L</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>Rachat <span style="color: #3CF08A; text-shadow: 0 0 10px rgba(60, 240, 138, 0.5);">47,1 %</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>Prochain plein <span style="color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);">samedi 18:00</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>Un plein de 50 L = <span style="color: #FF3D2E;">117,30 €</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>10 % pour l’aide alimentaire</span>
+      <span style="color: #3A414C;">·</span>
+      <span>Aucun DM, jamais</span>
+      <span style="color: #3A414C;">·</span>
+    </p>
+    <p aria-hidden="true" style="margin: 0; display: flex; align-items: center; gap: 30px; padding: 12px 15px; font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 700; font-size: 18px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; color: #A7AFB9;">
+      <span>Gazole en direct <span style="color: #FF3D2E; text-shadow: 0 0 10px rgba(255, 61, 46, 0.55);">2,346 €/L</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>Rachat <span style="color: #3CF08A; text-shadow: 0 0 10px rgba(60, 240, 138, 0.5);">47,1 %</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>Prochain plein <span style="color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);">samedi 18:00</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>Un plein de 50 L = <span style="color: #FF3D2E;">117,30 €</span></span>
+      <span style="color: #3A414C;">·</span>
+      <span>10 % pour l’aide alimentaire</span>
+      <span style="color: #3A414C;">·</span>
+      <span>Aucun DM, jamais</span>
+      <span style="color: #3A414C;">·</span>
+    </p>
+  </div>
+</div>
+
+<section id="top" style="position: relative; background: radial-gradient(ellipse 70% 60% at 50% -10%, rgba(214, 230, 255, 0.10), transparent 70%), radial-gradient(ellipse 32% 42% at 80% 62%, rgba(255, 61, 46, 0.10), transparent 70%), radial-gradient(ellipse 28% 30% at 82% 80%, rgba(60, 240, 138, 0.07), transparent 70%), #07090C;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: 64px 24px 88px; display: flex; flex-wrap: wrap; align-items: center; gap: 56px 72px;">
+    <div style="flex: 1 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 26px;">
+      <p style="margin: 0; display: flex; align-items: flex-start; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #A7AFB9;">
+        <span aria-hidden="true" style="flex: none; width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; background: #3CF08A; box-shadow: 0 0 12px #3CF08A; animation: pouls 2.4s ease-in-out infinite;"></span>
+        <span>Station $PLEIN · ouverte 24/7 · Solana</span>
+      </p>
+      <h1 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(54px, 7.4vw, 116px); line-height: 0.9; letter-spacing: -0.005em; text-transform: uppercase; text-wrap: balance;">Quand le gazole monte, <span style="color: #3CF08A; text-shadow: 0 0 36px rgba(60, 240, 138, 0.35);">$PLEIN rachète.</span></h1>
+      <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: clamp(27px, 2.7vw, 38px); line-height: 1.12; color: #F1F4F6;">Un prix qu’on subit, un rachat qu’on vérifie.</p>
+      <p style="margin: 0; max-width: 590px; font-size: 19px; line-height: 1.55; color: #A7AFB9;">Chaque samedi à 18 h, une part des frais rachète des $PLEIN et les brûle. Cette part suit le prix officiel du gazole : 20 × le prix au litre, entre 30 % et 60 %. Tout est publié, ticket compris.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+        <button type="button" onClick="{{openPump}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 26px; border: 0; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 18px; cursor: pointer; box-shadow: 0 0 34px rgba(255, 167, 51, 0.30);">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"></path><path d="M3 21h12"></path><path d="M6.5 8h5"></path><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg>
+          Faire le plein
+        </button>
+        <a href="#samedi" style="display: inline-flex; align-items: center; min-height: 54px; padding: 0 24px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #3A414C; color: #F1F4F6; font-weight: 600; font-size: 18px; text-decoration: none;">Voir le dernier ticket</a>
+      </div>
+      <div style="max-width: 590px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 12px 12px 16px; border-radius: 12px; background: #0F1216; border: 1px solid #262C35;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939E;">Contrat officiel</span>
+        <span style="flex: 1 1 170px; min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #F1F4F6; overflow-wrap: anywhere;">[adresse du contrat]</span>
+        <button type="button" onClick="{{copyCA}}" style="min-height: 44px; padding: 0 16px; border-radius: 9px; border: 1px solid #3A414C; background: #171B21; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;">{{caLabel}}</button>
+        <span style="flex-basis: 100%; font-size: 14px; color: #8A939E;">Le seul. Tout autre est faux.</span>
+      </div>
+      <p style="margin: 0; font-size: 14px; color: #8A939E;">Ce n’est pas une assurance contre le gazole. C’est un mème, avec un rachat qu’on vérifie.</p>
+    </div>
+
+    <div style="flex: 1 1 340px; min-width: 0; display: flex; justify-content: center;">
+      <figure role="img" aria-label="Totem de la station : gazole 2,356 euros le litre au relevé officiel, rachat 47,1 % ce samedi, et le compte à rebours jusqu’au prochain plein" style="margin: 0; width: 100%; max-width: 372px; display: flex; flex-direction: column; align-items: center;">
+        <div style="width: 100%; box-sizing: border-box; padding: 14px; border-radius: 16px; background: linear-gradient(180deg, #1B2028, #12161B); border: 1px solid #2C333D; box-shadow: 0 50px 120px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.07); display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: #F1F4F6; color: #0B0D10; border-radius: 9px; padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 34px rgba(241, 244, 246, 0.20);">
+            <span style="display: flex; flex-direction: column; line-height: 1;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;">Station</span>
+              <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 36px; letter-spacing: 0.02em;">$PLEIN</span>
+            </span>
+            <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #0B0D10; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"></path><path d="M3 21h12"></path><path d="M6.5 8h5"></path><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg>
+          </div>
+          <div style="background: #030405; border: 1px solid #1E242C; border-radius: 9px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <span style="display: flex; flex-direction: column; gap: 5px; line-height: 1;">
+              <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase;">Gazole</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A939E;">officiel · 2 oct.</span>
+            </span>
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: clamp(46px, 13vw, 60px); line-height: 0.9; color: #FF3D2E; text-shadow: 0 0 14px rgba(255, 61, 46, 0.6); animation: ledin 700ms 150ms both;">2,356</span>
+          </div>
+          <div style="background: #030405; border: 1px solid #1E242C; border-radius: 9px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <span style="display: flex; flex-direction: column; gap: 5px; line-height: 1;">
+              <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase;">Rachat</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A939E;">ce samedi</span>
+            </span>
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: clamp(46px, 13vw, 60px); line-height: 0.9; color: #3CF08A; text-shadow: 0 0 14px rgba(60, 240, 138, 0.55); animation: ledin 700ms 380ms both;">47,1%</span>
+          </div>
+          <div style="background: #030405; border: 1px solid #1E242C; border-radius: 9px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+            <span style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; line-height: 1;">
+              <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase;">Plein dans</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A939E;">samedi 18:00</span>
+            </span>
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: clamp(32px, 9.5vw, 40px); line-height: 1; color: #FFA733; text-shadow: 0 0 14px rgba(255, 167, 51, 0.55); font-variant-numeric: tabular-nums; animation: ledin 700ms 600ms both;">{{countdown}}</span>
+          </div>
+          <p style="margin: 2px 4px 0; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; line-height: 1.4; color: #8A939E; text-align: center;">20 × 2,356 € = 47,1 % · plancher 30 · plafond 60</p>
+        </div>
+        <div aria-hidden="true" style="width: 60%; display: flex; justify-content: space-between;"><span style="width: 16px; height: 56px; background: linear-gradient(180deg, #1C2128, #0C0F13);"></span><span style="width: 16px; height: 56px; background: linear-gradient(180deg, #1C2128, #0C0F13);"></span></div>
+        <div aria-hidden="true" style="width: 120%; max-width: 100vw; height: 64px; margin-top: -4px; border-radius: 50%; background: radial-gradient(ellipse 46% 60% at 50% 22%, rgba(255, 61, 46, 0.24), transparent 72%), radial-gradient(ellipse 36% 46% at 52% 40%, rgba(60, 240, 138, 0.14), transparent 72%);"></div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<div aria-hidden="true" style="height: 60px; background: #0A0C0F; border-top: 2px solid rgba(241, 244, 246, 0.5); border-bottom: 2px solid rgba(241, 244, 246, 0.5); display: flex; align-items: center;">
+  <div style="width: 100%; height: 5px; background: repeating-linear-gradient(90deg, rgba(241, 244, 246, 0.72) 0 64px, transparent 64px 136px);"></div>
+</div>
+
+<section id="peage" style="background: #07090C;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: clamp(72px, 9vw, 112px) 24px; display: flex; flex-direction: column; gap: 44px;">
+    <div style="max-width: 780px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+      <span style="display: inline-flex; align-items: center; gap: 12px; padding: 6px 16px 6px 6px; border-radius: 9px; background: #1D4FA3; border: 2px solid #F1F4F6; box-shadow: 0 0 0 3px #1D4FA3, 0 12px 34px rgba(29, 79, 163, 0.28);">
+        <span style="padding: 3px 9px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.05em; text-transform: uppercase;">Sortie 1</span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">Le péage</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+      </span>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">1 % de péage. Voilà où va chaque centime.</h2>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Chaque achat et chaque vente de $PLEIN paie 1 % de frais. Jupiter en garde la moitié. L’autre moitié remplit le réservoir de la station, et le prix du gazole décide comment on le vide.</p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch;">
+      <div style="flex: 1 1 380px; min-width: 0; box-sizing: border-box; padding: 28px; border-radius: 18px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 20px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A939E;">1 % sur chaque échange</span>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+          <div style="border-radius: 12px; background: #0B0E12; border: 1px solid #262C35; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0;">
+            <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 8px; background: #030405; border: 1px solid #1E242C; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(60, 240, 138, 0.8));"><path d="M12 4v15"></path><path d="M6 13l6 6 6-6"></path></svg></span>
+            <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 46px; line-height: 1;">0,5 %</span>
+            <span style="font-size: 15px; line-height: 1.4; color: #A7AFB9;">Jupiter, la plateforme</span>
+          </div>
+          <div style="border-radius: 12px; background: rgba(255, 167, 51, 0.06); border: 1.5px solid #FFA733; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0;">
+            <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 8px; background: #030405; border: 1px solid #1E242C; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(60, 240, 138, 0.8));"><path d="M12 4v15"></path><path d="M6 13l6 6 6-6"></path></svg></span>
+            <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 46px; line-height: 1; color: #FFA733;">0,5 %</span>
+            <span style="font-size: 15px; line-height: 1.4; color: #F1F4F6;">Station $PLEIN, le réservoir</span>
+          </div>
+        </div>
+        <p style="margin: 0; font-size: 16px; color: #A7AFB9;">Avant comme après la cotation sur Meteora, le partage reste le même. Chaque samedi, le réservoir se vide en trois parts.</p>
+        <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #262C35; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 28px; line-height: 1.2; color: #F1F4F6;">Quand le gazole monte, c’est notre part qui baisse.</p>
+      </div>
+
+      <div style="flex: 1.35 1 480px; min-width: 0; box-sizing: border-box; padding: 28px; border-radius: 18px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 22px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px 16px;">
+          <label for="gazole" style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 0.03em; text-transform: uppercase;">Et si le gazole passait à…</label>
+          <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 46px; line-height: 1; color: #FF3D2E; text-shadow: 0 0 12px rgba(255, 61, 46, 0.5);">{{priceLabel}} €</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <input id="gazole" type="range" min="1.5" max="3.2" step="0.001" value="{{price}}" onChange="{{onPrice}}" style="width: 100%; height: 44px; margin: 0; accent-color: #FFA733; cursor: pointer;">
+          <div aria-hidden="true" style="position: relative; height: 12px; margin: -6px 9px 0;">
+            <span style="position: absolute; left: 0; top: 0; width: 2px; height: 12px; background: #6C7581;"></span>
+            <span style="position: absolute; left: 41.2%; top: 0; width: 3px; height: 12px; border-radius: 2px; background: #FFA733;"></span>
+            <span style="position: absolute; left: 50.6%; top: 0; width: 3px; height: 12px; border-radius: 2px; background: #F1F4F6;"></span>
+            <span style="position: absolute; left: 88.2%; top: 0; width: 2px; height: 12px; background: #6C7581;"></span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;">
+            <span>1,50 € → 30 %</span>
+            <span>60 % ← 3,00 €</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #C9D0D8;">
+            <span style="display: inline-flex; align-items: center; gap: 8px;"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 2px; background: #F1F4F6;"></span>2,356 aujourd’hui</span>
+            <span style="display: inline-flex; align-items: center; gap: 8px;"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 2px; background: #FFA733;"></span>≈ 2,20 après le 1er nov.</span>
+          </div>
+        </div>
+        <div role="img" aria-label="{{barLabel}}" style="display: flex; height: 58px; border-radius: 10px; overflow: hidden; border: 1px solid #262C35;">
+          <div style="width: {{buyW}}; background: #3CF08A; color: #04130A; display: flex; align-items: center; padding: 0 14px; box-sizing: border-box; font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden; transition: width 220ms ease;"><span>{{buyPct}}</span></div>
+          <div style="width: 10%; min-width: 44px; background: #F1F4F6; color: #0B0D10; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden;"><span>10 %</span></div>
+          <div style="flex: 1 1 auto; background: #262C35; color: #F1F4F6; display: flex; align-items: center; justify-content: flex-end; padding: 0 14px; font-weight: 700; font-size: 17px; white-space: nowrap; overflow: hidden;"><span>{{teamPct}}</span></div>
+        </div>
+        <ul style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 12px;">
+          <li style="display: flex; flex-direction: column; gap: 2px; padding-left: 14px; border-left: 4px solid #3CF08A;"><span style="font-weight: 600;">Rachat + burn · {{buyPct}}</span><span style="font-size: 14px; color: #A7AFB9;">20 × le prix, entre 30 et 60 %</span></li>
+          <li style="display: flex; flex-direction: column; gap: 2px; padding-left: 14px; border-left: 4px solid #F1F4F6;"><span style="font-weight: 600;">Aide alimentaire · 10 %</span><span style="font-size: 14px; color: #A7AFB9;">ne bouge jamais</span></li>
+          <li style="display: flex; flex-direction: column; gap: 2px; padding-left: 14px; border-left: 4px solid #4A5260;"><span style="font-weight: 600;">Équipe · {{teamPct}}</span><span style="font-size: 14px; color: #A7AFB9;">le reste, et rien d’autre</span></li>
+        </ul>
+        <p style="margin: 0; font-size: 14px; color: #8A939E;">Plancher 30 %, plafond 60 %. L’aide alimentaire ne bouge jamais. Le rachat de samedi suit le relevé officiel DGEC, pas ce curseur.</p>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 16px; align-items: flex-start; padding: 20px 22px; border-radius: 14px; background: #0F1216; border: 1px solid #262C35;">
+      <span aria-hidden="true" style="flex: none; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #FFA733; color: #FFA733; display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 22px;">i</span>
+      <p style="margin: 0; font-size: 17px; color: #C9D0D8;"><strong style="color: #F1F4F6;">1er novembre.</strong> Le gazole doit baisser à partir du 1er novembre. Le taux de rachat baissera avec lui : c’est la règle. Ton plein, lui, coûtera moins cher.</p>
+    </div>
+  </div>
+</section>
+
+<section id="bord" style="background: #0F1216; border-top: 1px solid #1A1F26; border-bottom: 1px solid #1A1F26;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: clamp(72px, 9vw, 112px) 24px; display: flex; flex-direction: column; gap: 40px;">
+    <div style="max-width: 780px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+      <span style="display: inline-flex; align-items: center; gap: 12px; padding: 6px 16px 6px 6px; border-radius: 9px; background: #1D4FA3; border: 2px solid #F1F4F6; box-shadow: 0 0 0 3px #1D4FA3, 0 12px 34px rgba(29, 79, 163, 0.28);">
+        <span style="padding: 3px 9px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.05em; text-transform: uppercase;">Sortie 2</span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">Tableau de bord</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+      </span>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">En direct de la chaîne. Rien à croire, tout à vérifier.</h2>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Chaque aiguille lit Solana. Chaque chiffre renvoie vers sa transaction. Les voyants, c’est notre contrôle technique, fait par nous-mêmes, en public.</p>
+    </div>
+
+    <div style="position: relative; box-sizing: border-box; padding: clamp(20px, 3vw, 36px); border-radius: 34px; background: radial-gradient(ellipse 80% 70% at 50% 0%, #1A2028, #090B0E 72%); border: 1px solid #2C333D; box-shadow: inset 0 2px 40px rgba(0, 0, 0, 0.7), 0 40px 90px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column; gap: 30px;">
+      <span style="align-self: flex-end; padding: 5px 10px; border-radius: 6px; border: 1px solid #FFA733; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #FFA733;">Maquette · chiffres d’exemple</span>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-around; align-items: center; gap: 28px 32px;">
+        <div style="flex: 0 1 270px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+          <svg viewBox="0 0 260 176" role="img" aria-label="Jauge du réservoir, environ aux deux tiers" style="width: 100%; max-width: 270px; height: auto;">
+            <path d="M30 150 A100 100 0 0 1 230 150" style="fill: none; stroke: #262C35; stroke-width: 10; stroke-linecap: round;"></path>
+            <path d="M30 150 A100 100 0 0 1 37 113.2" style="fill: none; stroke: #FF3D2E; stroke-width: 10; stroke-linecap: round;"></path>
+            <path d="M46 150H34M70.6 90.6L62.1 82.1M130 66V54M189.4 90.6L197.9 82.1M214 150H226" style="fill: none; stroke: #A7AFB9; stroke-width: 3; stroke-linecap: round;"></path>
+            <text x="24" y="172" style="fill: #FF3D2E; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; text-anchor: middle;">E</text>
+            <text x="130" y="40" style="fill: #A7AFB9; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; text-anchor: middle;">½</text>
+            <text x="236" y="172" style="fill: #F1F4F6; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; text-anchor: middle;">F</text>
+            <path d="M118 116v-14a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v14M117 116h14M121 105h6M130 108h2a2 2 0 0 1 2 2v3a1.3 1.3 0 0 0 2.6 0v-6l-2.5-2.5" style="fill: none; stroke: #6C7581; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;"></path>
+            <path d="M130 150L161.3 71" style="fill: none; stroke: #F1F4F6; stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(241, 244, 246, 0.6));"></path>
+            <circle cx="130" cy="150" r="10" style="fill: #F1F4F6;"></circle>
+            <circle cx="130" cy="150" r="4" style="fill: #0B0E12;"></circle>
+          </svg>
+          <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 38px; line-height: 1; font-variant-numeric: tabular-nums;">3 412 <span style="font-size: 22px; color: #A7AFB9;">USDC</span></span>
+          <span style="font-size: 14px; color: #A7AFB9; text-align: center;">Réservoir · frais depuis samedi dernier</span>
+        </div>
+
+        <div style="flex: 0 1 330px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939E; text-align: center;">$PLEIN brûlés depuis l’ouverture</span>
+          <div role="img" aria-label="Compteur : 12 480 551 $PLEIN brûlés" style="display: flex; align-items: center; gap: 3px; padding: 8px; border-radius: 8px; background: #000000; border: 1px solid #262C35;">
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #2E353F, #0B0D10 32%, #0B0D10 68%, #2E353F); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #F1F4F6;">1</span>
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #2E353F, #0B0D10 32%, #0B0D10 68%, #2E353F); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #F1F4F6;">2</span>
+            <span style="width: 6px;"></span>
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #2E353F, #0B0D10 32%, #0B0D10 68%, #2E353F); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #F1F4F6;">4</span>
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #2E353F, #0B0D10 32%, #0B0D10 68%, #2E353F); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #F1F4F6;">8</span>
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #2E353F, #0B0D10 32%, #0B0D10 68%, #2E353F); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #F1F4F6;">0</span>
+            <span style="width: 6px;"></span>
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #2E353F, #0B0D10 32%, #0B0D10 68%, #2E353F); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #F1F4F6;">5</span>
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #2E353F, #0B0D10 32%, #0B0D10 68%, #2E353F); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #F1F4F6;">5</span>
+            <span style="width: 28px; height: 46px; border-radius: 4px; background: linear-gradient(180deg, #5A1A14, #1E0705 32%, #1E0705 68%, #5A1A14); display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; color: #FF6B5E;">1</span>
+          </div>
+          <div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 12px; border-radius: 10px; background: #030405; border: 1px solid #1E242C;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939E;">Rachat prévu samedi</span>
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 34px; line-height: 1.1; color: #3CF08A; text-shadow: 0 0 12px rgba(60, 240, 138, 0.5);">≈ 1 607 USDC</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A7AFB9;">3 412 × 47,1 %</span>
+          </div>
+          <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 700; font-size: 20px; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);">Plein dans {{countdown}}</span>
+        </div>
+
+        <div style="flex: 0 1 270px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+          <svg viewBox="0 0 260 176" role="img" aria-label="Compteur de volume sur 24 heures, environ 182 000 dollars" style="width: 100%; max-width: 270px; height: auto;">
+            <path d="M30 150 A100 100 0 0 1 230 150" style="fill: none; stroke: #262C35; stroke-width: 10; stroke-linecap: round;"></path>
+            <path d="M46 150H34M70.6 90.6L62.1 82.1M130 66V54M189.4 90.6L197.9 82.1M214 150H226" style="fill: none; stroke: #A7AFB9; stroke-width: 3; stroke-linecap: round;"></path>
+            <text x="24" y="172" style="fill: #A7AFB9; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; text-anchor: middle;">0</text>
+            <text x="130" y="40" style="fill: #A7AFB9; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; text-anchor: middle;">125 k</text>
+            <text x="234" y="172" style="fill: #A7AFB9; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px; text-anchor: middle;">250 k</text>
+            <path d="M130 150L185.8 85.9" style="fill: none; stroke: #F1F4F6; stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(241, 244, 246, 0.6));"></path>
+            <circle cx="130" cy="150" r="10" style="fill: #F1F4F6;"></circle>
+            <circle cx="130" cy="150" r="4" style="fill: #0B0E12;"></circle>
+          </svg>
+          <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 38px; line-height: 1; font-variant-numeric: tabular-nums;">182 k <span style="font-size: 22px; color: #A7AFB9;">$</span></span>
+          <span style="font-size: 14px; color: #A7AFB9; text-align: center;">Débit · volume des 24 dernières heures</span>
+        </div>
+      </div>
+
+      <ul style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px;">
+        <li style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;">
+          <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(60, 240, 138, 0.10); box-shadow: 0 0 18px rgba(60, 240, 138, 0.30);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"></path><circle cx="17" cy="9" r="2.6"></circle><path d="M15.5 14.2c2.4.2 4.2 1.8 4.8 4.8"></path></svg></span>
+          <span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span style="font-weight: 600; font-size: 16px;">Équipe : 0 %</span><span style="font-size: 13px; color: #8A939E;">aucun jeton réservé au lancement</span></span>
+        </li>
+        <li style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;">
+          <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(60, 240, 138, 0.10); box-shadow: 0 0 18px rgba(60, 240, 138, 0.30);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="8"></circle><path d="M9 12h6M12 9v6"></path><path d="M5 19L19 5"></path></svg></span>
+          <span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span style="font-weight: 600; font-size: 16px;">Création révoquée</span><span style="font-size: 13px; color: #8A939E;">personne ne peut créer de $PLEIN</span></span>
+        </li>
+        <li style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;">
+          <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(60, 240, 138, 0.10); box-shadow: 0 0 18px rgba(60, 240, 138, 0.30);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"></path><path d="M5 20L20 5"></path></svg></span>
+          <span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span style="font-weight: 600; font-size: 16px;">Gel révoqué</span><span style="font-size: 13px; color: #8A939E;">personne ne peut bloquer ton wallet</span></span>
+        </li>
+        <li style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;">
+          <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(60, 240, 138, 0.10); box-shadow: 0 0 18px rgba(60, 240, 138, 0.30);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+          <span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span style="font-weight: 600; font-size: 16px;">Liquidité verrouillée</span><span style="font-size: 13px; color: #8A939E;">calendrier de déblocage publié</span></span>
+        </li>
+        <li style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #4A3A20;">
+          <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255, 167, 51, 0.12); box-shadow: 0 0 18px rgba(255, 167, 51, 0.38);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #FFA733; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;"><path d="M5 20V11M10 20V4M15 20v-7M20 20v-4"></path></svg></span>
+          <span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span style="font-weight: 600; font-size: 16px;">Top 10 : 17 %</span><span style="font-size: 13px; color: #FFB95E;">défaut mineur : au-dessus de 15 %</span></span>
+        </li>
+        <li style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;">
+          <span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(60, 240, 138, 0.10); box-shadow: 0 0 18px rgba(60, 240, 138, 0.30);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"></path><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"></path></svg></span>
+          <span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span style="font-weight: 600; font-size: 16px;">Bundles : 2 %</span><span style="font-size: 13px; color: #8A939E;">achats groupés au lancement</span></span>
+        </li>
+      </ul>
+
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 28px;">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border: 2px solid #3CF08A; border-radius: 10px; transform: rotate(-2deg); color: #3CF08A; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em;">
+          <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #3CF08A; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.7 2.7L16.5 9.5"></path></svg>
+          <span style="display: flex; flex-direction: column; line-height: 1.3;">
+            <span style="font-size: 11px;">Contrôle technique · SOL OS</span>
+            <span style="font-size: 22px; font-weight: 600;">Favorable</span>
+            <span style="font-size: 11px; color: #FFB95E;">1 défaut mineur</span>
+          </span>
+        </div>
+        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E;">Lu sur Solana · mis à jour il y a 12 s · chaque chiffre a son lien Solscan</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="samedi" style="background: #07090C;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: clamp(72px, 9vw, 112px) 24px; display: flex; flex-direction: column; gap: 44px;">
+    <div style="max-width: 780px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+      <span style="display: inline-flex; align-items: center; gap: 12px; padding: 6px 16px 6px 6px; border-radius: 9px; background: #1D4FA3; border: 2px solid #F1F4F6; box-shadow: 0 0 0 3px #1D4FA3, 0 12px 34px rgba(29, 79, 163, 0.28);">
+        <span style="padding: 3px 9px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.05em; text-transform: uppercase;">Sortie 3</span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">Le plein du samedi</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+      </span>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Samedi, 18:00. Le plein.</h2>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Le même rituel chaque semaine, à la même heure, en public. Le ticket sort même quand le réservoir est vide.</p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 48px 64px; align-items: flex-start;">
+      <div style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 24px;">
+        <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;">
+          <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0; border-bottom: 1px dashed #2C333D;">
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">17:45</span>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Le prix officiel est figé</span><span style="font-size: 15px; color: #A7AFB9;">Le relevé hebdomadaire DGEC publié avant le samedi.</span></span>
+          </li>
+          <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0; border-bottom: 1px dashed #2C333D;">
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">17:50</span>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Les frais rejoignent le coffre</span><span style="font-size: 15px; color: #A7AFB9;">Un coffre multisig : rien ne sort sans la signature des deux fondateurs.</span></span>
+          </li>
+          <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0; border-bottom: 1px dashed #2C333D;">
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">18:00</span>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Rachat en 12 tranches</span><span style="font-size: 15px; color: #A7AFB9;">Une tranche toutes les 5 minutes, pour ne pas faire bondir le prix.</span></span>
+          </li>
+          <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0; border-bottom: 1px dashed #2C333D;">
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">19:00</span>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Burn</span><span style="font-size: 15px; color: #A7AFB9;">Chaque $PLEIN racheté est détruit, en une transaction publique.</span></span>
+          </li>
+          <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0;">
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">19:05</span>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Le ticket s’imprime</span><span style="font-size: 15px; color: #A7AFB9;">Ici, sur X et sur Telegram, avec tous les liens Solscan. 10 % partent à l’aide alimentaire, reçu publié.</span></span>
+          </li>
+        </ol>
+        <a href="#samedi" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 20px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #3A414C; color: #F1F4F6; font-weight: 600; font-size: 16px; text-decoration: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="3.5" y="5" width="17" height="15" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>
+          Mettre un rappel samedi 18:00
+        </a>
+      </div>
+
+      <div style="flex: 0 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 22px;">
+        <div style="position: relative; transform: rotate(1.2deg);">
+          <div style="background: #F2EFE6; color: #17181B; font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 14px; padding: 26px 24px 18px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;">
+              <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 32px; line-height: 1;">STATION $PLEIN</span>
+              <span style="font-size: 12px; letter-spacing: 0.12em;">TICKET DE CAISSE · SOLANA</span>
+            </div>
+            <div style="border-top: 2px dashed #17181B;"></div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+              <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 34px; line-height: 1;">PLEIN #1</span>
+              <span>SAM 24/10 · 18:00</span>
+            </div>
+            <div style="border-top: 2px dashed #17181B;"></div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-variant-numeric: tabular-nums;">
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span>GAZOLE (DGEC)</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;">2,356 €/L</span></div>
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span>TAUX DE RACHAT</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;">47,1 %</span></div>
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span>RÉSERVOIR</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;">3 412,00 USDC</span></div>
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span>RACHAT</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;">1 607,05 USDC</span></div>
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span>$PLEIN BRÛLÉS</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;">12 480 551</span></div>
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span>AIDE ALIMENTAIRE</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;">341,20 USDC</span></div>
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span>ÉQUIPE</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;">1 463,75 USDC</span></div>
+            </div>
+            <div style="border-top: 2px dashed #17181B;"></div>
+            <div style="display: flex; flex-direction: column; gap: 5px; font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; gap: 12px;"><span>TX RACHAT ×12</span><span>solscan ↗</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px;"><span>TX BURN</span><span>solscan ↗</span></div>
+              <div style="display: flex; justify-content: space-between; gap: 12px;"><span>REÇU DU DON</span><span>pdf ↗</span></div>
+            </div>
+            <div style="border-top: 2px dashed #17181B;"></div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-size: 13px;">
+              <span style="font-weight: 600;">MERCI DE VOTRE VISITE</span>
+              <span>PROCHAIN PLEIN : SAMEDI 18:00</span>
+            </div>
+            <div aria-hidden="true" style="display: flex; justify-content: center; gap: 3px; height: 46px; margin-top: 2px;"><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span></div>
+          </div>
+          <div aria-hidden="true" style="height: 16px; background: #F2EFE6; clip-path: polygon(0 0, 100% 0, 100% 100%, 96% 0, 92% 100%, 88% 0, 84% 100%, 80% 0, 76% 100%, 72% 0, 68% 100%, 64% 0, 60% 100%, 56% 0, 52% 100%, 48% 0, 44% 100%, 40% 0, 36% 100%, 32% 0, 28% 100%, 24% 0, 20% 100%, 16% 0, 12% 100%, 8% 0, 4% 100%, 0 0);"></div>
+          <span style="position: absolute; top: -14px; right: -12px; padding: 2px 12px; background: #F2EFE6; border: 3px solid #D7261E; border-radius: 6px; transform: rotate(9deg); color: #D7261E; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: 0.08em;">EXEMPLE</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A939E;">Tous les tickets</span>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+            <span style="display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 4px; background: #F2EFE6; color: #17181B; font-family: 'IBM Plex Mono', monospace; font-size: 12px;"><strong style="font-size: 15px;">#1</strong><span>24 oct.</span><span>imprimé</span></span>
+            <span style="display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 4px; border: 1.5px dashed #3A414C; color: #8A939E; font-family: 'IBM Plex Mono', monospace; font-size: 12px;"><strong style="font-size: 15px; color: #C9D0D8;">#2</strong><span>31 oct.</span><span>à venir</span></span>
+            <span style="display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 4px; border: 1.5px dashed #3A414C; color: #8A939E; font-family: 'IBM Plex Mono', monospace; font-size: 12px;"><strong style="font-size: 15px; color: #C9D0D8;">#3</strong><span>7 nov.</span><span>à venir</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mon-plein" style="background: #0F1216; border-top: 1px solid #1A1F26; border-bottom: 1px solid #1A1F26;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: clamp(72px, 9vw, 112px) 24px; display: flex; flex-direction: column; gap: 40px;">
+    <div style="max-width: 780px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+      <span style="display: inline-flex; align-items: center; gap: 12px; padding: 6px 16px 6px 6px; border-radius: 9px; background: #1D4FA3; border: 2px solid #F1F4F6; box-shadow: 0 0 0 3px #1D4FA3, 0 12px 34px rgba(29, 79, 163, 0.28);">
+        <span style="padding: 3px 9px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.05em; text-transform: uppercase;">Sortie 4</span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">Mon Plein</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+      </span>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Le plein le moins cher autour de toi.</h2>
+      <p style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px;">
+        <span style="padding: 6px 12px; border-radius: 999px; background: #171B21; border: 1px solid #262C35; font-size: 15px; font-weight: 600;">Gratuit</span>
+        <span style="padding: 6px 12px; border-radius: 999px; background: #171B21; border: 1px solid #262C35; font-size: 15px; font-weight: 600;">Sans wallet</span>
+        <span style="padding: 6px 12px; border-radius: 999px; background: #171B21; border: 1px solid #262C35; font-size: 15px; font-weight: 600;">Données officielles</span>
+      </p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;">
+      <form onSubmit="{{onFind}}" style="flex: 1 1 340px; min-width: 0; box-sizing: border-box; padding: 26px; border-radius: 18px; background: #171B21; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label for="cp" style="font-weight: 600; font-size: 15px;">Code postal</label>
+          <input id="cp" type="text" inputmode="numeric" maxlength="5" value="{{cp}}" onChange="{{onCp}}" style="min-height: 50px; padding: 0 14px; border-radius: 10px; border: 1px solid #3A414C; background: #0B0E12; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 20px; letter-spacing: 0.12em;">
+        </div>
+        <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px;">
+          <legend style="padding: 0; margin-bottom: 8px; font-weight: 600; font-size: 15px;">Carburant</legend>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{fuels}}" as="f" hint-placeholder-count="3">
+              <button type="button" aria-pressed="{{f.on}}" onClick="{{f.pick}}" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid {{f.bd}}; background: {{f.bg}}; color: {{f.fg}}; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;">{{f.name}}</button>
+            </sc-for>
+          </div>
+        </fieldset>
+        <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px;">
+          <legend style="padding: 0; margin-bottom: 8px; font-weight: 600; font-size: 15px;">Réservoir</legend>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{tanks}}" as="t" hint-placeholder-count="3">
+              <button type="button" aria-pressed="{{t.on}}" onClick="{{t.pick}}" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid {{t.bd}}; background: {{t.bg}}; color: {{t.fg}}; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;">{{t.name}}</button>
+            </sc-for>
+          </div>
+        </fieldset>
+        <button type="submit" style="min-height: 52px; border: 0; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; cursor: pointer;">Trouver mon plein</button>
+        <p style="margin: 0; font-size: 13px; color: #8A939E;">Source : prix-carburants.gouv.fr, flux officiel en temps réel. Aucune donnée personnelle gardée.</p>
+      </form>
+
+      <div style="flex: 1.45 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px;">
+          <span style="font-weight: 600; font-size: 18px;">3 stations · {{cp}} · {{fuel}}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFA733;">Résultats d’exemple</span>
+        </div>
+        <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px;">
+          <sc-for list="{{stations}}" as="s" hint-placeholder-count="3">
+            <li style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; padding: 16px 18px; border-radius: 14px; background: #0B0E12; border: 1px solid #262C35;">
+              <span style="flex: none; width: 34px; height: 34px; border-radius: 50%; background: #1D4FA3; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 19px;">{{s.rank}}</span>
+              <span style="flex: 1 1 160px; min-width: 0; display: flex; flex-direction: column; line-height: 1.3;"><span style="font-weight: 600;">{{s.name}}</span><span style="font-size: 14px; color: #8A939E;">{{s.km}}</span></span>
+              <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 34px; line-height: 1; color: #FF3D2E; text-shadow: 0 0 10px rgba(255, 61, 46, 0.5);">{{s.price}}</span>
+              <span style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25;"><span style="font-weight: 700; color: #3CF08A;">{{s.save}}</span><span style="font-size: 13px; color: #8A939E;">sur ton plein</span></span>
+              <a href="#mon-plein" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; box-sizing: border-box; border-radius: 10px; border: 1px solid #3A414C; color: #F1F4F6; text-decoration: none; font-weight: 600; font-size: 14px;">Itinéraire</a>
+            </li>
+          </sc-for>
+        </ol>
+        <p style="margin: 0; font-size: 16px; color: #C9D0D8;">{{spreadLine}}</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 16px 18px; border-radius: 14px; background: #030405; border: 1px solid #1E242C;">
+          <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 40px; line-height: 1; color: #FF3D2E; text-shadow: 0 0 12px rgba(255, 61, 46, 0.55);">{{bestPrice}}</span>
+          <span style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; line-height: 1.35;"><span style="font-weight: 600;">Mon plein à {{bestPrice}} €/L.</span><span style="font-size: 14px; color: #A7AFB9;">Trouve le tien sur la Station.</span></span>
+          <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #3A414C; background: #171B21; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;">Partager ma carte</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="atelier" style="background: #07090C;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: clamp(72px, 9vw, 112px) 24px; display: flex; flex-direction: column; gap: 40px;">
+    <div style="max-width: 780px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+      <span style="display: inline-flex; align-items: center; gap: 12px; padding: 6px 16px 6px 6px; border-radius: 9px; background: #1D4FA3; border: 2px solid #F1F4F6; box-shadow: 0 0 0 3px #1D4FA3, 0 12px 34px rgba(29, 79, 163, 0.28);">
+        <span style="padding: 3px 9px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.05em; text-transform: uppercase;">Sortie 5</span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">L’Atelier</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+      </span>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Fais ton totem.</h2>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Deux lignes, un prix, ton humeur. Télécharge, poste, ça tourne.</p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch;">
+      <div style="flex: 1 1 360px; min-width: 0; box-sizing: border-box; padding: 26px; border-radius: 18px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-weight: 600; font-size: 15px;">Idées</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{presets}}" as="p" hint-placeholder-count="5">
+              <button type="button" onClick="{{p.pick}}" style="min-height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #3A414C; background: #171B21; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 13px; cursor: pointer;">{{p.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px;">
+          <label for="l1" style="font-weight: 600; font-size: 14px;">Ligne 1</label>
+          <label for="v1" style="font-weight: 600; font-size: 14px;">Prix</label>
+          <input id="l1" type="text" maxlength="14" value="{{l1}}" onChange="{{onL1}}" style="min-width: 0; min-height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A414C; background: #0B0E12; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 16px; text-transform: uppercase;">
+          <input id="v1" type="text" maxlength="8" value="{{v1}}" onChange="{{onV1}}" style="min-width: 0; min-height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A414C; background: #0B0E12; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 16px;">
+          <label for="l2" style="font-weight: 600; font-size: 14px;">Ligne 2</label>
+          <label for="v2" style="font-weight: 600; font-size: 14px;">Prix</label>
+          <input id="l2" type="text" maxlength="14" value="{{l2}}" onChange="{{onL2}}" style="min-width: 0; min-height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A414C; background: #0B0E12; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 16px; text-transform: uppercase;">
+          <input id="v2" type="text" maxlength="8" value="{{v2}}" onChange="{{onV2}}" style="min-width: 0; min-height: 46px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A414C; background: #0B0E12; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 16px;">
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 18px 28px;">
+          <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px;">
+            <legend style="padding: 0; margin-bottom: 8px; font-weight: 600; font-size: 15px;">Format</legend>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <sc-for list="{{formats}}" as="m" hint-placeholder-count="3">
+                <button type="button" aria-pressed="{{m.on}}" onClick="{{m.pick}}" style="min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1.5px solid {{m.bd}}; background: {{m.bg}}; color: {{m.fg}}; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;">{{m.name}}</button>
+              </sc-for>
+            </div>
+          </fieldset>
+          <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px;">
+            <legend style="padding: 0; margin-bottom: 8px; font-weight: 600; font-size: 15px;">LED</legend>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <sc-for list="{{leds}}" as="c" hint-placeholder-count="3">
+                <button type="button" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1.5px solid {{c.bd}}; background: {{c.bg}}; color: {{c.fg}}; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;"><span aria-hidden="true" style="width: 12px; height: 12px; border-radius: 50%; background: {{c.hex}}; box-shadow: 0 0 8px {{c.hex}};"></span>{{c.name}}</button>
+              </sc-for>
+            </div>
+          </fieldset>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <button type="button" style="min-height: 50px; padding: 0 20px; border: 0; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer;">Télécharger le PNG</button>
+          <button type="button" style="min-height: 50px; padding: 0 20px; border-radius: 12px; border: 1.5px solid #3A414C; background: transparent; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 16px; cursor: pointer;">Copier le lien</button>
+        </div>
+        <p style="margin: 0; padding-top: 16px; border-top: 1px solid #262C35; font-size: 14px; color: #A7AFB9;"><strong style="color: #F1F4F6;">Le concours du samedi :</strong> trois totems choisis par un jury. Gratuit, sans achat, 18 ans et plus. <a href="#aire">Règlement</a>.</p>
+      </div>
+
+      <div style="flex: 1 1 420px; min-width: 0; box-sizing: border-box; min-height: 480px; padding: 36px 24px; border-radius: 18px; background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(214, 230, 255, 0.10), transparent 70%), #030405; border: 1px solid #1E242C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;">
+        <sc-if value="{{isTotem}}" hint-placeholder-val="{{true}}">
+          <div style="width: 100%; max-width: 390px; box-sizing: border-box; padding: 12px; border-radius: 14px; background: linear-gradient(180deg, #1B2028, #12161B); border: 1px solid #2C333D; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 9px;">
+            <div style="background: #F1F4F6; color: #0B0D10; border-radius: 8px; padding: 9px 14px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 26px; line-height: 1;">STATION $PLEIN</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #0B0D10; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"></path><path d="M3 21h12"></path><path d="M6.5 8h5"></path><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg>
+            </div>
+            <div style="background: #030405; border: 1px solid #1E242C; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <span style="min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere;">{{l1}}</span>
+              <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: clamp(38px, 11vw, 54px); line-height: 0.9; color: {{ledHex}}; text-shadow: 0 0 12px {{ledGlow}}; white-space: nowrap;">{{v1}}</span>
+            </div>
+            <div style="background: #030405; border: 1px solid #1E242C; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <span style="min-width: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere;">{{l2}}</span>
+              <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: clamp(38px, 11vw, 54px); line-height: 0.9; color: {{ledHex}}; text-shadow: 0 0 12px {{ledGlow}}; white-space: nowrap;">{{v2}}</span>
+            </div>
+          </div>
+          <div aria-hidden="true" style="width: 52%; max-width: 172px; display: flex; justify-content: space-between; margin-top: -18px;"><span style="width: 14px; height: 40px; background: linear-gradient(180deg, #1C2128, #0C0F13);"></span><span style="width: 14px; height: 40px; background: linear-gradient(180deg, #1C2128, #0C0F13);"></span></div>
+        </sc-if>
+        <sc-if value="{{isPanneau}}" hint-placeholder-val="{{false}}">
+          <div style="width: 100%; max-width: 400px; box-sizing: border-box; padding: 18px 20px; border-radius: 12px; background: #1D4FA3; border: 3px solid #F1F4F6; box-shadow: 0 0 0 4px #1D4FA3, 0 30px 80px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 14px; color: #FFFFFF;">
+            <span style="align-self: flex-start; padding: 3px 10px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: 0.04em;">SORTIE 17</span>
+            <span style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; line-height: 1;"><span style="min-width: 0; overflow-wrap: anywhere;">{{l1}}</span><span style="white-space: nowrap;">{{v1}}</span></span>
+            <span style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 32px; line-height: 1;"><span style="min-width: 0; overflow-wrap: anywhere;">{{l2}}</span><span style="white-space: nowrap;">{{v2}}</span></span>
+            <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true" style="align-self: flex-end; fill: none; stroke: #FFFFFF; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{isTicket}}" hint-placeholder-val="{{false}}">
+          <div style="width: 100%; max-width: 320px;">
+            <div style="background: #F2EFE6; color: #17181B; font-family: 'IBM Plex Mono', monospace; font-size: 15px; padding: 22px 20px 16px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; gap: 12px;">
+              <span style="text-align: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 28px; line-height: 1;">STATION $PLEIN</span>
+              <span style="border-top: 2px dashed #17181B;"></span>
+              <span style="display: flex; align-items: baseline; gap: 8px; text-transform: uppercase;"><span style="min-width: 0; overflow-wrap: anywhere;">{{l1}}</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600; white-space: nowrap;">{{v1}}</span></span>
+              <span style="display: flex; align-items: baseline; gap: 8px; text-transform: uppercase;"><span style="min-width: 0; overflow-wrap: anywhere;">{{l2}}</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600; white-space: nowrap;">{{v2}}</span></span>
+              <span style="border-top: 2px dashed #17181B;"></span>
+              <span style="text-align: center; font-size: 13px;">MERCI DE VOTRE VISITE</span>
+            </div>
+            <div aria-hidden="true" style="height: 14px; background: #F2EFE6; clip-path: polygon(0 0, 100% 0, 100% 100%, 95% 0, 90% 100%, 85% 0, 80% 100%, 75% 0, 70% 100%, 65% 0, 60% 100%, 55% 0, 50% 100%, 45% 0, 40% 100%, 35% 0, 30% 100%, 25% 0, 20% 100%, 15% 0, 10% 100%, 5% 0, 0 100%);"></div>
+          </div>
+        </sc-if>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #6C7581;">fait à la station $PLEIN</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div aria-hidden="true" style="height: 60px; background: #0A0C0F; border-top: 2px solid rgba(241, 244, 246, 0.5); border-bottom: 2px solid rgba(241, 244, 246, 0.5); display: flex; align-items: center;">
+  <div style="width: 100%; height: 6px; background: #F1F4F6; box-shadow: 0 0 14px rgba(241, 244, 246, 0.35);"></div>
+</div>
+
+<section id="lignes" style="background: #0F1216; border-bottom: 1px solid #1A1F26;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: clamp(72px, 9vw, 112px) 24px; display: flex; flex-direction: column; gap: 40px;">
+    <div style="max-width: 780px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+      <span style="display: inline-flex; align-items: center; gap: 12px; padding: 6px 16px 6px 6px; border-radius: 9px; background: #1D4FA3; border: 2px solid #F1F4F6; box-shadow: 0 0 0 3px #1D4FA3, 0 12px 34px rgba(29, 79, 163, 0.28);">
+        <span style="padding: 3px 9px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.05em; text-transform: uppercase;">Sortie 6</span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">Les lignes continues</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+      </span>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Celles qu’on ne franchit pas.</h2>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Sur la route, une ligne continue ne se franchit pas. Ici, ce sont nos engagements, et chacun se vérifie.</p>
+    </div>
+
+    <div style="position: relative;">
+      <span aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; width: 6px; border-radius: 3px; background: #F1F4F6; box-shadow: 0 0 16px rgba(241, 244, 246, 0.35);"></span>
+      <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;">
+      <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px; border-bottom: 1px solid #1E242C;">
+        <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">1</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">0 % de jetons réservés à l’équipe. Ni prévente, ni investisseurs.</span>
+        <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">Vérifiable : nos wallets sont publics.</span>
+      </li>
+      <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px; border-bottom: 1px solid #1E242C;">
+        <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">2</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">La formule ne change pas sans quatre semaines de préavis.</span>
+        <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">Annoncé ici et sur X, daté.</span>
+      </li>
+      <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px; border-bottom: 1px solid #1E242C;">
+        <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">3</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">Un ticket chaque samedi, même quand le réservoir est vide.</span>
+        <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">Les tickets ne s’effacent pas.</span>
+      </li>
+      <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px; border-bottom: 1px solid #1E242C;">
+        <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">4</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">Aucune promotion payée. Aucun influenceur rémunéré.</span>
+        <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">C’est la loi en France, et c’est notre choix.</span>
+      </li>
+      <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px; border-bottom: 1px solid #1E242C;">
+        <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">5</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">On ne t’écrira jamais en premier.</span>
+        <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">Un DM « de l’équipe » est une arnaque.</span>
+      </li>
+      <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px; border-bottom: 1px solid #1E242C;">
+        <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">6</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">Tous nos wallets sont publics : réservoir, équipe, aide.</span>
+        <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">La liste est dans l’aire de repos.</span>
+      </li>
+      <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px;">
+        <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">7</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">Aucun mouvement, parti, syndicat ni marque.</span>
+        <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">Tout le monde passe à la pompe.</span>
+      </li>
+      </ol>
+    </div>
+
+    <div style="padding: 10px; border-radius: 20px; background: repeating-linear-gradient(-45deg, rgba(241, 244, 246, 0.8) 0 12px, #0F1216 12px 30px);">
+      <div style="border-radius: 14px; background: #0F1216; padding: clamp(20px, 3vw, 32px); display: flex; flex-wrap: wrap; gap: 20px 26px; align-items: flex-start;">
+        <svg width="52" height="52" viewBox="0 0 24 24" aria-hidden="true" style="flex: none; fill: none; stroke: #FFA733; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;"><path d="M12 3.5L2.5 20h19z"></path><path d="M12 10v4.5"></path><path d="M12 17.2v.3"></path></svg>
+        <div style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 10px;">
+          <h3 style="margin: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 28px; letter-spacing: 0.03em; text-transform: uppercase;">Bande d’arrêt d’urgence</h3>
+          <p style="margin: 0; font-size: 19px; color: #F1F4F6;">$PLEIN est un memecoin. Son prix peut tomber à zéro. Le rachat redistribue des frais : il ne garantit ni prix ni rendement.</p>
+          <p style="margin: 0; font-size: 19px; color: #F1F4F6;">N’achète que ce que tu peux perdre, et <strong style="color: #FFA733;">ne mets jamais l’argent de ton plein dans $PLEIN.</strong></p>
+          <p style="margin: 0; font-size: 14px; color: #8A939E;">Réservé aux majeurs. Rien ici n’est un conseil en investissement.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="aire" style="background: #07090C;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: clamp(72px, 9vw, 112px) 24px; display: flex; flex-direction: column; gap: 40px;">
+    <div style="max-width: 780px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px;">
+      <span style="display: inline-flex; align-items: center; gap: 12px; padding: 6px 16px 6px 6px; border-radius: 9px; background: #1D4FA3; border: 2px solid #F1F4F6; box-shadow: 0 0 0 3px #1D4FA3, 0 12px 34px rgba(29, 79, 163, 0.28);">
+        <span style="padding: 3px 9px; border-radius: 5px; background: #F1F4F6; color: #1D4FA3; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 17px; letter-spacing: 0.05em; text-transform: uppercase;">Sortie 7</span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">Aire de repos</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
+      </span>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Questions, vérifications, liens.</h2>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 32px 40px; align-items: flex-start;">
+      <div style="flex: 1.4 1 500px; min-width: 0; border-top: 1px solid #262C35;">
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">C’est quoi, le rachat ?</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">Chaque samedi, une part des frais de la semaine achète des $PLEIN sur le marché. Ces jetons sont ensuite brûlés : ils n’existent plus.</p>
+        </details>
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Pourquoi le prix du gazole ?</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">Parce que c’est le prix que tout le monde regarde. Plus il monte, plus la part du rachat grandit, entre 30 % et 60 % des frais de la station.</p>
+        </details>
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Qui touche quoi ?</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">1 % de frais sur chaque échange : 0,5 % pour Jupiter, 0,5 % pour la station. La part de la station se divise en trois : le rachat, 10 % d’aide alimentaire, le reste pour l’équipe. Tout est public.</p>
+        </details>
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Et si le gazole baisse ?</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">Le rachat baisse aussi, c’est la règle, et la part de l’équipe remonte d’autant. Le taux suit le relevé officiel, avec son décalage d’une semaine.</p>
+        </details>
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Comment vérifier ?</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">Chaque ticket donne les liens Solscan du rachat et du burn. Les wallets sont publiés. Le tableau de bord lit la chaîne en direct.</p>
+        </details>
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">C’est politique ?</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">Non. Tout le monde passe à la pompe. $PLEIN ne représente aucun mouvement, parti, syndicat ni marque.</p>
+        </details>
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Et l’aide alimentaire ?</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">10 % de la part de la station, chaque semaine, versés en euros à une association. Son nom est publié dès que la convention est signée, avec chaque reçu.</p>
+        </details>
+        <details style="border-bottom: 1px solid #262C35;">
+          <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Quelqu’un m’a écrit en privé pour $PLEIN.</summary>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">C’est une arnaque. L’équipe n’écrit jamais en premier. Vérifie le contrat ci-contre avant de signer quoi que ce soit.</p>
+        </details>
+      </div>
+
+      <div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 18px;">
+        <form onSubmit="{{onCheck}}" style="box-sizing: border-box; padding: 22px; border-radius: 16px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 12px;">
+          <label for="verif" style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.03em; text-transform: uppercase;">Vérifier un contrat</label>
+          <div style="display: flex; gap: 8px;">
+            <input id="verif" type="text" placeholder="Colle une adresse" value="{{check}}" onChange="{{onCheckInput}}" style="flex: 1 1 auto; min-width: 0; min-height: 48px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A414C; background: #0B0E12; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 14px;">
+            <button type="submit" style="min-height: 48px; padding: 0 16px; border: 0; border-radius: 10px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer;">Vérifier</button>
+          </div>
+          <sc-if value="{{checkIdle}}" hint-placeholder-val="{{true}}">
+            <p style="margin: 0; font-size: 14px; color: #8A939E;">On compare l’adresse au seul contrat officiel. Rien n’est envoyé.</p>
+          </sc-if>
+          <sc-if value="{{checkOk}}" hint-placeholder-val="{{false}}">
+            <p role="status" style="margin: 0; padding: 12px 14px; border-radius: 10px; background: rgba(60, 240, 138, 0.10); border: 1px solid #3CF08A; color: #3CF08A; font-weight: 600;">C’est le vrai $PLEIN.</p>
+          </sc-if>
+          <sc-if value="{{checkBad}}" hint-placeholder-val="{{false}}">
+            <p role="status" style="margin: 0; padding: 12px 14px; border-radius: 10px; background: rgba(255, 61, 46, 0.10); border: 1px solid #FF3D2E; color: #FF8A80; font-weight: 600;">Ce n’est PAS $PLEIN. Ne signe rien.</p>
+          </sc-if>
+        </form>
+
+        <div style="box-sizing: border-box; padding: 22px; border-radius: 16px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 6px;">Nos wallets</span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Réservoir (multisig)</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E;">[adresse]</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Aide alimentaire</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E;">[adresse]</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Équipe · fondateur 1</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E;">[adresse]</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0;"><span>Équipe · fondateur 2</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E;">[adresse]</span></span>
+        </div>
+
+        <nav aria-label="Liens officiels" style="box-sizing: border-box; padding: 10px 22px; border-radius: 16px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column;">
+          <a href="https://x.com" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span>X · @[compte]</span><span aria-hidden="true">↗</span></a>
+          <a href="https://t.me" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span>Telegram · [lien]</span><span aria-hidden="true">↗</span></a>
+          <a href="https://dexscreener.com/solana" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span>DexScreener</span><span aria-hidden="true">↗</span></a>
+          <a href="https://solscan.io" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span>Solscan</span><span aria-hidden="true">↗</span></a>
+          <a href="https://jup.ag" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none;"><span>Jupiter</span><span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="background: #030405; border-top: 1px solid #1A1F26;">
+  <div style="max-width: 1280px; margin: 0 auto; padding: 40px 24px 104px; display: flex; flex-direction: column; gap: 22px;">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 28px;">
+      <span style="display: flex; align-items: center; gap: 12px;">
+        <svg width="22" height="32" viewBox="0 0 26 38" aria-hidden="true"><rect x="1" y="1" width="24" height="31" rx="3" style="fill: #171B21; stroke: #3A414C; stroke-width: 1.5;"></rect><rect x="4" y="4" width="18" height="5" rx="1" style="fill: #F1F4F6;"></rect><rect x="4" y="11.5" width="18" height="5" rx="1" style="fill: #FF3D2E;"></rect><rect x="4" y="18.5" width="18" height="5" rx="1" style="fill: #3CF08A;"></rect><rect x="4" y="25.5" width="18" height="3.5" rx="1" style="fill: #FFA733;"></rect><rect x="10" y="32" width="6" height="6" style="fill: #3A414C;"></rect></svg>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: 0.03em;">Station $PLEIN</span>
+        <span style="font-size: 14px; color: #8A939E;">ouverte 24/7</span>
+      </span>
+      <nav aria-label="Informations" style="display: flex; flex-wrap: wrap; gap: 0 22px;">
+        <a href="#aire" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; text-decoration: none;">Mentions légales</a>
+        <a href="#atelier" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; text-decoration: none;">Règlement du concours</a>
+        <a href="#aire" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; text-decoration: none;">Contact</a>
+      </nav>
+    </div>
+    <p style="margin: 0; max-width: 920px; font-size: 14px; line-height: 1.6; color: #8A939E;">Prix des carburants : prix-carburants.gouv.fr, données ouvertes de l’État. $PLEIN ne représente aucun mouvement, parti, syndicat ni marque de carburant. $PLEIN est un memecoin : il ne donne aucun droit, ni dividende, ni vote, ni remboursement, et son prix peut tomber à zéro. Rien ici n’est un conseil en investissement. Réservé aux majeurs.</p>
+  </div>
+</footer>
+
+<div class="pompe-bar" style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; gap: 10px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); background: rgba(7, 9, 12, 0.94); border-top: 1px solid #262C35; backdrop-filter: blur(10px);">
+  <button type="button" onClick="{{openPump}}" style="flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; border: 0; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; cursor: pointer;">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"></path><path d="M3 21h12"></path><path d="M6.5 8h5"></path><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg>
+    Faire le plein
+  </button>
+  <button type="button" onClick="{{copyCA}}" style="flex: 0 0 auto; min-height: 50px; padding: 0 16px; border-radius: 12px; border: 1px solid #3A414C; background: #171B21; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;">{{caShort}}</button>
+</div>
+
+<sc-if value="{{pumpOpen}}" hint-placeholder-val="{{false}}">
+  <div role="dialog" aria-modal="true" aria-label="La pompe : acheter $PLEIN" style="position: fixed; inset: 0; z-index: 40; display: flex; justify-content: flex-end; background: rgba(3, 4, 5, 0.74);">
+    <div style="width: min(440px, 100%); height: 100%; overflow-y: auto; box-sizing: border-box; padding: 24px; background: #0F1216; border-left: 1px solid #262C35; display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 30px; text-transform: uppercase;">La pompe</span>
+        <button type="button" aria-label="Fermer" onClick="{{closePump}}" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #3A414C; background: #171B21; color: #F1F4F6; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round;"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 10px; background: #030405; border: 1px solid #1E242C;">
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.06em; text-transform: uppercase;">Pompe n° 3</span>
+        <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 30px; color: #3CF08A; text-shadow: 0 0 10px rgba(60, 240, 138, 0.5);">$PLEIN</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 14px; border: 1.5px dashed #3A414C;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A939E;">Jupiter Plugin · mode intégré</span>
+        <div style="display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 10px; background: #0B0E12; border: 1px solid #262C35;">
+          <span style="font-size: 13px; color: #8A939E;">Tu paies</span>
+          <span style="display: flex; align-items: center; justify-content: space-between; gap: 10px;"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px;">0,00</span><span style="padding: 6px 10px; border-radius: 8px; background: #171B21; font-weight: 600;">USDC</span></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 10px; background: #0B0E12; border: 1px solid #262C35;">
+          <span style="font-size: 13px; color: #8A939E;">Tu reçois</span>
+          <span style="display: flex; align-items: center; justify-content: space-between; gap: 10px;"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 30px; color: #8A939E;">0</span><span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; background: #171B21; font-weight: 600;">$PLEIN <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2;"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span></span>
+        </div>
+        <button type="button" style="min-height: 52px; border: 0; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 17px; cursor: pointer;">Faire le plein</button>
+      </div>
+      <p style="margin: 0; font-size: 14px; color: #A7AFB9;">La sortie est verrouillée sur le contrat officiel. Frais de la station : 0 %. Seul le 1 % du protocole s’applique.</p>
+      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">Contrat : [adresse du contrat]</p>
+      <p style="margin: 0; padding-top: 14px; border-top: 1px solid #262C35; font-size: 14px; color: #F1F4F6;">N’achète que ce que tu peux perdre. Jamais l’argent de ton plein.</p>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":10100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      price: 2.356, copied: false, pumpOpen: false, now: Date.now(),
+      fuel: 'Gazole', tank: 50, cp: '69003',
+      l1: 'MORAL', v1: '0,00', l2: 'LOYER', v2: '980', format: 'totem', led: 'rouge',
+      check: '', checked: false
+    };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState({ now: Date.now() }), 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    clearTimeout(this.copyTimer);
+  }
+  countdown() {
+    const f = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+    const p = {};
+    f.formatToParts(new Date(this.state.now)).forEach((x) => { p[x.type] = x.value; });
+    const dow = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[p.weekday] || 0;
+    const sec = dow * 86400 + Number(p.hour) * 3600 + Number(p.minute) * 60 + Number(p.second);
+    let d = 6 * 86400 + 18 * 3600 - sec;
+    if (d <= 0) d += 7 * 86400;
+    const j = Math.floor(d / 86400), h = Math.floor((d % 86400) / 3600), m = Math.floor((d % 3600) / 60), s = d % 60;
+    const z = (n) => String(n).padStart(2, '0');
+    return (j > 0 ? j + 'J ' : '') + z(h) + ':' + z(m) + ':' + z(s);
+  }
+  copyCA() {
+    try { if (navigator.clipboard) navigator.clipboard.writeText('[adresse du contrat]').catch(() => {}); } catch (e) {}
+    this.setState({ copied: true });
+    clearTimeout(this.copyTimer);
+    this.copyTimer = setTimeout(() => this.setState({ copied: false }), 2000);
+  }
+  renderVals() {
+    const st = this.state;
+    const fr = (x, n) => x.toFixed(n).replace('.', ',');
+    const buy = Math.min(60, Math.max(30, st.price * 20));
+    const team = 90 - buy;
+    const pct = (x) => fr(x, 1) + ' %';
+    const chip = (on) => on
+      ? { bg: '#FFA733', fg: '#0B0C0E', bd: '#FFA733' }
+      : { bg: '#171B21', fg: '#F1F4F6', bd: '#3A414C' };
+    const fuelData = {
+      'Gazole': { avg: 2.356, max: 2.449, prices: [2.219, 2.239, 2.259] },
+      'SP95-E10': { avg: 2.147, max: 2.229, prices: [2.019, 2.035, 2.049] },
+      'SP98': { avg: 2.235, max: 2.319, prices: [2.109, 2.125, 2.139] }
+    };
+    const fd = fuelData[st.fuel] || fuelData['Gazole'];
+    const places = [['Station de l’avenue', '1,2 km'], ['Station du marché', '2,8 km'], ['Station du rond-point', '3,5 km']];
+    const stations = fd.prices.map((pr, i) => ({
+      rank: i + 1, name: places[i][0], km: places[i][1],
+      price: fr(pr, 3), save: '−' + fr((fd.avg - pr) * st.tank, 2) + ' €'
+    }));
+    const spread = fd.max - fd.prices[0];
+    const leds = {
+      rouge: { hex: '#FF3D2E', glow: 'rgba(255, 61, 46, 0.6)' },
+      vert: { hex: '#3CF08A', glow: 'rgba(60, 240, 138, 0.55)' },
+      ambre: { hex: '#FFA733', glow: 'rgba(255, 167, 51, 0.55)' }
+    };
+    const led = leds[st.led] || leds.rouge;
+    const presets = [['MORAL', '0,00'], ['LOYER', '980'], ['BAGUETTE', '1,45'], ['FIN DU MOIS', 'J-12'], ['MON PLEIN', '117,30']];
+    const official = '[adresse du contrat]';
+    const checkVal = st.check.trim();
+    return {
+      countdown: this.countdown(),
+      caLabel: st.copied ? 'Copié' : 'Copier',
+      caShort: st.copied ? 'Copié' : 'Contrat',
+      copyCA: () => this.copyCA(),
+      pumpOpen: st.pumpOpen,
+      openPump: () => this.setState({ pumpOpen: true }),
+      closePump: () => this.setState({ pumpOpen: false }),
+      price: st.price,
+      priceLabel: fr(st.price, 3),
+      buyW: buy.toFixed(1) + '%',
+      buyPct: pct(buy),
+      teamPct: pct(team),
+      barLabel: 'Répartition : rachat et burn ' + pct(buy) + ', aide alimentaire 10 %, équipe ' + pct(team),
+      onPrice: (e) => this.setState({ price: parseFloat(e.target.value) }),
+      cp: st.cp,
+      fuel: st.fuel,
+      onCp: (e) => this.setState({ cp: e.target.value.replace(/[^0-9]/g, '').slice(0, 5) }),
+      onFind: (e) => { e.preventDefault(); },
+      fuels: ['Gazole', 'SP95-E10', 'SP98'].map((n) => Object.assign({ name: n, on: st.fuel === n, pick: () => this.setState({ fuel: n }) }, chip(st.fuel === n))),
+      tanks: [40, 50, 60].map((n) => Object.assign({ name: n + ' L', on: st.tank === n, pick: () => this.setState({ tank: n }) }, chip(st.tank === n))),
+      stations: stations,
+      bestPrice: fr(fd.prices[0], 3),
+      spreadLine: 'Dans ton secteur, ' + fr(spread, 2) + ' €/L d’écart entre la station la moins chère et la plus chère : ' + fr(spread * st.tank, 2) + ' € sur un plein de ' + st.tank + ' L.',
+      presets: presets.map((p) => ({ label: p[0] + ' ' + p[1], pick: () => this.setState({ l2: st.l1, v2: st.v1, l1: p[0], v1: p[1] }) })),
+      l1: st.l1, v1: st.v1, l2: st.l2, v2: st.v2,
+      onL1: (e) => this.setState({ l1: e.target.value.toUpperCase() }),
+      onV1: (e) => this.setState({ v1: e.target.value }),
+      onL2: (e) => this.setState({ l2: e.target.value.toUpperCase() }),
+      onV2: (e) => this.setState({ v2: e.target.value }),
+      formats: [['totem', 'Totem'], ['panneau', 'Panneau'], ['ticket', 'Ticket']].map((f) => Object.assign({ name: f[1], on: st.format === f[0], pick: () => this.setState({ format: f[0] }) }, chip(st.format === f[0]))),
+      leds: [['rouge', 'Rouge'], ['vert', 'Vert'], ['ambre', 'Ambre']].map((c) => Object.assign({ name: c[1], hex: leds[c[0]].hex, on: st.led === c[0], pick: () => this.setState({ led: c[0] }) }, chip(st.led === c[0]))),
+      isTotem: st.format === 'totem',
+      isPanneau: st.format === 'panneau',
+      isTicket: st.format === 'ticket',
+      ledHex: led.hex,
+      ledGlow: led.glow,
+      check: st.check,
+      onCheckInput: (e) => this.setState({ check: e.target.value, checked: false }),
+      onCheck: (e) => { e.preventDefault(); this.setState({ checked: true }); },
+      checkIdle: !st.checked || checkVal === '',
+      checkOk: st.checked && checkVal !== '' && checkVal === official,
+      checkBad: st.checked && checkVal !== '' && checkVal !== official
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+/* Brand fonts, served from this site (no third-party font requests, so no visitor IP goes to a
+   font CDN). Latin subsets from Fontsource; all SIL Open Font License 1.1, see /fonts/*-OFL.txt. */
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/barlow-condensed-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/barlow-condensed-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:800;font-display:swap;src:url(/fonts/barlow-condensed-latin-800-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/barlow-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/barlow-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/barlow-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/barlow-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Doto';font-style:normal;font-weight:700;font-display:swap;src:url(/fonts/doto-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Doto';font-style:normal;font-weight:900;font-display:swap;src:url(/fonts/doto-latin-900-normal.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:600;font-display:swap;src:url(/fonts/ibm-plex-mono-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-latin-400-italic.woff2) format('woff2')}

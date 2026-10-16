@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fiche $PLEIN · Station $PLEIN</title>
+<meta name="description" content="Ce qu’est $PLEIN, d’où viennent les frais, comment se calcule le rachat du samedi, où va chaque centime et ce qui peut mal tourner.">
+<!-- Draft: remove noindex once every [bracket] is filled and a lawyer has read the page. -->
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07090C">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/fonts.css">
+<link rel="stylesheet" href="/css/page.css">
+<script src="/config.js"></script>
+<script type="module" src="/js/fiche.js"></script>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-in">
+    <a class="marque" href="/" aria-label="Station $PLEIN, accueil">
+      <svg width="22" height="32" viewBox="0 0 26 38" aria-hidden="true"><rect x="1" y="1" width="24" height="31" rx="3" fill="#171B21" stroke="#3A414C" stroke-width="1.5"/><rect x="4" y="4" width="18" height="5" rx="1" fill="#F1F4F6"/><rect x="4" y="11.5" width="18" height="5" rx="1" fill="#FF3D2E"/><rect x="4" y="18.5" width="18" height="5" rx="1" fill="#3CF08A"/><rect x="4" y="25.5" width="18" height="3.5" rx="1" fill="#FFA733"/><rect x="10" y="32" width="6" height="6" fill="#3A414C"/></svg>
+      Station $PLEIN
+    </a>
+    <a class="retour" href="/">Retour à la station</a>
+  </div>
+</header>
+<div class="auvent" aria-hidden="true"></div>
+
+<main>
+  <p class="kicker">Fiche $PLEIN · ce qui est promis, ce qui ne l’est pas</p>
+  <h1>La fiche $PLEIN</h1>
+  <p class="chapo">Chaque samedi à 18:00, une part des frais de $PLEIN rachète des $PLEIN sur le marché et les brûle. Cette part suit le prix officiel du gazole. Voici la règle entière, et tout ce qui peut mal tourner.</p>
+
+  <div class="projet" role="note"><strong>Projet à compléter avant l’ouverture.</strong> Les passages <span class="todo">[entre crochets]</span> attendent une information que seule l’équipe peut donner, ou une vérification après la création du jeton. À faire relire par un avocat, au regard des règles MiCA sur la communication (loyale, claire, non trompeuse).</div>
+
+  <h2><span class="borne">1</span>Ce que c’est</h2>
+  <ul>
+    <li><strong>Nom&nbsp;:</strong> Le Plein · <strong>symbole&nbsp;:</strong> PLEIN · <strong>réseau&nbsp;:</strong> Solana.</li>
+    <li><strong>Contrat officiel&nbsp;:</strong> <span class="mono" data-ca>publié ici samedi à 18:00</span>. Le seul. Tout autre est faux.</li>
+    <li><strong>Lancement&nbsp;:</strong> sur Jupiter Studio, le <span class="todo">[date et heure de création, lien Solscan]</span>.</li>
+    <li><strong>Émis par&nbsp;:</strong> <span class="todo">[raison sociale, forme, RCS]</span>, voir les <a href="/mentions-legales.html">mentions légales</a>.</li>
+    <li><strong>Nombre de jetons&nbsp;:</strong> 1&nbsp;000&nbsp;000&nbsp;000, offre fixe <span class="todo">[à vérifier sur Solscan après création&nbsp;: autorité de création révoquée]</span>.</li>
+    <li><strong>Jetons réservés à l’équipe&nbsp;:</strong> 0&nbsp;%. Ni prévente, ni investisseurs. Le revenu de l’équipe, c’est sa part des frais, publiée chaque semaine.</li>
+  </ul>
+  <p><strong>Ce que $PLEIN ne donne pas&nbsp;:</strong> aucun dividende, aucun vote, aucun remboursement, aucune part de société, aucune créance sur l’équipe. Ce n’est pas un placement, ni une assurance contre le prix du carburant. Son prix peut tomber à zéro.</p>
+
+  <h2><span class="borne">2</span>D’où viennent les frais</h2>
+  <p>Chaque achat et chaque vente de $PLEIN sur Jupiter paie 1&nbsp;% de frais&nbsp;: 0,5&nbsp;% pour Jupiter, 0,5&nbsp;% pour la station. La part de la station s’accumule dans <strong>le réservoir</strong>, un coffre multisig&nbsp;: rien n’en sort sans la signature des deux fondateurs.</p>
+  <p>Au lancement, les frais anti-sniper de Jupiter Studio reviennent aussi à la station. Ils iront en totalité au premier rachat <span class="todo">[montant publié après le lancement]</span>.</p>
+  <p class="doux">La pompe du site ne prend rien de plus&nbsp;: frais de la station sur l’échange, 0&nbsp;%.</p>
+
+  <h2><span class="borne">3</span>La règle du samedi</h2>
+  <div class="encart">
+    <p class="formule"><span class="vert">Rachat</span> = 20&nbsp;× <span class="rouge">prix du gazole</span>, entre 30 et 60&nbsp;%</p>
+  </div>
+  <ul>
+    <li><strong>Le prix&nbsp;:</strong> le dernier relevé hebdomadaire officiel du prix moyen du gazole en France (DGEC, ministère chargé de l’énergie) publié avant le samedi 17:45, heure où il est figé. Le relevé paraît en début de semaine pour la semaine précédente&nbsp;: il a donc quelques jours. Pas le prix en direct, pas le curseur du site.</li>
+    <li><strong>Le calcul&nbsp;:</strong> 20&nbsp;× le prix en euros par litre, arrondi au dixième de point, jamais moins de 30&nbsp;%, jamais plus de 60&nbsp;%.</li>
+    <li><strong>L’aide alimentaire&nbsp;:</strong> 10&nbsp;%, fixe, versés en euros à une association. Son nom est publié dès que la convention est signée, avec chaque reçu. Sans partenaire, ces 10&nbsp;% attendent dans un wallet publié et ne vont jamais à l’équipe.</li>
+    <li><strong>L’équipe&nbsp;:</strong> le reste. Quand le gazole monte, c’est la part de l’équipe qui baisse.</li>
+  </ul>
+  <p>Cette semaine&nbsp;: <strong data-official="formula">20&nbsp;× 2,328&nbsp;€ = 46,6&nbsp;%</strong>, équipe <strong data-official="team">43,4&nbsp;%</strong>. <span class="doux" data-official="source">Relevé hebdomadaire officiel du 9 octobre 2026</span>.</p>
+  <div class="tableau">
+    <table>
+      <caption class="doux" style="caption-side: bottom; text-align: left; padding: 10px 14px; font-size: 14px;">Part du réservoir, selon le prix officiel du gazole.</caption>
+      <thead><tr><th scope="col">Gazole</th><th scope="col">Rachat et burn</th><th scope="col">Aide alimentaire</th><th scope="col">Équipe</th></tr></thead>
+      <tbody>
+        <tr><td>1,50&nbsp;€/L</td><td class="vert">30&nbsp;% (plancher)</td><td>10&nbsp;%</td><td>60&nbsp;%</td></tr>
+        <tr><td>2,00&nbsp;€/L</td><td class="vert">40&nbsp;%</td><td>10&nbsp;%</td><td>50&nbsp;%</td></tr>
+        <tr><td>2,50&nbsp;€/L</td><td class="vert">50&nbsp;%</td><td>10&nbsp;%</td><td>40&nbsp;%</td></tr>
+        <tr><td>3,00&nbsp;€/L</td><td class="vert">60&nbsp;% (plafond)</td><td>10&nbsp;%</td><td>30&nbsp;%</td></tr>
+        <tr><td>3,20&nbsp;€/L</td><td class="vert">60&nbsp;% (plafond)</td><td>10&nbsp;%</td><td>30&nbsp;%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="doux">Exemple de ticket, à 2,356&nbsp;€/L&nbsp;: un réservoir de 3&nbsp;412,00&nbsp;USDC donne 1&nbsp;607,05 au rachat, 341,20 à l’aide alimentaire et 1&nbsp;463,75 à l’équipe. C’est un exemple, pas une prévision.</p>
+
+  <h3>Le déroulé, chaque samedi</h3>
+  <ol class="horaire">
+    <li><time>17:45</time><span>le prix officiel est figé.</span></li>
+    <li><time>17:50</time><span>les frais de la semaine rejoignent le coffre multisig.</span></li>
+    <li><time>18:00</time><span>rachat sur le marché, en 12 tranches jusqu’à 19:00.</span></li>
+    <li><time>19:00</time><span>les $PLEIN rachetés sont brûlés.</span></li>
+    <li><time>19:05</time><span>le ticket est publié ici, sur X et sur Telegram, chaque ligne avec sa transaction Solscan.</span></li>
+  </ol>
+  <p>Un ticket sort chaque samedi, même quand le réservoir est presque vide. <span class="todo">[À décider&nbsp;: si Solana ou Jupiter est indisponible samedi, le rachat est reporté à quand, et comment c’est annoncé&nbsp;?]</span></p>
+
+  <h2><span class="borne">4</span>Où va chaque centime</h2>
+  <p>Les wallets sont publics. Chaque rachat, chaque burn et chaque versement d’aide renvoie vers sa transaction.</p>
+  <ul class="wallets">
+    <li><span class="role">Le réservoir (multisig)</span><span class="mono" data-wallet="reservoir">publié à l’ouverture</span></li>
+    <li><span class="role">Aide alimentaire</span><span class="mono" data-wallet="aid">publié à l’ouverture</span></li>
+    <li><span class="role">Fondateur 1</span><span class="mono" data-wallet="founder1">publié à l’ouverture</span></li>
+    <li><span class="role">Fondateur 2</span><span class="mono" data-wallet="founder2">publié à l’ouverture</span></li>
+  </ul>
+  <p class="doux">Les signataires du multisig&nbsp;: <span class="todo">[outil de multisig et seuil, par exemple 2 signatures sur 2]</span>. Liquidité après la cotation&nbsp;: <span class="todo">[verrouillage réel de la liquidité, vérifié sur la chaîne après la migration, avec le lien]</span>.</p>
+
+  <h2><span class="borne">5</span>Les sept lignes continues</h2>
+  <ol>
+    <li>0&nbsp;% de jetons réservés à l’équipe, ni prévente ni investisseurs.</li>
+    <li>La formule ne change pas sans quatre semaines de préavis, annoncé ici.</li>
+    <li>Un ticket chaque samedi, même quand le réservoir est vide.</li>
+    <li>Aucune promotion payée, aucun influenceur rémunéré.</li>
+    <li>On ne t’écrira jamais en premier.</li>
+    <li>Tous nos wallets sont publics.</li>
+    <li>Aucun mouvement, parti, syndicat ni marque.</li>
+  </ol>
+
+  <h2><span class="borne">6</span>Ce qui peut mal tourner</h2>
+  <ul>
+    <li><strong>Le prix peut tomber à zéro.</strong> Le rachat ne garantit aucun prix. Il dépense des frais, il ne crée pas de valeur.</li>
+    <li><strong>Sans échanges, pas de rachat.</strong> Les frais viennent du volume. Si le volume s’effondre, le rachat devient minuscule.</li>
+    <li><strong>Le gazole qui baisse fait baisser le rachat.</strong> La part du rachat suit le prix dans les deux sens, jusqu’au plancher de 30&nbsp;%.</li>
+    <li><strong>La liquidité peut manquer.</strong> Vendre beaucoup d’un coup peut faire chuter le prix.</li>
+    <li><strong>Les outils peuvent tomber.</strong> Solana, Jupiter ou le pool de liquidité peuvent connaître une panne ou une faille.</li>
+    <li><strong>Les imitations existent.</strong> De faux contrats circulent dès les premières minutes. Vérifie l’adresse ici, et nulle part ailleurs.</li>
+    <li><strong>Les règles peuvent changer.</strong> La formule, avec quatre semaines de préavis. La loi, sans préavis&nbsp;: la réglementation des crypto-actifs évolue en France et dans l’Union européenne.</li>
+    <li><strong>Les fondateurs sont deux.</strong> Le coffre exige leurs deux signatures&nbsp;; si l’un d’eux ne peut plus signer, le rachat s’arrête jusqu’à ce qu’une solution soit publiée <span class="todo">[à décider&nbsp;: procédure de secours]</span>.</li>
+  </ul>
+  <p class="doux">Rien ici n’est un conseil en investissement. Réservé aux majeurs.</p>
+
+  <p class="maj">Version <span class="todo">[1, date]</span>. Toute modification de cette fiche est datée ici. Contact&nbsp;: <span class="todo">[adresse e-mail]</span>.</p>
+</main>
+
+<footer>
+  <div class="route" aria-hidden="true"></div>
+  <div class="pied">
+    <span>Station $PLEIN · ouverte 24/7</span>
+    <nav aria-label="Informations">
+      <a href="/">Accueil</a>
+      <a href="/mentions-legales.html">Mentions légales</a>
+      <a href="/reglement-concours.html">Règlement du concours</a>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

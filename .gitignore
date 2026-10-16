@@ -1,0 +1,10 @@
+node_modules/
+.vercel/
+.env
+.env.*
+*.log
+.DS_Store
+# never commit keys, keypairs or seed phrases
+*.key
+*keypair*.json
+id.json
