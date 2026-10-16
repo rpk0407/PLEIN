@@ -125,8 +125,8 @@ npm run check:feed    # needs network: checks the official feed still has the fi
   official weekly survey, labelled as such.
 - **Atelier links:** a totem prefilled from URL parameters carries a notice that it is a visitor's
   card, not a message from the station.
-- `/api/*` failing is normal offline (the page keeps its printed fallbacks). The sandbox this repo
-  was built in could not reach the feed; CI can.
+- `/api/*` failing is normal offline (the page keeps its printed fallbacks). Some sandboxes cannot
+  reach the feed; CI can, and its `feed` job is the live check.
 - Check both widths after any layout change (1440 and 390); the page must never scroll sideways.
 - The design is dark by choice (one look, every colour explicit). Tokens are in `design/README.md`.
 
@@ -142,8 +142,11 @@ state; in a simulated opening (the all-ones system address as a visibly fake pla
 contract appearing without a reload, a malformed wallet refused, dated dashboard readings, a 9-digit
 burn count, and the reload when the contract changes under an open swap widget.
 
+Also Tier 1, verified in CI on 17 October 2026 (GitHub Actions run 38975061978): the live official
+feed has every field `api/_feed.js` reads, `/api/diesel` returns a national average in the sane
+band, and `/api/stations` answers for 75011, 13001 and 69003. The Monday CI run re-checks it.
+
 **Tier 2, built but unverified:**
-- Official feed field names in `api/_feed.js` (CI `check:feed` is the probe).
 - Jupiter Plugin script URL and `init` options (`displayMode: 'integrated'`, `formProps.fixedMint`).
   Test in a real browser with a wallet on a preview deployment before launch.
 - Jupiter Studio economics: the 0.5 % creator share before and after graduation, the anti-sniper fee
