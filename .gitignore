@@ -14,3 +14,5 @@ out/
 
 # private notes (lawyer questions, anything not for the public repo)
 docs/private/
+.vercel
+.env*

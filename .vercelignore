@@ -1,0 +1,14 @@
+# What a deployment never uploads: the site needs public/, api/, vercel.json and package.json only.
+docs/
+design/
+brand/
+test/
+mcp/
+scripts/
+out/
+.claude/
+.github/
+.mcp.json
+*.log
+.env
+.env.*
