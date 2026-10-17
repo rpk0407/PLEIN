@@ -10,7 +10,5 @@
 # by that owner could not satisfy "Require review from Code Owners" and would be stuck. So turn
 # that option on only once both handles are here; the check is in /lancement preflight.
 #
-# Replace SECOND_FOUNDER_HANDLE with the real GitHub handle (an unknown handle makes GitHub ignore
-# the whole line), delete the commented line, and keep a single active line.
-* @rpk0407
-# * @rpk0407 @SECOND_FOUNDER_HANDLE
+# Both founders: rpk0407 and axel9lg (added 17 October 2026). Keep a single active line.
+* @rpk0407 @axel9lg

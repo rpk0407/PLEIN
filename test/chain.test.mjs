@@ -6,6 +6,7 @@
 // run time from bytes.
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import handler, { clearReadingCache, marketBlock, poolVaultBalance, readHolders, sharedReading, takeReading, tokenBlock, topHolders } from '../api/chain.js';
 import {
   ASSOCIATED_TOKEN_PROGRAM, BAD_RPC_URL, SYSTEM_PROGRAM, TOKEN_2022_PROGRAM, TOKEN_PROGRAM, USDC_MINT, WSOL_MINT,
@@ -13,9 +14,10 @@ import {
   isOnCurve, lamportDelta, parseMint, parseMintExtensions, parseRpcUrl, parseTokenAccount, rpc, scrubRpcUrl, tokenDeltas, toUi,
 } from '../api/_solana.js';
 import {
-  PUMP_AMM_PROGRAM, PUMP_PROGRAM, ammCreatorVaultAuthority, bondingCurveAddress,
-  canonicalPoolAddress, creatorVaultAddress, creatorVaultUnclaimed, curveProgressPct, curveQuote,
-  eventAuthorityAddress, globalAddress, mintAuthorityAddress, parseBondingCurve, parseGlobal, parsePool, pct1,
+  CREATE_DISCRIMINATORS, CURVE_SPEC, FEE_PROGRAM, PUMP_AMM_PROGRAM, PUMP_PROGRAM, SHARING_CONFIG_DISCRIMINATOR, ammCreatorVaultAuthority,
+  bondingCurveAddress, canonicalPoolAddress, creatorVaultAddress, creatorVaultUnclaimed, curveProgressPct, curveQuote,
+  eventAuthorityAddress, globalAddress, looksLikeSharingConfig, mintAuthorityAddress, parseBondingCurve, parseGlobal, parsePool,
+  parseSharingConfig, parseTokenMetadata, pct1, readCreation, sharingConfigAddress,
 } from '../api/_pump.js';
 import {
   BUNDLE_WARN_PCT, TOP10_WARN_PCT, analyseEarlyBuyers, audit, checkCurveSettings, formatAudit, suggestLights,
@@ -72,6 +74,48 @@ function token2022MintBytes(extensions, opts = { supply: 1_000_000_000_000_000n 
   return out;
 }
 
+/** A Token-2022 mint as pump.fun makes it: a metadata pointer, then a TokenMetadata entry with a name, a ticker and a uri. */
+function pumpMintBytes({
+  name = 'Le Plein', symbol = 'PLEIN', uri = 'https://meta.example/plein.json', updateAuthority = null, supply = 1_000_000_000_000_000n, mint = MINT,
+} = {}) {
+  const text = (value) => {
+    const encoded = new TextEncoder().encode(value);
+    const out = new Uint8Array(4 + encoded.length);
+    new DataView(out.buffer).setUint32(0, encoded.length, true);
+    out.set(encoded, 4);
+    return out;
+  };
+  const parts = [updateAuthority ? addressBytes(updateAuthority) : new Uint8Array(32), addressBytes(mint), text(name), text(symbol), text(uri), new Uint8Array(4)];
+  const body = new Uint8Array(parts.reduce((n, part) => n + part.length, 0));
+  let at = 0;
+  for (const part of parts) { body.set(part, at); at += part.length; }
+  const head = token2022MintBytes([[18, 64]], { supply });
+  const entry = new Uint8Array(4 + body.length);
+  new DataView(entry.buffer).setUint16(0, 19, true);
+  new DataView(entry.buffer).setUint16(2, body.length, true);
+  entry.set(body, 4);
+  const out = new Uint8Array(head.length + entry.length);
+  out.set(head, 0);
+  out.set(entry, head.length);
+  return out;
+}
+
+/** A pump_fees SharingConfig account like the live one (1 024 bytes: the fields first, zeros after). */
+function sharingConfigBytes({ mint = MINT, admin = addr(40), adminRevoked = true, status = 1, shareholders = [{ address: addr(41), shareBps: 10000 }] } = {}) {
+  const out = new Uint8Array(1024);
+  out.set(SHARING_CONFIG_DISCRIMINATOR, 0);
+  out[8] = 255;
+  out[9] = 2;
+  out[10] = status;
+  out.set(addressBytes(mint), 11);
+  out.set(addressBytes(admin), 43);
+  out[75] = adminRevoked ? 1 : 0;
+  const view = new DataView(out.buffer);
+  view.setUint32(76, shareholders.length, true);
+  shareholders.forEach((h, i) => { out.set(addressBytes(h.address), 80 + i * 34); view.setUint16(80 + i * 34 + 32, h.shareBps, true); });
+  return out;
+}
+
 function tokenAccountBytes({ mint, owner, amount }) {
   const bytes = new Uint8Array(165);
   bytes.set(addressBytes(mint), 0);
@@ -91,10 +135,21 @@ function flagCurve(bytes, ...names) {
   return out;
 }
 
-/** A captured bonding curve with the creator, the complete flag or the two fee counters replaced. */
-function patchCurve(bytes, { creator, complete, creatorFee, protocolFees }) {
+// byte offset of each curve field, summed from CURVE_SPEC (8 bytes of discriminator, then the fields in order)
+const CURVE_AT = (() => {
+  const size = { u8: 1, bool: 1, u64: 8, pubkey: 32 };
+  let at = 8;
+  const out = {};
+  for (const [name, type] of CURVE_SPEC) { out[name] = at; at += size[type]; }
+  return out;
+})();
+
+/** A captured bonding curve with the creator, the complete flag, the fee counters, the fee rate or the launch reserves replaced. */
+function patchCurve(bytes, { creator, complete, creatorFee, protocolFees, creatorFeeBps, initialVirtualQuote }) {
   const out = Uint8Array.from(bytes);
   const view = new DataView(out.buffer);
+  if (creatorFeeBps !== undefined) view.setBigUint64(CURVE_AT.creatorFeeBps, BigInt(creatorFeeBps), true);
+  if (initialVirtualQuote !== undefined) view.setBigUint64(CURVE_AT.initialVirtualQuoteReserves, BigInt(initialVirtualQuote), true);
   if (creator) out.set(addressBytes(creator), 49);
   if (complete !== undefined) out[48] = complete ? 1 : 0;
   if (creatorFee !== undefined) view.setBigUint64(125, BigInt(creatorFee), true);
@@ -387,16 +442,19 @@ test('mint and token accounts decode; a Token-2022 mint lists its extensions', (
   assert.deepEqual(parseMintExtensions(truncated), [], 'a cut entry is dropped');
 });
 
-function swapTransaction({ slot = 100, blockTime = 1_790_000_000, err = null, keys, balances, lamports }) {
-  const accountKeys = keys.map((pubkey) => ({ pubkey, signer: false, writable: true }));
+function swapTransaction({
+  slot = 100, blockTime = 1_790_000_000, err = null, keys, balances, lamports, signers = [], instructions = [], inner = [],
+}) {
+  const accountKeys = keys.map((pubkey) => ({ pubkey, signer: signers.includes(pubkey), writable: true }));
   const side = (which) => balances
     .filter((b) => b[which] !== null)
     .map((b) => ({ accountIndex: b.index, mint: b.mint, owner: b.owner, uiTokenAmount: { amount: String(b[which]), decimals: b.decimals ?? 6 } }));
   return {
     slot, blockTime, version: 0,
-    transaction: { message: { accountKeys } },
+    transaction: { message: { accountKeys, instructions } },
     meta: {
-      err, preTokenBalances: side('pre'), postTokenBalances: side('post'),
+      err, innerInstructions: inner.length ? [{ index: 0, instructions: inner }] : [],
+      preTokenBalances: side('pre'), postTokenBalances: side('post'),
       preBalances: lamports?.pre ?? keys.map(() => 0), postBalances: lamports?.post ?? keys.map(() => 0),
     },
   };
@@ -1109,14 +1167,27 @@ test('the lights: a fact is stated only when it is true, and pending says why', 
   assert.match(done.lp.detail, /Solscan/);
 });
 
-/** A stubbed chain with a creation block (creator, two bundled buyers), one sniper next block and a later buyer. */
-function auditNetwork({ transactionsFail = false, supply = 1_000_000_000_000_000n, flags = [] } = {}) {
+/** The pump program's create_v2 instruction as getTransaction (jsonParsed) shows an instruction it cannot parse: the program id and the data in base58. */
+const createInstruction = (name = 'create_v2') => ({ programId: PUMP_PROGRAM, accounts: [], data: b58encode(Uint8Array.from([...CREATE_DISCRIMINATORS[name], 4, 5, 6])) });
+
+/**
+ * A stubbed chain with a creation transaction (the create instruction signed by `signers`, with the
+ * dev's buy inside it when there is one), two bundled buyers in the same block, one sniper next block
+ * and a later buyer. Options change one thing at a time: who signs the creation (`signers`) and who
+ * owns the dev's tokens (`devOwner`), a failed first attempt before the creation, tokens the creator
+ * holds in its associated account (bought later, outside the window), the mint and the sharing account.
+ */
+function auditNetwork({
+  transactionsFail = false, supply = 1_000_000_000_000_000n, flags = [], devBuy = true, sharing = false, sharingAccount = null, curveFields = {},
+  signers = null, devOwner = null, failedAttempt = false, creatorHolds = 0n, mintData = null,
+} = {}) {
   const creator = addr(11);
   const curve = bondingCurveAddress(MINT);
-  const curveBytes = flagCurve(patchCurve(CURVE_USDC, { creator }), ...flags);
-  const sigs = { late: sig(1), sniper: sig(2), b: sig(3), a: sig(4), dev: sig(5) };
+  const curveBytes = flagCurve(patchCurve(CURVE_USDC, { creator, ...curveFields }), ...flags);
+  const sigs = { late: sig(1), sniper: sig(2), b: sig(3), a: sig(4), dev: sig(5), failed: sig(6) };
   const acct = { dev: addr(31), a: addr(32), b: addr(33), sniper: addr(34) };
-  const owners = { dev: creator, a: addr(12), b: addr(13), sniper: addr(14) };
+  const owners = { dev: devOwner ?? creator, a: addr(12), b: addr(13), sniper: addr(14) };
+  const creationSigners = signers ?? [creator, MINT];
   const buyTx = (slot, who, amount) => swapTransaction({
     slot, keys: ['payer', acct[who], 'curveAcct'],
     balances: [
@@ -1124,16 +1195,28 @@ function auditNetwork({ transactionsFail = false, supply = 1_000_000_000_000_000
       { index: 2, owner: curve, mint: MINT, pre: 500_000_000_000, post: 500_000_000_000 - amount },
     ],
   });
+  // the creation: create_v2, signed by the creator and the mint, with the dev's buy in it when there is one
+  const devIndex = creationSigners.length;
+  const creationTx = swapTransaction({
+    slot: 100, keys: [...creationSigners, acct.dev, 'curveAcct'], signers: creationSigners, instructions: [createInstruction()],
+    balances: [
+      ...(devBuy ? [{ index: devIndex, owner: owners.dev, mint: MINT, pre: null, post: 10_000_000_000_000 }] : []),
+      { index: devIndex + 1, owner: curve, mint: MINT, pre: null, post: 700_000_000_000 },
+    ],
+  });
   const txs = {
-    [sigs.dev]: buyTx(100, 'dev', 10_000_000_000_000), // 10 million tokens
+    [sigs.dev]: creationTx,
     [sigs.a]: buyTx(100, 'a', 20_000_000_000_000), [sigs.b]: buyTx(100, 'b', 5_000_000_000_000),
     [sigs.sniper]: buyTx(102, 'sniper', 7_000_000_000_000),
   };
-  const held = { [acct.dev]: 10_000_000_000_000n, [acct.a]: 20_000_000_000_000n, [acct.b]: 0n, [acct.sniper]: 7_000_000_000_000n };
+  const held = { [acct.dev]: devBuy ? 10_000_000_000_000n : 0n, [acct.a]: 20_000_000_000_000n, [acct.b]: 0n, [acct.sniper]: 7_000_000_000_000n };
   const accounts = {
-    [MINT]: accountValue({ owner: TOKEN_2022_PROGRAM, data: token2022MintBytes([[18, 64], [19, 183]], { supply }) }),
+    [MINT]: accountValue({ owner: TOKEN_2022_PROGRAM, data: mintData ?? pumpMintBytes({ supply }) }),
     [curve]: accountValue({ owner: PUMP_PROGRAM, data: curveBytes }),
     [globalAddress()]: accountValue({ owner: PUMP_PROGRAM, data: GLOBAL }),
+    ...(sharing ? { [sharingConfigAddress(MINT)]: accountValue({ owner: FEE_PROGRAM, data: sharingConfigBytes() }) } : {}),
+    ...(sharingAccount ? { [sharingConfigAddress(MINT)]: sharingAccount } : {}),
+    ...(creatorHolds > 0n ? { [associatedTokenAddress(creator, MINT, TOKEN_2022_PROGRAM)]: accountValue({ owner: TOKEN_2022_PROGRAM, data: tokenAccountBytes({ mint: MINT, owner: creator, amount: creatorHolds }) }) } : {}),
   };
   for (const who of Object.keys(acct)) accounts[acct[who]] = accountValue({ owner: TOKEN_2022_PROGRAM, data: tokenAccountBytes({ mint: MINT, owner: owners[who], amount: held[acct[who]] }) });
   const s = holdersScenario();
@@ -1154,6 +1237,8 @@ function auditNetwork({ transactionsFail = false, supply = 1_000_000_000_000_000
           { signature: sigs.b, slot: 100, err: null, blockTime: 1_790_000_000 },
           { signature: sigs.a, slot: 100, err: null, blockTime: 1_790_000_000 },
           { signature: sigs.dev, slot: 100, err: null, blockTime: 1_790_000_000 },
+          // an attempt that failed ten slots before the creation: its signature is in the curve's history, nothing was created
+          ...(failedAttempt ? [{ signature: sigs.failed, slot: 90, err: { InstructionError: [0, 'Custom'] }, blockTime: 1_789_999_990 }] : []),
         ];
       },
       getTransaction: ([signature]) => (transactionsFail ? null : txs[signature] ?? null),
@@ -1266,7 +1351,7 @@ test('curve settings: quote asset, creator, the four flags off, and a mint that 
 const plain = (text) => text.replace(/[  ]/g, ' ');
 
 test('the audit of a Mayhem-mode coin shows the gaps and says on which base each share is counted', async () => {
-  auditNetwork({ supply: 2_000_000_000_000_000n, flags: ['isMayhemMode'] });
+  auditNetwork({ supply: 2_000_000_000_000_000n, flags: ['isMayhemMode'], devBuy: false });
   const result = await audit({ live: { wallets: { creator: addr(11) } }, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
   assert.equal(result.curveSettings.ok, false);
   assert.deepEqual(result.curveSettings.rows.filter((r) => r.ok === false).map((r) => r.key), ['isMayhemMode', 'supply']);
@@ -1283,7 +1368,7 @@ test('the audit of a Mayhem-mode coin shows the gaps and says on which base each
 });
 
 test('the audit of a coin made as asked shows every setting conform and no limit', async () => {
-  auditNetwork();
+  auditNetwork({ devBuy: false });
   const result = await audit({ live: { wallets: { creator: addr(11) } }, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
   assert.equal(result.curveSettings.allChecked, true);
   assert.deepEqual(result.limits, []);
@@ -1291,11 +1376,250 @@ test('the audit of a coin made as asked shows every setting conform and no limit
   assert.match(text, /### Réglages de la courbe/);
   assert.match(text, /Tous les réglages sont conformes\./);
   // no quote given (the config could not be read): the settings are shown but the quote is not compared
-  auditNetwork();
+  auditNetwork({ devBuy: false });
   const unasked = await audit({ live: {}, mint: MINT, rpcUrl: RPC, now: NOW });
   assert.equal(unasked.curveSettings.allChecked, false);
   assert.equal(unasked.curveSettings.ok, true);
   assert.match(plain(formatAudit(unasked)), /Aucun écart ; certains réglages n’ont pas pu être comparés\./);
+});
+
+// ---------------------------------------------------------------- the 15:31 rows: creator fee, launch reserves, fee sharing
+
+test('the fee-sharing config is derived under the fee program: a mainnet vector, and not under the pump program', () => {
+  // read on mainnet on 17 October 2026: this coin has fee sharing on, its curve's creator is the config account
+  const coin = '5jWgS74ATYgdpwbNwkSGSqHft85jG8MCr9VwGoJspump';
+  assert.equal(FEE_PROGRAM, 'pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ');
+  assert.equal(sharingConfigAddress(coin), 'JEGP5AsEcJur2aNbKUrSEF7jyd46Mshc3gPcurrDcSYV');
+  assert.equal(sharingConfigAddress(coin), findProgramAddress(['sharing-config', { address: coin }], FEE_PROGRAM).address);
+  assert.notEqual(sharingConfigAddress(coin), findProgramAddress(['sharing-config', { address: coin }], PUMP_PROGRAM).address,
+    'the pump-program derivation points at an account that never exists, so a "no account" there proved nothing');
+  assert.notEqual(sharingConfigAddress(addr(1)), sharingConfigAddress(addr(2)));
+});
+
+test('the curve field offsets summed from CURVE_SPEC are the ones the decoder reads', () => {
+  const patched = parseBondingCurve(patchCurve(CURVE_USDC, { creatorFeeBps: 30, initialVirtualQuote: 7_000_000_000n }));
+  assert.equal(patched.creatorFeeBps, 30n);
+  assert.equal(patched.initialVirtualQuoteReserves, 7_000_000_000n);
+  assert.equal(patched.canEditCreatorFee, false, 'the fields around it did not move');
+  assert.equal(patched.isHolderReward, false);
+  assert.equal(CURVE_AT.creatorFeeBps, 115);
+  assert.equal(CURVE_AT.initialVirtualQuoteReserves, 142);
+});
+
+test('the audit prints the creator fee rate: only 0 passes, 30 and 300 are a difference', async () => {
+  for (const [bps, verdict] of [[0, 'OK'], [30, 'ÉCART'], [300, 'ÉCART'], [1, 'ÉCART']]) {
+    auditNetwork({ devBuy: false, curveFields: { creatorFeeBps: bps } });
+    const result = await audit({ live: { wallets: { creator: addr(11) } }, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+    const line = result.curveSettings.rows.find((r) => r.key === 'creatorFeeBps');
+    assert.equal(line.ok, bps === 0, `creatorFeeBps ${bps}`);
+    assert.equal(line.account, bondingCurveAddress(MINT));
+    const expected = `Taux de frais du créateur : ${bps} point${bps > 1 ? 's' : ''} de base · attendu : 0 point de base (barème par défaut) → ${verdict} · lu dans ${bondingCurveAddress(MINT)} au slot 1, d’après l’IDL`;
+    assert.ok(plain(formatAudit(result)).includes(expected), `the line for ${bps}`);
+  }
+  assert.equal(parseBondingCurve(CURVE_USDC.slice(0, 115)).creatorFeeBps, null, 'a curve cut before the field has no rate');
+  const cut = checkCurveSettings({ curve: parseBondingCurve(CURVE_USDC.slice(0, 115)), quote: 'USDC', launch: { global: null, sharing: null, creatorBuy: null } });
+  assert.deepEqual(cut.rows.filter((r) => r.key === 'creatorFeeBps').map((r) => [r.ok, r.read, r.found]), [[null, false, 'non lu']], 'an unread rate is « non lu », never a pass');
+});
+
+test('the audit compares the launch reserves with the Global account read in the same call, not with a number written here', async () => {
+  const g = parseGlobal(GLOBAL);
+  auditNetwork({ devBuy: false });
+  const same = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  const row = same.curveSettings.rows.find((r) => r.key === 'launchReserves');
+  assert.equal(row.ok, true);
+  assert.equal(plain(row.found), '4 292 USDC');
+  assert.equal(plain(row.expected), '4 292 USDC (compte Global)');
+  assert.equal(parseBondingCurve(CURVE_USDC).initialVirtualQuoteReserves, g.initialVirtualQuoteReserves, 'the captured curve starts where the captured Global says');
+  // the curve says 4 000 USDC while the Global account says 4 292: a difference
+  auditNetwork({ devBuy: false, curveFields: { initialVirtualQuote: 4_000_000_000n } });
+  const off = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  const bad = off.curveSettings.rows.find((r) => r.key === 'launchReserves');
+  assert.equal(bad.ok, false);
+  assert.equal(plain(bad.found), '4 000 USDC');
+  assert.equal(off.curveSettings.ok, false);
+  // a Global account that cannot be read leaves the row unread, and the limits say so
+  network({
+    accounts: {
+      [MINT]: accountValue({ owner: TOKEN_2022_PROGRAM, data: token2022MintBytes([[18, 64], [19, 183]]) }),
+      [bondingCurveAddress(MINT)]: accountValue({ owner: PUMP_PROGRAM, data: CURVE_USDC }),
+    },
+    methods: { getSignaturesForAddress: () => [], getTokenLargestAccounts: methodOff, getProgramAccounts: () => [] },
+  });
+  const blind = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  const unread = blind.curveSettings.rows.find((r) => r.key === 'launchReserves');
+  assert.deepEqual([unread.ok, unread.read, unread.found], [null, false, 'non lu']);
+  assert.equal(blind.curveSettings.allChecked, false);
+  assert.ok(blind.limits.some((l) => l.includes('compte Global')));
+});
+
+test('the audit reads the fee-sharing account at the fee-program address: none is the declared state, a real sharing config is a difference', async () => {
+  const sharing = sharingConfigAddress(MINT);
+  auditNetwork({ devBuy: false });
+  const none = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  const row = none.curveSettings.rows.find((r) => r.key === 'feeSharing');
+  assert.deepEqual([row.ok, row.found, row.account, row.slot], [true, 'aucun compte de partage au slot 1', sharing, 1]);
+  assert.equal(none.read.accounts.feeSharing, sharing);
+  const { calls } = auditNetwork({ devBuy: false, sharing: true });
+  const present = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  const found = present.curveSettings.rows.find((r) => r.key === 'feeSharing');
+  assert.deepEqual([found.ok, found.found], [false, `compte de partage présent : 1 bénéficiaire (${addr(41).slice(0, 4)}…${addr(41).slice(-4)} 100 %), état active`]);
+  assert.equal(present.curveSettings.ok, false);
+  assert.match(plain(formatAudit(present)), /Partage des frais : compte de partage présent : 1 bénéficiaire .* · attendu : aucun compte de partage → ÉCART/);
+  const asked = calls.filter((c) => c.method === 'getMultipleAccounts')[0].params[0];
+  assert.deepEqual(asked.slice(0, 4), [MINT, bondingCurveAddress(MINT), globalAddress(), sharing], 'one call reads the mint, the curve, the Global account and the sharing config');
+  assert.equal(asked.includes(findProgramAddress(['sharing-config', { address: MINT }], PUMP_PROGRAM).address), false, 'the pump-program address is not read');
+});
+
+test('the creator buy is a row of the curve settings: zero is proven only when the whole window was read', async () => {
+  auditNetwork();
+  const bought = await audit({ live: { wallets: { creator: addr(11) } }, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  const row = bought.curveSettings.rows.find((r) => r.key === 'creatorBuy');
+  assert.equal(row.ok, false);
+  assert.match(plain(row.found), /^10 000 000 jetons achetés entre les slots 100 et 105, 10 000 000 détenus au slot 1$/);
+  assert.equal(row.source, 'transactions');
+  auditNetwork({ devBuy: false });
+  const none = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  assert.equal(none.curveSettings.rows.find((r) => r.key === 'creatorBuy').ok, true);
+  // transactions the node does not have: nothing bought is seen, which is not the same as nothing bought
+  auditNetwork({ devBuy: false, transactionsFail: true });
+  const blind = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  const unproven = blind.curveSettings.rows.find((r) => r.key === 'creatorBuy');
+  assert.deepEqual([unproven.ok, unproven.read], [null, true]);
+  assert.match(unproven.found, /lecture incomplète/);
+  assert.equal(blind.curveSettings.allChecked, false);
+  // a window cut by --max-tx is a lower bound, not a zero
+  auditNetwork({ devBuy: false });
+  const capped = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', maxTx: 1, now: NOW });
+  assert.equal(capped.curveSettings.rows.find((r) => r.key === 'creatorBuy').ok, null);
+});
+
+// ---------------------------------------------------------------- the creation transaction, the sharing config, the metadata
+
+test('the creation instructions are the Anchor hashes of their names, and so is the sharing config account', () => {
+  const head = (text) => [...createHash('sha256').update(text).digest().subarray(0, 8)];
+  assert.deepEqual(CREATE_DISCRIMINATORS.create, head('global:create'));
+  assert.deepEqual(CREATE_DISCRIMINATORS.create_v2, head('global:create_v2'));
+  assert.deepEqual(SHARING_CONFIG_DISCRIMINATOR, head('account:SharingConfig'));
+  assert.notDeepEqual(CREATE_DISCRIMINATORS.create, CREATE_DISCRIMINATORS.create_v2);
+});
+
+test('readCreation: a successful transaction with a create instruction of the pump program, and who signed it', () => {
+  const creator = addr(11);
+  const make = (over = {}) => swapTransaction({
+    keys: [creator, MINT, 'curveAcct'], signers: [creator, MINT], balances: [], instructions: [createInstruction()], ...over,
+  });
+  const found = readCreation(make());
+  assert.deepEqual(found, { instruction: 'create_v2', signers: [creator, MINT], signersKnown: true, feePayer: creator, feePayerSigned: true });
+  assert.equal(readCreation(make({ instructions: [createInstruction('create')] })).instruction, 'create');
+  // a creation that a wrapper program calls is still a creation (inner instruction)
+  const wrapped = readCreation(make({ instructions: [], inner: [createInstruction()] }));
+  assert.equal(wrapped.instruction, 'create_v2');
+  // a fee payer that did not sign is shown as such, and the signers are only the keys flagged as signers
+  const sponsored = readCreation(make({ keys: [addr(12), creator, MINT], signers: [creator, MINT] }));
+  assert.deepEqual([sponsored.signers, sponsored.feePayer, sponsored.feePayerSigned], [[creator, MINT], addr(12), false]);
+  // not a creation: a buy, a failed transaction, the discriminator on another program, text that is not base58, no transaction
+  const buy = { programId: PUMP_PROGRAM, accounts: [], data: b58encode(Uint8Array.from([102, 6, 61, 18, 1, 218, 235, 234, 1, 2])) };
+  assert.equal(readCreation(make({ instructions: [buy] })), null);
+  assert.equal(readCreation(make({ err: { InstructionError: [0, 'Custom'] } })), null);
+  assert.equal(readCreation(make({ instructions: [{ ...createInstruction(), programId: addr(60) }] })), null);
+  assert.equal(readCreation(make({ instructions: [{ ...createInstruction(), data: 'not base58 !!' }] })), null);
+  assert.equal(readCreation(make({ instructions: [{ ...createInstruction(), data: '1'.repeat(5000) }] })), null);
+  assert.equal(readCreation(null), null);
+  // an older reply with bare string keys cannot say who signed: the signers are unknown, never guessed
+  const bare = make();
+  bare.transaction.message.accountKeys = bare.transaction.message.accountKeys.map((k) => k.pubkey);
+  const unknown = readCreation(bare);
+  assert.deepEqual([unknown.signers, unknown.signersKnown, unknown.feePayer, unknown.feePayerSigned], [[], false, creator, false]);
+});
+
+test('parseSharingConfig and parseTokenMetadata live in api/_pump.js and throw synchronously', () => {
+  const config = parseSharingConfig(sharingConfigBytes({ shareholders: [{ address: addr(41), shareBps: 6000 }, { address: addr(42), shareBps: 4000 }] }));
+  assert.deepEqual(config.shareholders.map((h) => h.shareBps), [6000, 4000]);
+  assert.equal(config.mint, MINT);
+  assert.equal(looksLikeSharingConfig(sharingConfigBytes()), true);
+  assert.equal(looksLikeSharingConfig(new Uint8Array(1024)), false);
+  assert.equal(looksLikeSharingConfig(new Uint8Array(3)), false);
+  assert.throws(() => parseSharingConfig(new Uint8Array(1024)), /not a fee-sharing config/);
+  const lying = sharingConfigBytes();
+  new DataView(lying.buffer).setUint32(76, 5000, true);
+  assert.throws(() => parseSharingConfig(lying), /does not fit/);
+  assert.deepEqual(parseTokenMetadata(pumpMintBytes({ name: 'Le Plein', symbol: 'PLEIN', uri: 'https://meta.example/a.json', updateAuthority: addr(40) })),
+    { updateAuthority: addr(40), mint: MINT, name: 'Le Plein', symbol: 'PLEIN', uri: 'https://meta.example/a.json' });
+  assert.equal(parseTokenMetadata(pumpMintBytes()).updateAuthority, null);
+  assert.equal(parseTokenMetadata(mintBytes({ supply: 1n })), null, 'a classic mint has none');
+  const full = pumpMintBytes();
+  assert.throws(() => parseTokenMetadata(full.subarray(0, full.length - 10).slice()), /cut short/);
+});
+
+test('early buyers: the wallets given as aliases count as the creator, whatever the curve says', () => {
+  const curve = bondingCurveAddress(MINT);
+  const buy = (slot, who, amount, account) => ({
+    slot,
+    tx: swapTransaction({
+      slot, keys: ['p', account, 'curveAcct'],
+      balances: [{ index: 1, owner: who, mint: MINT, pre: 0, post: amount }, { index: 2, owner: curve, mint: MINT, pre: 900_000_000, post: 900_000_000 - amount }],
+    }),
+  });
+  const out = analyseEarlyBuyers({
+    mint: MINT, curveAddress: curve, creator: addr(11), creatorAliases: [addr(60), null], creationSlot: 100, earlySlots: 5,
+    transactions: [buy(100, addr(60), 4_000_000, 'acct-60'), buy(100, addr(11), 1_000_000, 'acct-11'), buy(100, addr(12), 2_000_000, 'acct-12')],
+  });
+  assert.equal(out.creator.bought, 5_000_000n, 'the curve creator and the alias are one creator');
+  assert.deepEqual([...out.creator.accounts].sort(), ['acct-11', 'acct-60']);
+  assert.deepEqual([...out.same.keys()], [addr(12)], 'a signer of the creation is not a "bundled buyer"');
+});
+
+test('the audit takes the creation from the first SUCCESSFUL transaction that holds the create instruction, not from a failed attempt before it', async () => {
+  auditNetwork({ failedAttempt: true });
+  const result = await audit({ live: { wallets: { creator: addr(11) } }, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  assert.equal(result.creation.slot, 100, 'not slot 90, where the failed attempt is');
+  assert.equal(result.creation.confirmed, true);
+  assert.equal(result.creation.time, new Date(1_790_000_000 * 1000).toISOString());
+  assert.equal(result.creatorBuy.boughtPct, 1, 'the creator buy in the real creation is seen');
+  const row = result.curveSettings.rows.find((r) => r.key === 'creatorBuy');
+  assert.equal(row.ok, false);
+  assert.deepEqual(result.limits, []);
+
+  // only failed attempts on the curve: nothing is created, nothing is proven
+  network({
+    accounts: {
+      [MINT]: accountValue({ owner: TOKEN_2022_PROGRAM, data: pumpMintBytes() }),
+      [bondingCurveAddress(MINT)]: accountValue({ owner: PUMP_PROGRAM, data: CURVE_USDC }),
+      [globalAddress()]: accountValue({ owner: PUMP_PROGRAM, data: GLOBAL }),
+    },
+    methods: {
+      getSignaturesForAddress: () => [{ signature: sig(6), slot: 90, err: { InstructionError: [0, 'Custom'] }, blockTime: 1_789_999_990 }],
+      getTokenLargestAccounts: methodOff,
+      getProgramAccounts: () => [],
+    },
+  });
+  const failedOnly = await audit({ live: {}, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  assert.equal(failedOnly.creation, undefined);
+  assert.match(failedOnly.suggested.bundles.facts[0], /aucune transaction réussie/);
+  const buyRow = failedOnly.curveSettings.rows.find((r) => r.key === 'creatorBuy');
+  assert.deepEqual([buyRow.ok, buyRow.read], [null, false], 'what the creator holds was read, what it bought was not: the row is unread');
+  assert.match(buyRow.found, /achats non lus/);
+});
+
+test('a creation transaction the audit does not recognize leaves the creation unproven, not zero', async () => {
+  // a creation signature whose transaction holds no create instruction (a wrapper the audit cannot read)
+  const { sigs } = auditNetwork();
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init = {}) => {
+    const body = JSON.parse(init.body);
+    if (body.method === 'getTransaction' && body.params[0] === sigs.dev) {
+      const plainTx = swapTransaction({ slot: 100, keys: [addr(11), 'curveAcct'], signers: [addr(11)], balances: [] });
+      return json({ jsonrpc: '2.0', id: 1, result: plainTx });
+    }
+    return realFetch(url, init);
+  };
+  const result = await audit({ live: { wallets: { creator: addr(11) } }, mint: MINT, rpcUrl: RPC, quote: 'USDC', now: NOW });
+  assert.equal(result.creation.confirmed, false);
+  assert.ok(result.limits.some((l) => l.includes('transaction de création non reconnue')));
+  assert.equal(formatAudit(result).includes('transaction de création non reconnue'), true);
+  const rows = Object.fromEntries(result.curveSettings.rows.map((r) => [r.key, r]));
+  assert.deepEqual([rows.creatorSigned.ok, rows.creatorSigned.read], [null, false]);
+  assert.equal(rows.creatorBuy.ok, null, 'a window without the creation proves nothing');
 });
 
 // ---------------------------------------------------------------- the ticket check

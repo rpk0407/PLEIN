@@ -5,7 +5,20 @@
   "functions": {
     "api/chain.js": { "includeFiles": "public/live.json", "maxDuration": 30 }
   },
+  "rewrites": [
+    { "source": "/airdrop", "destination": "/pas-d-airdrop.html" },
+    { "source": "/claim", "destination": "/pas-d-airdrop.html" },
+    { "source": "/presale", "destination": "/pas-d-airdrop.html" },
+    { "source": "/bonus", "destination": "/pas-d-airdrop.html" },
+    { "source": "/remboursement", "destination": "/pas-d-airdrop.html" },
+    { "source": "/v2", "destination": "/pas-de-v2.html" },
+    { "source": "/migration", "destination": "/pas-de-v2.html" }
+  ],
   "headers": [
+    {
+      "source": "/llms.txt",
+      "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
+    },
     {
       "source": "/live.json",
       "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0" }]

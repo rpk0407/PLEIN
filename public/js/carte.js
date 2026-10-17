@@ -94,7 +94,7 @@ export function writeCard(storage, card) {
 
 /**
  * True when the visitor has taken the card, which is to say the key exists. Reading is not
- * writing: this call stores nothing.
+ * writing: this call stores nothing. (Also exported as hasCard, the name docs/innovations.md uses.)
  */
 export function cardTaken(storage) {
   try {
@@ -104,7 +104,7 @@ export function cardTaken(storage) {
   }
 }
 
-/** Throw the card away: removes the key. False when storage refuses. */
+/** Hand the card back: removes the key. False when storage refuses. (Also exported as returnCard.) */
 export function discardCard(storage) {
   try {
     if (!storage) return false;
@@ -117,7 +117,7 @@ export function discardCard(storage) {
 
 /**
  * The card as the page keeps it. Stamps live in memory, and nothing is written to the browser until
- * the visitor presses "Prendre ma carte": that click is the first write, so the storage serves a
+ * the visitor presses "Prendre une carte": that click is the first write, so the storage serves a
  * service the visitor asked for (CNIL consent question, still open for the lawyer; see
  * mentions-legales.html). The key's existence is the choice. Once taken, every new stamp is written.
  * Without a usable storage the card simply lives for the visit.
@@ -144,11 +144,19 @@ export function createKeeper(storage) {
       if (!taken) taken = writeCard(storage, card);
       return taken;
     },
-    /** The visitor throws the card away: the key goes, the stamps with it. */
+    /** The visitor hands the card back ("Rendre la carte"): the key goes, the stamps with it. */
     discard() {
       taken = false;
       card = emptyCard();
       return discardCard(storage);
     },
   };
+}
+
+// The names docs/innovations.md (T2) gives the same three moves. The page goes through createKeeper.
+export const hasCard = cardTaken;
+export const returnCard = discardCard;
+/** The visitor takes a card: the first write. False when the browser refuses to store it. */
+export function takeCard(storage, card = emptyCard()) {
+  return writeCard(storage, card);
 }

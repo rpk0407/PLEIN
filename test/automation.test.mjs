@@ -1,9 +1,13 @@
 // The bots and scheduled jobs: the official-price reader, the look-alike watch, the Telegram
-// sender, the daily totem and the workflow files. Everything runs offline (fetch is stubbed,
-// the ministry's workbook is rebuilt in memory); the live checks are done by hand and in CI.
+// sender, the daily totem, the schedule gate with its first-plein floor, the Saturday guard that
+// notices a dropped run, and the workflow files. Everything runs offline (fetch is stubbed, GitHub's
+// Actions API is a fake, the ministry's workbook is rebuilt in memory); the live checks are done by
+// hand and in CI. Tier 2: no workflow has run on GitHub yet, so the files are read here, not run.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFile, execFileSync } from 'node:child_process';
+import { createServer } from 'node:http';
+import { promisify } from 'node:util';
 import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -18,8 +22,12 @@ import {
 import { chunkText, plainFromMarkdown, scrub, sendMessage, sendPhoto } from '../scripts/telegram.mjs';
 import { findBrowser, pngSize, renderPng } from '../scripts/_render.mjs';
 import { caption, facts, intentUrl, nextPlein, totemHtml } from '../scripts/totem.mjs';
-import { cronTime, decide } from '../scripts/_gate.mjs';
-import { paris } from '../public/js/clock.js';
+import {
+  FREEZE_LEAD_MS, ORDER_JOB, ORDER_STEP, ORDER_WORKFLOW, QUIET_DAYS,
+  afterOrders, feesOf, freezeOf, lookForSent, orderAlertText, sentAtOf, sentNote,
+  cronTime, decide, earlyNote, firstPleinFromConfig, judgeOrder, lookAtOrders, missingTelegram, orderOfRun, watchOrder, when,
+} from '../scripts/_gate.mjs';
+import { paris, parisInstant } from '../public/js/clock.js';
 import { typo } from '../public/js/typo.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -547,6 +555,581 @@ test('the gate follows the cron line, not the wall clock: one run in summer and 
   assert.throws(() => execFileSync(node, [join(root, 'scripts/_gate.mjs'), '--hour', '8'], { stdio: 'pipe' }), /Command failed/);
 });
 
+// ---- the first plein: the gate's floor ------------------------------------------------------
+
+const FIRST = Date.parse(config.firstPleinAt); // Saturday 24 October 2026, 18:00 Paris
+const utc = (day, h, min, delayMin = 0) => Date.parse(`${day}T${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:00Z`) + delayMin * 60000;
+const PLEIN_GATE = { hour: 17, until: '18:30', firstPlein: FIRST };
+const schedule = (cron, now, gate = PLEIN_GATE) => decide({ event: 'schedule', cron, now, ...gate });
+
+test('no scheduled plein runs before the price freeze of the first plein, and the first one is never blocked', () => {
+  assert.equal(FIRST, Date.parse('2026-10-24T18:00:00+02:00'));
+  assert.equal(FREEZE_LEAD_MS, 15 * 60000);
+  // launch day, Saturday 17 October: neither the order lines (17:52 Paris) nor the guard lines (17:58) go,
+  // on time or late, and the skip is planned, so it does not warn
+  for (const cron of ['52 15 * * 6', '52 16 * * 6', '58 15 * * 6', '58 16 * * 6']) {
+    const { min, hour } = cronTime(cron);
+    for (const delay of [0, 7, 35, 90]) {
+      const verdict = schedule(cron, utc('2026-10-17', hour, min, delay));
+      assert.equal(verdict.go, false, `${cron} +${delay} min`);
+      assert.equal(verdict.warn, undefined, `${cron} +${delay} min: a planned wait is quiet`);
+    }
+  }
+  assert.match(schedule('52 15 * * 6', utc('2026-10-17', 15, 52)).why, /no plein yet.*Saturday 24 October 2026, 18:00 Paris/);
+  // the gap this closes: without the floor the same line goes, a week early
+  assert.equal(decide({ event: 'schedule', cron: '52 15 * * 6', now: utc('2026-10-17', 15, 55), hour: 17, until: '18:30' }).go, true);
+
+  // the first Saturday and the ones after it: exactly the lines that went before, one order and one guard each
+  const goers = (day, lines, delay = 0) => lines.filter((cron) => {
+    const { min, hour } = cronTime(cron);
+    return schedule(cron, utc(day, hour, min, delay)).go;
+  });
+  for (const [day, order, guard] of [
+    ['2026-10-24', '52 15 * * 6', '58 15 * * 6'], ['2026-10-31', '52 16 * * 6', '58 16 * * 6'],
+    ['2026-12-19', '52 16 * * 6', '58 16 * * 6'], ['2027-03-27', '52 16 * * 6', '58 16 * * 6'], ['2027-04-03', '52 15 * * 6', '58 15 * * 6'],
+  ]) {
+    for (const delay of [0, 10, 35]) assert.deepEqual(goers(day, ['52 15 * * 6', '52 16 * * 6'], delay), [order], `${day} order +${delay}`);
+    // the guard is due at 17:58, so 30 minutes late is 18:28, the last start before the cut-off
+    for (const delay of [0, 10, 30]) assert.deepEqual(goers(day, ['58 15 * * 6', '58 16 * * 6'], delay), [guard], `${day} guard +${delay}`);
+  }
+
+  // the boundary is the freeze itself: 17:45 Paris on the first Saturday goes, a minute earlier does not
+  assert.equal(schedule('45 15 * * 6', utc('2026-10-24', 15, 45)).go, true);
+  const justBefore = schedule('44 15 * * 6', utc('2026-10-24', 15, 44));
+  assert.equal(justBefore.go, false);
+  assert.equal(justBefore.warn, undefined);
+  // after the floor the cut-off still applies, and is not planned: it warns
+  const late = schedule('52 15 * * 6', utc('2026-10-24', 15, 52, 45));
+  assert.equal(late.go, false);
+  assert.equal(late.warn, true);
+});
+
+test('a first-plein date that is far away or unreadable warns instead of silently skipping every Saturday', () => {
+  // up to QUIET_DAYS before the freeze: a planned wait (the week before, or a one-week postponement)
+  assert.equal(QUIET_DAYS, 8);
+  assert.equal(schedule('52 15 * * 6', Date.parse('2026-10-16T15:52:00Z')).warn, undefined, 'just under eight days');
+  assert.equal(schedule('52 15 * * 6', Date.parse('2026-10-15T15:52:00Z')).warn, true, 'nine days: a date that looks wrong');
+  const far = schedule('52 15 * * 6', utc('2026-10-03', 15, 52));
+  assert.equal(far.go, false);
+  assert.equal(far.warn, true);
+  assert.match(far.why, /check firstPleinAt/);
+  // a date config.js does not give is never read as "no floor": the gate stays shut and says so
+  for (const bad of [null, NaN]) {
+    const verdict = schedule('52 15 * * 6', utc('2026-10-24', 15, 52), { ...PLEIN_GATE, firstPlein: bad });
+    assert.equal(verdict.go, false);
+    assert.equal(verdict.warn, true);
+    assert.match(verdict.why, /cannot read firstPleinAt/);
+  }
+  // the line that does not own this clock regime stays quiet even then, so one problem is one message
+  assert.equal(schedule('52 16 * * 6', utc('2026-10-24', 16, 55), { ...PLEIN_GATE, firstPlein: null }).warn, undefined);
+});
+
+test('a press of the button works before the first plein and says it is early', () => {
+  const dispatch = (now, firstPlein = FIRST) => decide({ event: 'workflow_dispatch', now, hour: 17, until: '18:30', firstPlein });
+  const early = dispatch(utc('2026-10-17', 10, 0));
+  assert.equal(early.go, true);
+  assert.equal(early.early, true);
+  assert.match(early.why, /before the first plein \(Saturday 24 October 2026, 18:00 Paris\)/);
+  assert.equal(dispatch(FIRST - FREEZE_LEAD_MS - 1).early, true);
+  assert.deepEqual(dispatch(FIRST - FREEZE_LEAD_MS), { go: true, why: 'started by hand', early: false }, 'from the freeze on it is the real thing');
+  assert.equal(dispatch(utc('2026-10-25', 9, 0)).early, false);
+  // asked for the floor but could not read it: still goes (the order is read only), cannot call itself early
+  assert.deepEqual(dispatch(utc('2026-10-17', 10, 0), null), { go: true, why: 'started by hand', early: false });
+  // the note that goes on top of the order
+  const note = earlyNote(FIRST);
+  assert.match(note, /^\*\*NOTE: this order was started early, by hand\.\*\*/);
+  assert.match(note, /Saturday 24 October 2026, 18:00 Paris/);
+  assert.match(note, /`firstPleinAt` in public\/config\.js/);
+  assert.match(note, /preview/);
+  assert.equal(when(Date.parse('2026-10-31T18:00:00+01:00')), 'Saturday 31 October 2026, 18:00 Paris');
+});
+
+test('firstPleinAt is read from config.js the way the site reads it, and an unreadable file is null', () => {
+  assert.equal(firstPleinFromConfig(readFileSync(join(root, 'public/config.js'), 'utf8')), FIRST);
+  assert.equal(firstPleinFromConfig("window.PLEIN_CONFIG = { firstPleinAt: '2026-11-07T18:00:00+01:00' };"), Date.parse('2026-11-07T18:00:00+01:00'));
+  for (const bad of ['', 'window.PLEIN_CONFIG = {};', "window.PLEIN_CONFIG = { firstPleinAt: 'next Saturday' };", 'window.PLEIN_CONFIG = {', 'throw new Error("x")', undefined]) {
+    assert.equal(firstPleinFromConfig(bad), null, String(bad));
+  }
+  assert.equal(firstPleinFromConfig('while (true) {}'), null, 'a file that never ends is cut off');
+});
+
+test('the gate command line: --first-plein reads config.js, writes the early note, and prints early= only when asked', () => {
+  const dir = scratch();
+  const run = (extra, env) => {
+    const out = execFileSync(node, [join(root, 'scripts/_gate.mjs'), '--hour', '17', '--until', '18:30', ...extra], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], env: { ...process.env, ...env },
+    });
+    return Object.fromEntries(out.trim().split('\n').map((l) => l.trim().split('=')));
+  };
+  const sched = (cron) => ({ GITHUB_EVENT_NAME: 'schedule', CRON: cron });
+  // launch day: shut, quiet
+  assert.deepEqual(run(['--first-plein', '--now', '2026-10-17T15:55:00Z'], sched('52 15 * * 6')), { go: 'false', warn: 'false', early: 'false' });
+  assert.deepEqual(run(['--first-plein', '--now', '2026-10-17T16:00:00Z'], sched('58 15 * * 6')), { go: 'false', warn: 'false', early: 'false' });
+  // the first Saturday, summer line; then the first winter Saturday
+  assert.deepEqual(run(['--first-plein', '--now', '2026-10-24T15:55:00Z'], sched('52 15 * * 6')), { go: 'true', warn: 'false', early: 'false' });
+  assert.deepEqual(run(['--first-plein', '--now', '2026-10-31T16:59:00Z'], sched('58 16 * * 6')), { go: 'true', warn: 'false', early: 'false' });
+  // a gate that was not asked for the floor (the totem) prints what it always printed
+  assert.deepEqual(run(['--now', '2026-10-17T15:55:00Z'], sched('52 15 * * 6')), { go: 'true', warn: 'false' });
+  // by hand before the first plein: goes, early, and the note file is written
+  const note = join(dir, 'early-note.md');
+  assert.deepEqual(run(['--first-plein', '--early-note', note, '--now', '2026-10-17T10:00:00Z'], { GITHUB_EVENT_NAME: 'workflow_dispatch', CRON: '' }), { go: 'true', warn: 'false', early: 'true' });
+  assert.match(readFileSync(note, 'utf8'), /started early.*Saturday 24 October 2026, 18:00 Paris/s);
+  // by hand on the day: not early, and no note is written
+  const none = join(dir, 'none.md');
+  assert.deepEqual(run(['--first-plein', '--early-note', none, '--now', '2026-10-24T15:50:00Z'], { GITHUB_EVENT_NAME: 'workflow_dispatch', CRON: '' }), { go: 'true', warn: 'false', early: 'false' });
+  assert.equal(existsSync(none), false);
+  // a config.js without the date, or no config.js at all: shut and warn
+  const bare = join(dir, 'bare.js');
+  writeFileSync(bare, 'window.PLEIN_CONFIG = {};');
+  for (const config of [bare, join(dir, 'missing.js')]) {
+    assert.deepEqual(run(['--first-plein', '--config', config, '--now', '2026-10-24T15:55:00Z'], sched('52 15 * * 6')), { go: 'false', warn: 'true', early: 'false' }, config);
+  }
+});
+
+// ---- the Saturday guard --------------------------------------------------------------------
+
+const REPO = 'rpk0407/PLEIN';
+const SAT = '2026-10-24'; // Saturday 24 October 2026: 15:52Z is 17:52 in Paris
+const runUrl = (id) => `https://github.com/${REPO}/actions/runs/${id}`;
+const orderRun = (id, hh, mm, over = {}) => ({ id, event: 'schedule', status: 'completed', conclusion: 'success', created_at: `${SAT}T${hh}:${mm}:07Z`, html_url: runUrl(id), ...over });
+const jobStep = (name, conclusion) => ({ name, status: 'completed', conclusion });
+const JOBS = {
+  sent: [{ name: ORDER_JOB, status: 'completed', conclusion: 'success', steps: [jobStep('Is this the run for this Saturday?', 'success'), jobStep(ORDER_STEP, 'success'), jobStep('Tell the founders it failed', 'skipped')] }],
+  failed: [{ name: ORDER_JOB, status: 'completed', conclusion: 'failure', steps: [jobStep('Work out the purchase order', 'failure'), jobStep(ORDER_STEP, 'skipped')] }],
+  timedOut: [{ name: ORDER_JOB, status: 'completed', conclusion: 'cancelled', steps: [jobStep('Work out the purchase order', 'cancelled'), jobStep(ORDER_STEP, 'skipped')] }],
+  closed: [{ name: ORDER_JOB, status: 'completed', conclusion: 'success', steps: [jobStep('Is this the run for this Saturday?', 'success'), jobStep(ORDER_STEP, 'skipped')] }],
+  skipped: [{ name: ORDER_JOB, status: 'completed', conclusion: 'skipped', steps: [] }, { name: 'garde', status: 'in_progress', conclusion: null, steps: [] }],
+  running: [{ name: ORDER_JOB, status: 'in_progress', conclusion: null, steps: [jobStep('Work out the purchase order', 'success'), { name: ORDER_STEP, status: 'in_progress', conclusion: null }] }],
+  queued: [{ name: ORDER_JOB, status: 'queued', conclusion: null, steps: [] }],
+  sentThenBusy: [{ name: ORDER_JOB, status: 'in_progress', conclusion: null, steps: [jobStep(ORDER_STEP, 'success')] }],
+};
+
+test('a run of the plein workflow is read as sent, running, failed or idle from its jobs', () => {
+  const done = { status: 'completed' };
+  assert.equal(orderOfRun(done, JOBS.sent), 'sent');
+  assert.equal(orderOfRun(done, JOBS.failed), 'failed');
+  assert.equal(orderOfRun(done, JOBS.timedOut), 'failed');
+  assert.equal(orderOfRun(done, JOBS.closed), 'idle', 'a gate that closed made no order');
+  assert.equal(orderOfRun(done, JOBS.skipped), 'idle', 'the guard\'s own run has the order job skipped');
+  assert.equal(orderOfRun(done, []), 'idle');
+  assert.equal(orderOfRun(done, undefined), 'idle');
+  assert.equal(orderOfRun({ status: 'queued' }, []), 'running', 'no job yet on a run that has not started');
+  assert.equal(orderOfRun({ status: 'in_progress' }, JOBS.running), 'running');
+  assert.equal(orderOfRun({ status: 'in_progress' }, JOBS.queued), 'running');
+  assert.equal(orderOfRun({ status: 'in_progress' }, JOBS.sentThenBusy), 'sent', 'the send step is what counts');
+});
+
+test('only runs since the 17:45 freeze count, the guard\'s own run never does, and sent beats running beats failed', () => {
+  const since = utc(SAT, 15, 45);
+  const byRun = (entries) => new Map(Object.entries(entries).map(([id, j]) => [id, j]));
+  const run = (runs, entries, selfId = '999') => judgeOrder({ runs, jobsByRun: byRun(entries), since, selfId });
+  // yesterday's order, and one at 17:44, are not Saturday's
+  assert.equal(run([orderRun(1, '15', '44'), { ...orderRun(2, '15', '50'), created_at: '2026-10-23T15:50:07Z' }], { 1: JOBS.sent, 2: JOBS.sent }).state, 'missing');
+  assert.equal(run([orderRun(3, '15', '45')], { 3: JOBS.sent }).state, 'sent', 'the freeze minute itself counts');
+  // the guard's own run, sent or not, is excluded
+  assert.equal(run([orderRun(999, '15', '58')], { 999: JOBS.sent }).state, 'missing');
+  // a press of the button counts like the schedule
+  assert.equal(run([orderRun(4, '15', '53', { event: 'workflow_dispatch' })], { 4: JOBS.sent }).state, 'sent');
+  // precedence and the run to blame
+  const mixed = run([orderRun(5, '15', '52'), orderRun(6, '15', '56')], { 5: JOBS.failed, 6: JOBS.running });
+  assert.equal(mixed.state, 'running');
+  const failed = run([orderRun(5, '15', '52'), orderRun(7, '15', '53')], { 5: JOBS.failed, 7: JOBS.closed });
+  assert.equal(failed.state, 'failed');
+  assert.equal(failed.culprit.id, 5);
+  assert.equal(run([orderRun(5, '15', '52'), orderRun(8, '15', '54')], { 5: JOBS.failed, 8: JOBS.sent }).state, 'sent', 'a retry that worked ends the alarm');
+  assert.equal(run([orderRun(7, '15', '53')], { 7: JOBS.closed }).state, 'missing');
+  assert.equal(run([], {}).state, 'missing');
+  assert.equal(run(undefined, {}).state, 'missing');
+});
+
+/** A fake GitHub: `script(n)` gives the jobs of every run on the n-th look at the list; `runs` may be a function of n too. */
+function fakeGitHub(runs, script, log = []) {
+  let looks = 0;
+  const fetch = async (url, init) => {
+    log.push({ url, init });
+    const { pathname } = new URL(url);
+    if (pathname === `/repos/${REPO}/actions/workflows/${ORDER_WORKFLOW}/runs`) {
+      looks += 1;
+      const list = typeof runs === 'function' ? runs(looks) : runs;
+      return { ok: true, status: 200, json: async () => ({ workflow_runs: list }) };
+    }
+    const m = /^\/repos\/rpk0407\/PLEIN\/actions\/runs\/(\d+)\/jobs$/.exec(pathname);
+    if (m) return { ok: true, status: 200, json: async () => ({ jobs: script(looks)[m[1]] ?? [] }) };
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  return fetch;
+}
+const GUARD_ENV = { GH_TOKEN: 'ghs_testtoken123', GITHUB_REPOSITORY: REPO, GITHUB_RUN_ID: '999', GITHUB_SERVER_URL: 'https://github.com' };
+const clock = { t: 0 }; // a fake clock that only the fake sleep moves
+const sleepless = () => {
+  const naps = [];
+  return { naps, sleep: async (ms) => { naps.push(ms); clock.t += ms; } };
+};
+
+test('the guard reads the runs with its own token, only the ones that matter, and never leaks the token', async () => {
+  const log = [];
+  const runs = [orderRun(999, '15', '58'), orderRun(11, '15', '52'), { ...orderRun(12, '15', '10'), created_at: '2026-10-23T15:10:07Z' }];
+  const verdict = await lookAtOrders({ fetch: fakeGitHub(runs, () => ({ 11: JOBS.sent, 12: JOBS.sent }), log), env: GUARD_ENV, since: utc(SAT, 15, 45) });
+  assert.equal(verdict.state, 'sent');
+  const paths = log.map((c) => new URL(c.url).pathname + new URL(c.url).search);
+  assert.deepEqual(paths, [`/repos/${REPO}/actions/workflows/plein.yml/runs?per_page=30`, `/repos/${REPO}/actions/runs/11/jobs?per_page=30`], 'no jobs read for its own run or for yesterday\'s');
+  assert.ok(log.every((c) => c.url.startsWith('https://api.github.com/') && c.init.headers.authorization === 'Bearer ghs_testtoken123' && c.init.signal instanceof AbortSignal));
+
+  // failures say what and where, never the token, and never read as "fine"
+  const status = (code) => async () => ({ ok: false, status: code, json: async () => ({}) });
+  await assert.rejects(lookAtOrders({ fetch: status(500), env: GUARD_ENV, since: 0 }), (e) => /GitHub answered 500 for \/repos\/rpk0407\/PLEIN\/actions\/workflows\/plein\.yml\/runs/.test(e.message) && !e.message.includes('ghs_'));
+  await assert.rejects(lookAtOrders({ fetch: async (url, init) => { throw new Error(`connect failed ${init.headers.authorization}`); }, env: GUARD_ENV, since: 0 }),
+    (e) => /GitHub unreachable/.test(e.message) && !e.message.includes('ghs_testtoken123'));
+  await assert.rejects(lookAtOrders({ fetch: async () => ({ ok: true, status: 200, json: async () => ({ message: 'oops' }) }), env: GUARD_ENV, since: 0 }), /no list of workflow runs/);
+  await assert.rejects(lookAtOrders({ fetch: noNetwork, env: { ...GUARD_ENV, GH_TOKEN: '' }, since: 0 }), /GH_TOKEN/);
+  await assert.rejects(lookAtOrders({ fetch: noNetwork, env: { ...GUARD_ENV, GITHUB_REPOSITORY: 'a/b/../../c' }, since: 0 }), /owner\/name/);
+  await assert.rejects(lookAtOrders({ fetch: noNetwork, env: { ...GUARD_ENV, GITHUB_API_URL: 'http://api.example.test' }, since: 0 }), /https/);
+});
+
+test('at 17:58 the guard stays quiet when the order went out, waits for a run in progress, and otherwise alerts', async () => {
+  const start = utc(SAT, 15, 58); // 17:58 in Paris
+  const watch = (runs, script, over = {}) => {
+    clock.t = start;
+    const { naps, sleep } = sleepless();
+    return watchOrder({ fetch: fakeGitHub(runs, script), env: GUARD_ENV, clock: () => clock.t, sleep, ...over }).then((r) => ({ ...r, naps }));
+  };
+  const own = orderRun(999, '15', '58');
+  // the order went out: nothing to say
+  assert.deepEqual(await watch([own, orderRun(21, '15', '52')], () => ({ 21: JOBS.sent })), { alert: false, state: 'sent', text: '', naps: [] });
+
+  // no plein run at all (GitHub dropped the 17:52 line): the guard waits the full five minutes in case
+  // the line is only late, then alerts, with the fallback and the guard's own log
+  const none = await watch([own], () => ({}));
+  assert.equal(none.alert, true);
+  assert.equal(none.state, 'missing');
+  assert.match(none.text, /^Aucun ordre d'achat n'est arrivé à 18:03 et le job plein n'a pas tourné\./);
+  assert.match(none.text, /presser le bouton plein/);
+  assert.match(none.text, /npm run plein -- --from-chain --markdown/);
+  assert.match(none.text, /Journal de la garde : https:\/\/github\.com\/rpk0407\/PLEIN\/actions\/runs\/999$/);
+  assert.deepEqual(none.naps, Array(10).fill(30000));
+  // and waitMs 0 says it at once
+  const atOnce = await watch([own], () => ({}), { waitMs: 0 });
+  assert.deepEqual([atOnce.state, atOnce.naps.length], ['missing', 0]);
+  assert.match(atOnce.text, /17:58/);
+
+  // GitHub starts the 17:52 line late (the case that made two orders): nothing at 17:58, the run shows
+  // up at 18:00 and sends at 18:01. The guard saw it coming and says nothing, so nobody presses the button.
+  const late = await watch(
+    (looks) => (looks < 5 ? [own] : [own, orderRun(26, '16', '00', { status: 'in_progress', conclusion: null })]),
+    (looks) => ({ 26: looks < 7 ? JOBS.running : JOBS.sent }),
+  );
+  assert.deepEqual([late.alert, late.state, late.text], [false, 'sent', '']);
+  assert.deepEqual(late.naps, Array(6).fill(30000));
+  // a line that comes after the five minutes is the button's business, and the alert says what happens then
+  const tooLate = await watch((looks) => (looks < 12 ? [own] : [own, orderRun(27, '16', '07')]), () => ({ 27: JOBS.sent }));
+  assert.deepEqual([tooLate.alert, tooLate.state, tooLate.naps.length], [true, 'missing', 10]);
+  assert.match(tooLate.text, /s'arrête de lui-même quand un ordre est déjà parti/);
+
+  // a run that already broke does not wait: its own notice has gone out, the founders need the way out now
+  assert.deepEqual((await watch([own, orderRun(28, '15', '52')], () => ({ 28: JOBS.failed }))).naps, []);
+
+  // a run that broke: alert, pointing at its log
+  const broke = await watch([own, orderRun(22, '15', '52')], () => ({ 22: JOBS.failed }));
+  assert.equal(broke.state, 'failed');
+  assert.match(broke.text, /a échoué ou a été interrompu/);
+  assert.ok(broke.text.includes(runUrl(22)));
+
+  // the gate closed on the run (a wrong clock regime, a cut-off): that is no order either
+  assert.equal((await watch([own, orderRun(23, '15', '52')], () => ({ 23: JOBS.closed }))).state, 'missing');
+
+  // a run still going: the guard waits, polling every 30 s, and is quiet if it finishes in time
+  const slow = await watch([own, orderRun(24, '15', '52', { status: 'in_progress', conclusion: null })], (looks) => ({ 24: looks < 3 ? JOBS.running : JOBS.sent }));
+  assert.deepEqual([slow.alert, slow.state], [false, 'sent']);
+  assert.deepEqual(slow.naps, [30000, 30000]);
+
+  // one that never finishes: it stops waiting after five minutes and says it is still running
+  const stuck = await watch([own, orderRun(25, '15', '52', { status: 'in_progress', conclusion: null })], () => ({ 25: JOBS.running }));
+  assert.equal(stuck.alert, true);
+  assert.equal(stuck.state, 'running');
+  assert.equal(stuck.naps.length, 10);
+  assert.match(stuck.text, /tourne encore à 18:03/);
+  assert.ok(stuck.text.includes(runUrl(25)));
+  // and waitMs 0 does not wait at all
+  assert.equal((await watch([own, orderRun(25, '15', '52', { status: 'in_progress', conclusion: null })], () => ({ 25: JOBS.running }), { waitMs: 0 })).naps.length, 0);
+
+  // GitHub unreadable: an error, never "no alert"
+  clock.t = start;
+  await assert.rejects(watchOrder({ fetch: async () => ({ ok: false, status: 403, json: async () => ({}) }), env: GUARD_ENV, clock: () => clock.t, sleep: async () => {} }), /GitHub answered 403/);
+
+  // the freeze is today's 17:45 Paris, winter or summer
+  clock.t = utc('2026-11-07', 16, 58);
+  const winter = await watchOrder({
+    fetch: fakeGitHub([{ ...orderRun(30, '16', '52'), created_at: '2026-11-07T16:52:07Z' }, { ...orderRun(31, '16', '40'), created_at: '2026-11-07T16:40:07Z' }], () => ({ 30: JOBS.closed, 31: JOBS.sent })),
+    env: GUARD_ENV, clock: () => clock.t, sleep: async () => {}, waitMs: 0, // no waiting: this sleep would not move the clock
+  });
+  assert.equal(winter.state, 'missing', 'the 17:40 CET order is before the freeze (16:45Z), the 17:52 one was closed');
+});
+
+test('the alert for the ops chat is French, typeset, and tells the founders what to do', () => {
+  const NB = String.fromCharCode(0xA0); // the non-breaking space typo() puts before : ; ! ? and inside « »
+  for (const state of ['missing', 'failed', 'running']) {
+    const text = orderAlertText({ state, now: utc(SAT, 15, 58), runUrl: runUrl(999), culpritUrl: runUrl(5) });
+    assert.equal(typo(text), text, `${state}: already typeset`);
+    assert.match(text, /17:58/);
+    assert.match(text, new RegExp(`À faire${NB}: `));
+    assert.match(text, /le bouton plein \(Actions, plein, Run workflow\), en donnant le réservoir à la main/);
+    assert.doesNotMatch(text, /undefined|null|NaN/);
+    assert.ok(text.length < 900, `${text.length} characters`);
+  }
+  const textOf = (state) => orderAlertText({ state, now: utc(SAT, 15, 58), runUrl: runUrl(999), culpritUrl: runUrl(5) });
+  // nothing came and nothing is on its way: press the button or run it on a laptop, and a late line stops by itself
+  for (const state of ['missing', 'failed']) {
+    assert.match(textOf(state), new RegExp(`À faire${NB}: presser le bouton plein`), state);
+    assert.match(textOf(state), new RegExp(`«${NB}npm run plein -- --from-chain --markdown${NB}»`), state);
+    assert.match(textOf(state), /Les tranches commencent à 18:00\./, state);
+  }
+  assert.match(textOf('missing'), new RegExp(`il s'arrête de lui-même quand un ordre est déjà parti${NB}: un seul ordre à exécuter`));
+  assert.doesNotMatch(textOf('failed'), /s'arrête de lui-même/);
+  // a run still going is already working on the order: wait and watch its log, press the button only if it fails
+  const running = textOf('running');
+  assert.match(running, new RegExp(`À faire${NB}: attendre la fin du job en suivant son journal, sans presser le bouton plein`));
+  assert.match(running, /S'il échoue, presser alors le bouton plein/);
+  assert.match(running, /Un seul ordre à exécuter\./);
+  assert.doesNotMatch(running, /npm run plein/);
+  assert.ok(orderAlertText({ state: 'running', now: utc(SAT, 15, 58), culpritUrl: runUrl(5) }).includes(runUrl(5)));
+  assert.doesNotMatch(orderAlertText({ state: 'missing', now: utc(SAT, 15, 58) }), /Journal de la garde/);
+});
+
+test('the guard command line refuses a missing argument and treats unreadable GitHub as exit code 2', () => {
+  const guard = (args, env) => {
+    try {
+      execFileSync(node, [join(root, 'scripts/_gate.mjs'), ...args], { encoding: 'utf8', stdio: 'pipe', env: { ...process.env, ...env } });
+      return { status: 0 };
+    } catch (e) { return { status: e.status, stderr: String(e.stderr), stdout: String(e.stdout) }; }
+  };
+  assert.equal(guard(['--watch-order'], {}).status, 1, 'no --alert-file');
+  assert.equal(guard(['--watch-order', '--alert-file', join(scratch(), 'a.txt'), '--wait', '99'], {}).status, 1, 'a wait over eight minutes');
+  const noToken = guard(['--watch-order', '--alert-file', join(scratch(), 'a.txt')], { GH_TOKEN: '', GITHUB_TOKEN: '', GITHUB_REPOSITORY: REPO });
+  assert.equal(noToken.status, 2);
+  assert.match(noToken.stderr, /GH_TOKEN/);
+  assert.doesNotMatch(noToken.stdout, /alert=/, 'an unreadable GitHub never prints alert=false');
+});
+
+test('the guard command line, end to end against a local fake of the Actions API', async () => {
+  // runs created "after the freeze" relative to today's Paris 17:45, whenever this test runs
+  const p = paris(Date.now());
+  const freeze = parisInstant(p.y, p.m, p.d, 17, 45);
+  const created = new Date(freeze + 7 * 60000).toISOString();
+  const seenAuth = [];
+  let scenario = 'missing';
+  const server = createServer((req, res) => {
+    seenAuth.push(req.headers.authorization);
+    const send = (code, body) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(body)); };
+    if (scenario === 'down') return send(500, { message: 'boom' });
+    if (req.url.startsWith(`/repos/${REPO}/actions/workflows/plein.yml/runs`)) {
+      return send(200, { workflow_runs: scenario === 'missing' ? [] : [{ id: 41, event: 'schedule', status: 'completed', conclusion: 'success', created_at: created, html_url: runUrl(41) }] });
+    }
+    if (req.url.startsWith(`/repos/${REPO}/actions/runs/41/jobs`)) return send(200, { jobs: scenario === 'sent' ? JOBS.sent : JOBS.failed });
+    return send(404, {});
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const env = { ...process.env, GH_TOKEN: 'ghs_faketoken', GITHUB_REPOSITORY: REPO, GITHUB_RUN_ID: '999', GITHUB_SERVER_URL: 'https://github.com', GITHUB_API_URL: `http://127.0.0.1:${server.address().port}` };
+    const guard = async () => {
+      const file = join(scratch(), 'alert.txt');
+      try {
+        const { stdout } = await promisify(execFile)(node, [join(root, 'scripts/_gate.mjs'), '--watch-order', '--alert-file', file, '--wait', '0'], { env, encoding: 'utf8' });
+        return { status: 0, out: Object.fromEntries(stdout.trim().split('\n').map((l) => l.split('='))), alert: existsSync(file) ? readFileSync(file, 'utf8') : null };
+      } catch (e) { return { status: e.code, stdout: String(e.stdout), stderr: String(e.stderr) }; }
+    };
+    scenario = 'sent';
+    const sent = await guard();
+    assert.deepEqual([sent.status, sent.out, sent.alert], [0, { alert: 'false', state: 'sent' }, null], 'the order went out: quiet, no alert file');
+    scenario = 'missing';
+    const missing = await guard();
+    assert.deepEqual([missing.status, missing.out], [0, { alert: 'true', state: 'missing' }]);
+    assert.match(missing.alert, /Aucun ordre d'achat n'est arrivé/);
+    assert.match(missing.alert, /Journal de la garde : https:\/\/github\.com\/rpk0407\/PLEIN\/actions\/runs\/999/);
+    scenario = 'failed';
+    const failed = await guard();
+    assert.deepEqual([failed.status, failed.out], [0, { alert: 'true', state: 'failed' }]);
+    assert.ok(failed.alert.includes(runUrl(41)));
+    scenario = 'down';
+    const down = await guard();
+    assert.equal(down.status, 2, 'GitHub unreadable is exit code 2');
+    assert.doesNotMatch(down.stdout, /alert=/);
+    assert.match(down.stderr, /GitHub answered 500/);
+    assert.doesNotMatch(down.stderr + down.stdout, /ghs_faketoken/);
+    assert.ok(seenAuth.length > 4 && seenAuth.every((a) => a === 'Bearer ghs_faketoken'));
+  } finally {
+    server.close();
+  }
+});
+
+// ---- one order a Saturday: the duplicate check of the order job -----------------------------
+
+test('when an order was sent is read from its send step, and the freeze and the fees are 17:45 and 17:50 in Paris', () => {
+  const run = orderRun(50, '15', '52');
+  const jobs = (completedAt) => [{ name: ORDER_JOB, status: 'completed', conclusion: 'success', steps: [{ ...jobStep(ORDER_STEP, 'success'), completed_at: completedAt }] }];
+  const done = utc(SAT, 15, 53) + 41000;
+  assert.equal(sentAtOf(run, jobs('2026-10-24T15:53:41Z')), done);
+  assert.equal(sentAtOf(run, JOBS.sent), Date.parse(run.created_at), 'no step time: the start of the run');
+  assert.equal(sentAtOf(run, undefined), Date.parse(run.created_at));
+  const since = utc(SAT, 15, 45);
+  const judged = (runs, entries) => judgeOrder({ runs, jobsByRun: new Map(Object.entries(entries)), since, selfId: '999' });
+  assert.equal(judged([run], { 50: jobs('2026-10-24T15:53:41Z') }).sentAt, done);
+  assert.equal(judged([run], { 50: JOBS.failed }).sentAt, null);
+  assert.equal(judged([], {}).sentAt, null);
+  assert.equal(freezeOf(utc(SAT, 16, 5)), utc(SAT, 15, 45));
+  assert.equal(feesOf(utc(SAT, 16, 5)), utc(SAT, 15, 50));
+  assert.equal(feesOf(utc('2026-10-31', 16, 55)), utc('2026-10-31', 16, 50), 'winter');
+});
+
+test('a scheduled run behind an order already sent stops; a press of the button goes ahead with a note', () => {
+  const go = { go: true, why: 'the 17:52 Paris line, started in time', early: false };
+  const button = { go: true, why: 'started by hand', early: false };
+  const closed = { go: false, why: 'no plein yet', early: false };
+  const sentAt = utc(SAT, 16, 3) + 10000; // 18:03 in Paris
+  const sent = { state: 'sent', sentAt, culprit: { html_url: runUrl(7), created_at: `${SAT}T16:02:07Z` } };
+
+  // the late line, arriving behind a press of the button: stops, and says nothing to the founders
+  const behind = afterOrders({ verdict: go, event: 'schedule', sent });
+  assert.deepEqual([behind.go, behind.duplicate, behind.warn, behind.sentNote], [false, true, undefined, undefined]);
+  assert.match(behind.why, /already sent today \(18:03 Paris, https:\/\/github\.com\/rpk0407\/PLEIN\/actions\/runs\/7\); this scheduled run stops/);
+
+  // the press behind an order: goes, with the note that only one order may be executed
+  const pressed = afterOrders({ verdict: button, event: 'workflow_dispatch', sent });
+  assert.deepEqual([pressed.go, pressed.duplicate], [true, true]);
+  assert.match(pressed.sentNote, /^\*\*NOTE: an order was already sent today, at 18:03 Paris \(https:\/\/github\.com\/rpk0407\/PLEIN\/actions\/runs\/7\)\.\*\*/);
+  assert.match(pressed.sentNote, /Execute only one order/);
+  assert.ok(pressed.sentNote.endsWith('\n\n'), 'ready to go in front of the order');
+  assert.equal(afterOrders({ verdict: { ...button, early: true }, event: 'workflow_dispatch', sent }).early, true, 'the early flag survives');
+  // the start of the run stands in when the API gives no time for the step
+  assert.match(afterOrders({ verdict: button, event: 'workflow_dispatch', sent: { ...sent, sentAt: null } }).sentNote, /at 18:02 Paris/);
+
+  // no order, one still running or broken, GitHub unreadable: nothing changes
+  for (const other of [null, { state: 'missing', culprit: null }, { state: 'running', culprit: {} }, { state: 'failed', culprit: {} }]) {
+    for (const [verdict, event] of [[go, 'schedule'], [button, 'workflow_dispatch']]) {
+      assert.deepEqual(afterOrders({ verdict, event, sent: other }), { ...verdict, duplicate: false }, `${event} / ${other?.state}`);
+    }
+  }
+  // a gate that was already closed stays as it was
+  assert.deepEqual(afterOrders({ verdict: closed, event: 'schedule', sent }), { ...closed, duplicate: false });
+  // a link from the API that is not https never reaches the note
+  assert.doesNotMatch(sentNote({ at: sentAt, url: 'javascript:alert(1)' }), /javascript/);
+  assert.match(sentNote({ at: sentAt, url: '' }), /^\*\*NOTE: an order was already sent today, at 18:03 Paris\.\*\*/);
+});
+
+test('the duplicate check never throws and never waits on GitHub past its deadline', async () => {
+  const since = utc(SAT, 15, 50);
+  const ok = await lookForSent({ fetch: fakeGitHub([orderRun(11, '15', '52')], () => ({ 11: JOBS.sent })), env: GUARD_ENV, since });
+  assert.deepEqual([ok.error, ok.sent.state], ['', 'sent']);
+  const hang = await lookForSent({ fetch: () => new Promise(() => {}), env: GUARD_ENV, since, deadlineMs: 40 });
+  assert.equal(hang.sent, null);
+  assert.match(hang.error, /GitHub did not answer within 0\.04 seconds/);
+  const down = await lookForSent({ fetch: async () => ({ ok: false, status: 502, json: async () => ({}) }), env: GUARD_ENV, since });
+  assert.equal(down.sent, null);
+  assert.match(down.error, /GitHub answered 502/);
+  const noToken = await lookForSent({ fetch: noNetwork, env: { ...GUARD_ENV, GH_TOKEN: '' }, since });
+  assert.equal(noToken.sent, null);
+  assert.match(noToken.error, /GH_TOKEN/);
+});
+
+test('the order gate, end to end against a local fake of the Actions API: one order a Saturday, whoever comes second', async () => {
+  const sentJobs = (done) => [{ name: ORDER_JOB, status: 'completed', conclusion: 'success', steps: [{ ...jobStep(ORDER_STEP, 'success'), completed_at: done }] }];
+  const state = { runs: [], jobs: {}, down: false, requests: [] };
+  const server = createServer((req, res) => {
+    state.requests.push(req.url);
+    const send = (code, body) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(body)); };
+    if (state.down) return send(500, { message: 'boom' });
+    if (req.url.startsWith(`/repos/${REPO}/actions/workflows/plein.yml/runs`)) return send(200, { workflow_runs: state.runs });
+    const m = /^\/repos\/rpk0407\/PLEIN\/actions\/runs\/(\d+)\/jobs/.exec(req.url);
+    if (m) return send(200, { jobs: state.jobs[m[1]] ?? [] });
+    return send(404, {});
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const gate = async (event, cron, now, envOver = {}) => {
+      const note = join(scratch(), 'already-sent.md');
+      const env = {
+        ...process.env, GITHUB_EVENT_NAME: event, CRON: cron, GH_TOKEN: 'ghs_faketoken', GITHUB_TOKEN: '', GITHUB_REPOSITORY: REPO, GITHUB_RUN_ID: '999',
+        GITHUB_API_URL: `http://127.0.0.1:${server.address().port}`, ...envOver,
+      };
+      const args = [join(root, 'scripts/_gate.mjs'), '--hour', '17', '--until', '18:30', '--first-plein', '--skip-if-sent', '--sent-note', note, '--now', now];
+      const { stdout, stderr } = await promisify(execFile)(node, args, { env, encoding: 'utf8' });
+      return { out: Object.fromEntries(stdout.trim().split('\n').map((l) => l.trim().split('='))), stderr, note: existsSync(note) ? readFileSync(note, 'utf8') : null };
+    };
+    const SCHEDULED = '52 15 * * 6';
+    const verdictOf = (r) => [r.out.go, r.out.warn, r.out.early, r.out.duplicate];
+
+    // the story that made two orders: GitHub starts the 17:52 line 15 minutes late, the guard alerted at
+    // 18:03, a founder pressed the button, and the order went out at 18:03
+    state.runs = [{ ...orderRun(60, '16', '02', { event: 'workflow_dispatch' }) }];
+    state.jobs = { 60: sentJobs('2026-10-24T16:03:10Z') };
+    const behind = await gate('schedule', SCHEDULED, '2026-10-24T16:07:00Z');
+    assert.deepEqual(verdictOf(behind), ['false', 'false', 'false', 'true'], 'closed, quietly: no warn, so no message to the founders');
+    assert.match(behind.stderr, /^skipped: an order was already sent today \(18:03 Paris, https:\/\/github\.com\/rpk0407\/PLEIN\/actions\/runs\/60\); this scheduled run stops/m);
+    assert.equal(behind.note, null);
+
+    // the other way round: the scheduled order went out at 17:53 and someone presses the button at 18:02
+    state.runs = [orderRun(61, '15', '52')];
+    state.jobs = { 61: sentJobs('2026-10-24T15:53:20Z') };
+    const pressed = await gate('workflow_dispatch', '', '2026-10-24T16:02:00Z');
+    assert.deepEqual(verdictOf(pressed), ['true', 'false', 'false', 'true']);
+    assert.match(pressed.stderr, /^::warning title=Order already sent::/m);
+    assert.match(pressed.note, /^\*\*NOTE: an order was already sent today, at 17:53 Paris \(https:\/\/github\.com\/rpk0407\/PLEIN\/actions\/runs\/61\)\.\*\*/);
+    assert.match(pressed.note, /Execute only one order/);
+
+    // no order yet; the run's own id, an order from before the fees (17:50), and yesterday's order do not count
+    state.runs = [orderRun(999, '15', '53'), orderRun(62, '15', '47'), { ...orderRun(63, '15', '52'), created_at: '2026-10-23T15:52:07Z' }];
+    state.jobs = { 999: sentJobs('2026-10-24T15:54:00Z'), 62: sentJobs('2026-10-24T15:48:00Z'), 63: sentJobs('2026-10-23T15:53:00Z') };
+    state.requests = [];
+    const first = await gate('schedule', SCHEDULED, '2026-10-24T15:55:00Z');
+    assert.deepEqual(verdictOf(first), ['true', 'false', 'false', 'false']);
+    assert.equal(first.note, null);
+    assert.equal(state.requests.length, 1, 'only the list: none of those runs needed its jobs read');
+
+    // a closed gate asks GitHub nothing (launch day: no plein yet)
+    state.requests = [];
+    const launchDay = await gate('schedule', SCHEDULED, '2026-10-17T15:55:00Z');
+    assert.deepEqual(verdictOf(launchDay), ['false', 'false', 'false', 'false']);
+    assert.deepEqual(state.requests, []);
+
+    // GitHub unreadable never stops an order: it goes ahead, with a warning that names the problem and not the token
+    state.down = true;
+    const down = await gate('schedule', SCHEDULED, '2026-10-24T15:55:00Z');
+    assert.deepEqual(verdictOf(down), ['true', 'false', 'false', 'false']);
+    assert.match(down.stderr, /^::warning title=Duplicate check::could not tell whether an order was already sent \(GitHub answered 500 for [^)]*\); going ahead$/m);
+    assert.doesNotMatch(down.stderr + JSON.stringify(down.out), /ghs_faketoken/);
+  } finally {
+    server.close();
+  }
+});
+
+// ---- the Telegram check --------------------------------------------------------------------
+
+test('a step that must reach the founders fails loudly when the Telegram secrets are empty', () => {
+  const all = { TELEGRAM_BOT_TOKEN: 'x', TELEGRAM_OPS_CHAT_ID: '-1001', TELEGRAM_CHANNEL_ID: '@station' };
+  assert.deepEqual(missingTelegram(all), []);
+  assert.deepEqual(missingTelegram({}), ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_OPS_CHAT_ID']);
+  assert.deepEqual(missingTelegram({ ...all, TELEGRAM_OPS_CHAT_ID: '  ' }), ['TELEGRAM_OPS_CHAT_ID']);
+  assert.deepEqual(missingTelegram({ ...all, TELEGRAM_CHANNEL_ID: '' }), [], 'the channel only matters when asked');
+  assert.deepEqual(missingTelegram({ ...all, TELEGRAM_CHANNEL_ID: '' }, { channel: true }), ['TELEGRAM_CHANNEL_ID']);
+  assert.deepEqual(missingTelegram(undefined), ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_OPS_CHAT_ID']);
+
+  const check = (env, ...flags) => {
+    try {
+      return { status: 0, stdout: execFileSync(node, [join(root, 'scripts/_gate.mjs'), '--require-ops', ...flags], { encoding: 'utf8', stdio: 'pipe', env: { ...process.env, ...env } }) };
+    } catch (e) { return { status: e.status, stdout: String(e.stdout) }; }
+  };
+  const secret = 'AAHsecret-bot-token-value-1234567890';
+  const ok = check({ ...all, TELEGRAM_BOT_TOKEN: secret });
+  assert.equal(ok.status, 0);
+  assert.doesNotMatch(ok.stdout, new RegExp(secret));
+  const none = check({ TELEGRAM_BOT_TOKEN: secret, TELEGRAM_OPS_CHAT_ID: '', TELEGRAM_CHANNEL_ID: '' });
+  assert.equal(none.status, 1);
+  assert.match(none.stdout, /^::error title=Telegram secrets missing::TELEGRAM_OPS_CHAT_ID is empty/);
+  assert.match(none.stdout, /Settings, Secrets and variables, Actions/);
+  assert.doesNotMatch(none.stdout, new RegExp(secret), 'names only, never values');
+  assert.equal(check({ ...all, TELEGRAM_CHANNEL_ID: '' }, '--require-channel').status, 1);
+  assert.match(check({ TELEGRAM_BOT_TOKEN: '', TELEGRAM_OPS_CHAT_ID: '', TELEGRAM_CHANNEL_ID: '' }).stdout, /TELEGRAM_BOT_TOKEN and TELEGRAM_OPS_CHAT_ID are empty/);
+});
+
 test('the next plein is Saturday 18:00 Paris, and never before the first one', () => {
   assert.equal(nextPlein(MORNING, config), Date.parse('2026-10-24T18:00:00+02:00')); // not this evening
   assert.equal(nextPlein(Date.parse('2026-10-26T06:00:00Z'), config), Date.parse('2026-10-31T18:00:00+01:00'));
@@ -640,7 +1223,10 @@ test('the card really renders at 1200 × 675 (needs Chrome or Edge; skipped in C
 
 const workflowDir = join(root, '.github', 'workflows');
 const MINE = ['totem', 'vigie', 'prix-officiel', 'plein', 'releve', 'audit'];
-const workflow = (name) => readFileSync(join(workflowDir, `${name}.yml`), 'utf8');
+// Line endings are normalised: on Windows git checks tracked files out with CRLF (core.autocrlf), and
+// the structure tests below match on "\n" and on exact indentation.
+const readWorkflow = (path) => readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
+const workflow = (name) => readWorkflow(join(workflowDir, `${name}.yml`));
 // The workflow files reach the repository in their own commit (pushing them needs the token's
 // workflow scope); until then these tests say so instead of failing on a missing file.
 const WORKFLOWS = MINE.every((n) => existsSync(join(workflowDir, `${n}.yml`))) ? {} : { skip: 'the workflow files are not in this tree yet' };
@@ -694,50 +1280,90 @@ test('every workflow is bounded, least-privilege and passes untrusted input only
   assert.match(workflow('vigie'), /issues: write/);
 });
 
+/** The jobs of a workflow by id: the text of each. */
+function jobsOf(text) {
+  const body = text.slice(text.indexOf('\njobs:\n') + '\njobs:\n'.length);
+  const out = {};
+  for (const part of body.split(/^(?=  [A-Za-z0-9_-]+:\s*$)/m)) {
+    const id = part.match(/^ {2}([A-Za-z0-9_-]+):/)?.[1];
+    if (id) out[id] = part;
+  }
+  return out;
+}
+/** The steps of a job: [{ name, text }]. A step with no name is called by its `uses:`. */
+function stepsOf(job) {
+  return job.split(/^(?= {6}- )/m).slice(1).map((text) => ({ name: text.match(/^ {6}- (?:name: )?(.*)$/m)[1].trim(), text }));
+}
+const stepNamed = (job, name) => stepsOf(job).find((s) => s.name === name);
+const crons = (name) => [...workflow(name).matchAll(/- cron: '([^']+)'/g)].map((m) => m[1]);
+const RUN_URL_ENV = /^ {10}RUN_URL: \$\{\{ github\.server_url \}\}\/\$\{\{ github\.repository \}\}\/actions\/runs\/\$\{\{ github\.run_id \}\}$/m;
+
 test('the jobs a Saturday depends on tell the founders when they fail, without a secret or a link in a shell line', WORKFLOWS, () => {
-  for (const name of ['plein', 'prix-officiel', 'audit']) {
-    const text = workflow(name);
-    const step = text.slice(text.indexOf('- name: Tell the founders it failed'));
-    assert.ok(step.length < text.length, `${name}: has a failure notice`);
-    assert.match(step, /^ {8}if: failure\(\) \|\| cancelled\(\)$/m, `${name}: a job stopped by its time limit is not "failed"`);
-    assert.match(step, /^ {8}timeout-minutes: 2$/m, `${name}: the notice has time of its own`);
-    assert.match(step, /^ {10}RUN_URL: \$\{\{ github\.server_url \}\}\/\$\{\{ github\.repository \}\}\/actions\/runs\/\$\{\{ github\.run_id \}\}$/m, name);
-    assert.match(step, /scripts\/telegram\.mjs --ops --text "[^"]*\$RUN_URL"/, name);
+  for (const [name, id, title] of [
+    ['plein', 'plein', 'Tell the founders it failed'], ['plein', 'garde', 'Tell the founders the guard failed'],
+    ['prix-officiel', 'prix', 'Tell the founders it failed'], ['audit', 'audit', 'Tell the founders it failed'],
+  ]) {
+    const notice = stepsOf(jobsOf(workflow(name))[id]).at(-1);
     // it is the last step, so it sees every earlier failure
-    assert.equal((text.match(/^ {6}- /gm) || []).length, (text.slice(0, text.indexOf('- name: Tell the founders it failed')).match(/^ {6}- /gm) || []).length + 1, `${name}: last step`);
+    assert.equal(notice.name, title, `${name}/${id}: the failure notice is the last step`);
+    assert.match(notice.text, /^ {8}if: failure\(\) \|\| cancelled\(\)$/m, `${name}/${id}: a job stopped by its time limit is not "failed"`);
+    assert.match(notice.text, /^ {8}timeout-minutes: 2$/m, `${name}/${id}: the notice has time of its own`);
+    assert.match(notice.text, RUN_URL_ENV, `${name}/${id}`);
+    assert.match(notice.text, /scripts\/telegram\.mjs --ops --text "[^"]*\$RUN_URL"/, `${name}/${id}`);
     // French wording with no mark that wants a non-breaking space typed into YAML
-    const said = step.match(/--text "([^"]*)"/)[1];
-    assert.doesNotMatch(said, /[:;!?%€»«]/, `${name}: ${said}`);
+    const said = notice.text.match(/--text "([^"]*)"/)[1];
+    assert.doesNotMatch(said, /[:;!?%€»«]/, `${name}/${id}: ${said}`);
   }
-  // a hung Telegram call must fail its own step quickly: the job then still has time to send the notice above
-  for (const [name, title] of [['plein', 'Send it to the founders'], ['prix-officiel', 'Tell the founders'], ['audit', 'Send it to the founders']]) {
-    const text = workflow(name);
-    const start = text.indexOf(`- name: ${title}\n`);
-    assert.ok(start >= 0, `${name}: ${title}`);
-    const own = text.slice(start, text.indexOf('\n      - ', start + 1));
-    assert.match(own, /^ {8}timeout-minutes: 2$/m, `${name}: ${title}`);
-    assert.match(own, /scripts\/telegram\.mjs/, `${name}: ${title}`);
+  // a hung Telegram call must fail its own step quickly (the job then still has time to send the
+  // notice above), and a missing secret must fail it loudly instead of printing to a log nobody reads
+  for (const [name, id, title] of [
+    ['plein', 'plein', 'Send it to the founders'], ['plein', 'garde', 'Tell the founders no order arrived'],
+    ['prix-officiel', 'prix', 'Tell the founders'], ['audit', 'audit', 'Send it to the founders'],
+    ['releve', 'releve', 'Send it to the founders'], ['vigie', 'vigie', 'Tell the founders about new look-alikes'],
+    // the notices of a run that is green by design are loud about a missing secret too
+    ['plein', 'plein', 'Tell the founders the run was skipped'], ['plein', 'garde', 'Tell the founders the guard was skipped'],
+    ['totem', 'totem', 'Tell the founders the run was skipped'],
+  ]) {
+    const own = stepNamed(jobsOf(workflow(name))[id], title);
+    assert.ok(own, `${name}/${id}: ${title}`);
+    assert.match(own.text, /^ {8}timeout-minutes: 2$/m, `${name}/${id}: ${title}`);
+    const check = own.text.indexOf('node scripts/_gate.mjs --require-ops');
+    const send = own.text.indexOf('node scripts/telegram.mjs --ops');
+    assert.ok(check >= 0 && send > check, `${name}/${id}: ${title} checks the Telegram secrets before it sends`);
   }
+  // the totem renders and keeps its card first, and only then goes red for a missing secret
+  const totem = stepsOf(jobsOf(workflow('totem')).totem);
+  const names = totem.map((s) => s.name);
+  assert.ok(names.indexOf('Keep the card') < names.indexOf('Were the Telegram secrets there?'));
+  assert.equal(totem.at(-1).name, 'Were the Telegram secrets there?');
+  assert.match(totem.at(-1).text, /^ {8}if: steps\.gate\.outputs\.go == 'true' && \(github\.event_name == 'schedule' \|\| inputs\.post\)$/m);
+  assert.match(totem.at(-1).text, /run: node scripts\/_gate\.mjs --require-ops --require-channel$/m);
   // the noisy ones stay quiet: vigie runs every 15 minutes on launch day, totem reports its own render failure
   for (const name of ['vigie', 'totem', 'releve']) assert.doesNotMatch(workflow(name), /Tell the founders it failed/, name);
 });
 
 test('a gate that closes for no planned reason tells the founders, because the run itself is green', WORKFLOWS, () => {
-  for (const name of ['plein', 'totem']) {
-    const text = workflow(name);
-    const start = text.indexOf('- name: Tell the founders the run was skipped\n');
-    assert.ok(start >= 0, `${name}: has the skipped-run notice`);
-    const own = text.slice(start, text.indexOf('\n      - ', start + 1));
-    assert.match(own, /^ {8}if: steps\.gate\.outputs\.warn == 'true'$/m, name);
-    assert.match(own, /^ {8}timeout-minutes: 2$/m, name);
-    assert.match(own, /^ {10}RUN_URL: \$\{\{ github\.server_url \}\}\/\$\{\{ github\.repository \}\}\/actions\/runs\/\$\{\{ github\.run_id \}\}$/m, name);
+  for (const [name, id, title, opening] of [
+    ['plein', 'plein', 'Tell the founders the run was skipped', "Le job plein n'a pas tourné"],
+    ['plein', 'garde', 'Tell the founders the guard was skipped', "La garde du plein n'a pas tourné"],
+    ['totem', 'totem', 'Tell the founders the run was skipped', "Le job totem n'a pas tourné"],
+  ]) {
+    const steps = stepsOf(jobsOf(workflow(name))[id]);
+    const gate = steps.findIndex((s) => s.text.includes('id: gate'));
+    const at = steps.findIndex((s) => s.name === title);
+    assert.ok(gate >= 0 && at >= 0, `${name}/${id}: has the skipped-run notice`);
+    const own = steps[at].text;
+    assert.match(own, /^ {8}if: steps\.gate\.outputs\.warn == 'true'$/m, `${name}/${id}`);
+    assert.match(own, /^ {8}timeout-minutes: 2$/m, `${name}/${id}`);
+    assert.match(own, RUN_URL_ENV, `${name}/${id}`);
     const said = own.match(/scripts\/telegram\.mjs --ops --text "([^"]*\$RUN_URL)"/)?.[1];
-    assert.ok(said, `${name}: sends to the ops chat with the run link`);
-    assert.match(said, new RegExp(`^Le job ${name} n'a pas tourné`), name);
-    assert.doesNotMatch(said, /[:;!?%€»«]/, `${name}: ${said}`);
+    assert.ok(said, `${name}/${id}: sends to the ops chat with the run link`);
+    assert.ok(said.startsWith(opening), `${name}/${id}: ${said}`);
+    assert.doesNotMatch(said, /[:;!?%€»«]/, `${name}/${id}: ${said}`);
     // it sits right after the gate, before any step that waits for go=true, and it is not the failure notice
-    assert.ok(text.indexOf('id: gate') < start && start < text.indexOf("steps.gate.outputs.go == 'true'"), name);
-    assert.doesNotMatch(own, /failure\(\)/, name);
+    const firstGo = steps.findIndex((s) => s.text.includes("steps.gate.outputs.go == 'true'"));
+    assert.ok(gate < at && at < firstGo, `${name}/${id}`);
+    assert.doesNotMatch(own, /failure\(\)/, `${name}/${id}`);
   }
 });
 
@@ -751,52 +1377,169 @@ test('the price job gives a founder a one-click link instead of opening the pull
   assert.match(code, /branch="prix\/\$DATE-\$\{price\/\.\/\}"/, 'a revised figure for the same survey gets its own branch');
 });
 
-test('the morning and Saturday jobs are gated by the cron line that started them, never by the wall clock alone', WORKFLOWS, () => {
-  const crons = (name) => [...workflow(name).matchAll(/- cron: '([^']+)'/g)].map((m) => m[1]);
-  for (const name of ['totem', 'plein']) {
-    const text = workflow(name);
-    assert.match(text, /^ {8}env:\n {10}CRON: \$\{\{ github\.event\.schedule \}\}\n {8}run: node scripts\/_gate\.mjs --hour \d+ --until \d{1,2}:\d{2} >> "\$GITHUB_OUTPUT"$/m, `${name}: gate`);
-    assert.doesNotMatch(codeOf(text), /date \+%H%M|TZ=Europe\/Paris date/, `${name}: no wall-clock test left in the shell`);
+test('the morning, Saturday and guard jobs are gated by the cron line that started them, never by the wall clock alone', WORKFLOWS, () => {
+  const gateLine = (extra) => new RegExp(`^ {8}env:\\n {10}CRON: \\$\\{\\{ github\\.event\\.schedule \\}\\}\\n {8}run: node scripts\\/_gate\\.mjs --hour \\d+ --until \\d{1,2}:\\d{2}${extra} >> "\\$GITHUB_OUTPUT"$`, 'm');
+  const gateOf = (job) => { const m = job.match(/_gate\.mjs --hour (\d+) --until (\d{1,2}:\d{2})/); return { hour: Number(m[1]), until: m[2] }; };
+  const totemJob = jobsOf(workflow('totem')).totem;
+  const pleinJobs = jobsOf(workflow('plein'));
+  assert.match(totemJob, gateLine(''), 'totem: gate');
+  // the order's gate also does the duplicate check, so it carries the job's own token to read the list of runs
+  const orderGate = new RegExp('^ {8}env:\\n {10}CRON: \\$\\{\\{ github\\.event\\.schedule \\}\\}\\n {10}GH_TOKEN: \\$\\{\\{ github\\.token \\}\\}\\n {8}run: node scripts\\/_gate\\.mjs --hour 17 --until 18:30'
+    + ' --first-plein --early-note "\\$RUNNER_TEMP\\/early-note\\.md" --skip-if-sent --sent-note "\\$RUNNER_TEMP\\/already-sent\\.md" >> "\\$GITHUB_OUTPUT"$', 'm');
+  assert.match(pleinJobs.plein, orderGate, 'plein: gate with the first-plein floor, the early note and the duplicate check');
+  assert.match(pleinJobs.garde, gateLine(' --first-plein'), 'garde: gate with the first-plein floor');
+  for (const name of ['totem', 'plein']) assert.doesNotMatch(codeOf(workflow(name)), /date \+%H%M|TZ=Europe\/Paris date/, `${name}: no wall-clock test left in the shell`);
+
+  // each job's own lines, run through its own gate, on the days around both clock changes
+  const goers = (lines, gate, day, delay) => lines.filter((cron) => {
+    const { min, hour } = cronTime(cron);
+    return decide({ event: 'schedule', cron, now: utc(day, hour, min, delay), ...gate }).go;
+  });
+  const days = ['2026-10-17', '2026-10-24', '2026-10-25', '2026-10-26', '2026-11-30', '2027-03-27', '2027-03-28', '2027-07-14'];
+  for (const day of days) for (const delay of [0, 10, 35]) {
+    assert.equal(goers(crons('totem'), gateOf(totemJob), day, delay).length, 1, `totem ${day} +${delay} min`);
   }
-  const gateOf = (name) => { const m = workflow(name).match(/_gate\.mjs --hour (\d+) --until (\d{1,2}:\d{2})/); return { hour: Number(m[1]), until: m[2] }; };
-  // each workflow's own lines, run through its own gate, on the days around both clock changes
-  const days = {
-    totem: ['2026-10-17', '2026-10-24', '2026-10-25', '2026-10-26', '2026-11-30', '2027-03-27', '2027-03-28', '2027-07-14'],
-    plein: ['2026-10-24', '2026-10-31', '2026-12-19', '2027-03-27', '2027-04-03', '2027-07-17'], // Saturdays
-  };
-  for (const name of ['totem', 'plein']) {
-    const gate = gateOf(name);
-    for (const day of days[name]) {
-      for (const delay of [0, 10, 35]) {
-        const goers = crons(name).filter((cron) => {
-          const { min, hour } = cronTime(cron);
-          const now = Date.parse(`${day}T${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}:00Z`) + delay * 60000;
-          return decide({ event: 'schedule', cron, now, ...gate }).go;
-        });
-        assert.equal(goers.length, 1, `${name} ${day} +${delay} min: ${goers}`);
-      }
-    }
+  // the Saturday lines: the order and the guard each go once a Saturday from the first plein, and never on launch day
+  const saturdays = ['2026-10-24', '2026-10-31', '2026-12-19', '2027-03-27', '2027-04-03', '2027-07-17'];
+  const lines = (prefix) => crons('plein').filter((c) => c.startsWith(`${prefix} `));
+  const order = { ...gateOf(pleinJobs.plein), firstPlein: FIRST };
+  const guard = { ...gateOf(pleinJobs.garde), firstPlein: FIRST };
+  assert.deepEqual(gateOf(pleinJobs.plein), gateOf(pleinJobs.garde), 'the guard has the order\'s clock regime and cut-off');
+  for (const day of saturdays) {
+    for (const delay of [0, 10, 35]) assert.equal(goers(lines('52'), order, day, delay).length, 1, `order ${day} +${delay} min`);
+    for (const delay of [0, 10, 30]) assert.equal(goers(lines('58'), guard, day, delay).length, 1, `guard ${day} +${delay} min`);
+  }
+  for (const delay of [0, 10, 35, 90]) {
+    assert.deepEqual(goers(lines('52'), order, '2026-10-17', delay), [], `launch day: no order +${delay} min`);
+    assert.deepEqual(goers(lines('58'), guard, '2026-10-17', delay), [], `launch day: no guard +${delay} min`);
   }
 });
 
-test('the Saturday job checks the official price before it builds the order, and says so first if config.js is behind', WORKFLOWS, () => {
+test('the plein workflow keeps the order and its guard apart: own lines, own group, a token that only reads runs', WORKFLOWS, () => {
   const text = workflow('plein');
-  const code = codeOf(text);
-  const step = (title) => text.indexOf(`- name: ${title}`);
-  assert.ok(step('Is this the run for this Saturday?') < step('Is config.js on the latest official price?'));
-  assert.ok(step('Is config.js on the latest official price?') < step('Work out the purchase order'));
-  assert.match(code, /node scripts\/official-price\.mjs --json >/);
+  const jobs = jobsOf(text);
+  assert.deepEqual(Object.keys(jobs), [ORDER_JOB, 'garde']);
+  // which job does a schedule line start? the workflow's own conditions, evaluated on each line
+  const evaluate = (expression, schedule) => new Function('startsWith', 'github', `return ${expression};`)((s, prefix) => String(s ?? '').startsWith(prefix), { event: { schedule } });
+  const condition = (job) => job.match(/^ {4}if: \$\{\{ (.*) \}\}$/m)[1];
+  const lines = crons('plein');
+  const starting = (schedule) => Object.keys(jobs).filter((id) => evaluate(condition(jobs[id]), schedule));
+  for (const cron of lines) assert.deepEqual(starting(cron), [cron.startsWith('58 ') ? 'garde' : ORDER_JOB], cron);
+  assert.deepEqual(starting(''), [ORDER_JOB], 'a press of the button starts the order, never the guard');
+  assert.deepEqual(starting(undefined), [ORDER_JOB]);
+  // the guard never waits behind the run it watches
+  const group = text.match(/^concurrency:\n {2}group: \$\{\{ (.*) \}\}$/m)[1];
+  for (const cron of lines) assert.equal(evaluate(group, cron), cron.startsWith('58 ') ? 'plein-garde' : 'plein', cron);
+  assert.equal(evaluate(group, ''), 'plein');
+  assert.match(text, /^ {2}cancel-in-progress: false$/m);
+  // least privilege: the workflow reads the repository; the two jobs that look at runs (the guard, and the
+  // order's duplicate check) also read Actions; nothing writes
+  assert.match(text, /^permissions:\n {2}contents: read\n/m);
+  for (const id of [ORDER_JOB, 'garde']) {
+    assert.match(jobs[id], /^ {4}permissions:\n {6}actions: read\n {6}contents: read\n {4}\S/m, `${id}: reads runs, writes nothing`);
+  }
+  assert.doesNotMatch(codeOf(text), /: write/);
+  assert.equal([...codeOf(text).matchAll(/^ {4}permissions:/gm)].length, 2, 'no other job widens its permissions');
+  // the guard's token reaches its step through env, and the wait fits inside the step, which fits inside the job
+  const watch = stepNamed(jobs.garde, 'Was the order sent?');
+  assert.match(watch.text, /^ {10}GH_TOKEN: \$\{\{ github\.token \}\}$/m);
+  assert.match(watch.text, /run: node scripts\/_gate\.mjs --watch-order --alert-file "\$RUNNER_TEMP\/alert\.txt" --wait \d+ >> "\$GITHUB_OUTPUT"$/m);
+  const wait = Number(watch.text.match(/--wait (\d+)/)[1]);
+  const stepLimit = Number(watch.text.match(/^ {8}timeout-minutes: (\d+)$/m)[1]);
+  const jobLimit = Number(jobs.garde.match(/^ {4}timeout-minutes: (\d+)$/m)[1]);
+  assert.ok(wait <= 8 && wait + 2 <= stepLimit && stepLimit + 2 <= jobLimit, `${wait} / ${stepLimit} / ${jobLimit}`);
+  assert.match(stepNamed(jobs.garde, 'Tell the founders no order arrived').text, /^ {8}if: steps\.watch\.outputs\.alert == 'true'$/m);
+  // what the guard looks for is really in the order job: the file, the job id and the step that sends
+  assert.ok(existsSync(join(workflowDir, ORDER_WORKFLOW)));
+  assert.ok(stepNamed(jobs[ORDER_JOB], ORDER_STEP), `a step named "${ORDER_STEP}" in the ${ORDER_JOB} job`);
+  assert.match(stepNamed(jobs[ORDER_JOB], ORDER_STEP).text, /scripts\/telegram\.mjs --ops --file "\$RUNNER_TEMP\/plein\.md"/);
+});
+
+test('the order is sent first and the draft is kept after, whatever happened: neither can take the other down', WORKFLOWS, () => {
+  const steps = stepsOf(jobsOf(workflow('plein'))[ORDER_JOB]);
+  const names = steps.map((s) => s.name);
+  const keep = steps[names.indexOf('Keep the order and the ticket draft')];
+  assert.ok(names.indexOf('Work out the purchase order') < names.indexOf(ORDER_STEP));
+  // after the send, so a hanging or failing artifact service cannot delay or skip the order ...
+  assert.ok(names.indexOf(ORDER_STEP) < names.indexOf(keep.name));
+  // ... still run when the send failed (a Telegram outage must not take the draft with it) ...
+  assert.match(keep.text, /^ {8}if: always\(\) && steps\.gate\.outputs\.go == 'true'$/m);
+  // ... and never turn a sent order into a red run (which tells the founders it may not have arrived), or eat the job's minutes
+  assert.match(keep.text, /^ {8}continue-on-error: true$/m);
+  assert.match(keep.text, /^ {8}timeout-minutes: 2$/m);
+  assert.match(keep.text, /^ {8}uses: actions\/upload-artifact@v4$/m);
+  assert.ok(names.indexOf(keep.name) < names.indexOf('Tell the founders it failed'), 'the failure notice stays last');
+  // the totem's copy of its card is bounded the same way
+  const card = stepNamed(jobsOf(workflow('totem')).totem, 'Keep the card');
+  assert.match(card.text, /^ {8}continue-on-error: true$/m);
+  assert.match(card.text, /^ {8}timeout-minutes: 2$/m);
+});
+
+test('the workflow files are read as the same text on a CRLF checkout', WORKFLOWS, () => {
+  // git on Windows (core.autocrlf) hands tracked files out with CRLF; every structure test matches "\n"
+  const dir = scratch();
+  for (const name of MINE) {
+    const crlf = join(dir, `${name}.yml`);
+    writeFileSync(crlf, workflow(name).replace(/\n/g, '\r\n'));
+    assert.ok(readFileSync(crlf, 'utf8').includes('\r\n'), `${name}: the copy really has CRLF`);
+    assert.equal(readWorkflow(crlf), workflow(name), name);
+  }
+  assert.deepEqual(Object.keys(jobsOf(readWorkflow(join(dir, 'plein.yml')))), [ORDER_JOB, 'garde']);
+  assert.match(readWorkflow(join(dir, 'plein.yml')), /^permissions:\n {2}contents: read\n/m);
+});
+
+test('the vigie reports to the run summary before anything can fail, and tells the founders before it marks anything as seen', WORKFLOWS, () => {
+  const steps = stepsOf(jobsOf(workflow('vigie')).vigie);
+  const names = steps.map((s) => s.name);
+  assert.match(steps[names.indexOf('Search DexScreener')].text, /cat "\$RUNNER_TEMP\/report\.md" >> "\$GITHUB_STEP_SUMMARY"/);
+  assert.ok(names.indexOf('Search DexScreener') < names.indexOf('Tell the founders about new look-alikes'));
+  assert.ok(names.indexOf('Tell the founders about new look-alikes') < names.indexOf('Update the issue'), 'the issue (the memory) is updated last');
+  assert.doesNotMatch(steps[names.indexOf('Update the issue')].text, /GITHUB_STEP_SUMMARY/);
+});
+
+test('no step that reaches outside runs without a time limit of its own, and the limit fits inside the job', WORKFLOWS, () => {
+  // the order's gate asks GitHub (the duplicate check) and the artifact steps ask the artifact service
+  const outside = /node scripts\/(?:telegram|official-price|plein|audit|releve|vigie|totem)\.mjs|node scripts\/_gate\.mjs [^\n]*(?:--watch-order|--skip-if-sent)|\buses: actions\/upload-artifact@|\bgh (?:issue|label)\b|git push|npm test/;
+  let checked = 0;
+  for (const name of MINE) {
+    for (const [id, job] of Object.entries(jobsOf(workflow(name)))) {
+      const jobLimit = Number(job.match(/^ {4}timeout-minutes: (\d+)$/m)[1]);
+      for (const s of stepsOf(job)) {
+        if (!outside.test(codeOf(s.text))) continue;
+        const own = s.text.match(/^ {8}timeout-minutes: (\d+)$/m);
+        assert.ok(own, `${name}/${id}: "${s.name}" reaches outside and has no timeout-minutes of its own`);
+        assert.ok(Number(own[1]) < jobLimit, `${name}/${id}: "${s.name}" ${own[1]} min against the job's ${jobLimit}`);
+        checked += 1;
+      }
+    }
+  }
+  assert.ok(checked >= 20, `${checked} steps checked`);
+});
+
+test('the Saturday job checks the official price before it builds the order, and says so first if config.js is behind', WORKFLOWS, () => {
+  const job = jobsOf(workflow('plein'))[ORDER_JOB];
+  const code = codeOf(job);
+  const at = (title) => stepsOf(job).findIndex((s) => s.name === title);
+  assert.ok(at('Is this the run for this Saturday?') < at('Is config.js on the latest official price?'));
+  assert.ok(at('Is config.js on the latest official price?') < at('Work out the purchase order'));
+  assert.match(code, /timeout 90 node scripts\/official-price\.mjs --json >/, 'a ministry site that does not answer cannot stop the order');
+  assert.match(code, /reason="no answer within 90 seconds"/);
   assert.doesNotMatch(code, /official-price\.mjs[^\n]*--write/, 'the check never writes config.js');
   assert.match(code, /status" = "new" \] \|\| \[ "\$status" = "revised"/);
   assert.match(code, /::error title=Official price is out of date::/);
   assert.match(code, /::warning title=Official price not checked::/, 'an outside failure is a warning, not a stop');
-  // the warning is put in front of the order that goes to the summary and to Telegram
-  assert.match(code, /cat "\$RUNNER_TEMP\/price-warning\.md" "\$RUNNER_TEMP\/order\.md" > "\$RUNNER_TEMP\/plein\.md"/);
+  // the notes go in front of the order that goes to the summary and to Telegram: "early" first, then the price
+  assert.match(code, /--early-note "\$RUNNER_TEMP\/early-note\.md"/);
+  assert.match(code, /for note in already-sent early-note price-warning; do/);
+  assert.match(code, /cat "\$RUNNER_TEMP\/\$note\.md" >> "\$RUNNER_TEMP\/plein\.md"/);
+  assert.match(code, /cat "\$RUNNER_TEMP\/order\.md" >> "\$RUNNER_TEMP\/plein\.md"/);
+  assert.match(code, /cat "\$RUNNER_TEMP\/plein\.md" >> "\$GITHUB_STEP_SUMMARY"/);
   assert.match(code, /telegram\.mjs --ops --file "\$RUNNER_TEMP\/plein\.md"/);
+  // the order step has a limit under the job's, so the failure notice still reaches the founders in time
+  assert.match(stepsOf(job)[at('Work out the purchase order')].text, /^ {8}timeout-minutes: 5$/m);
 });
 
 test('the schedules are the ones the founders asked for', WORKFLOWS, () => {
-  const crons = (name) => [...workflow(name).matchAll(/- cron: '([^']+)'/g)].map((m) => m[1]);
   for (const name of MINE) for (const c of crons(name)) assert.equal(c.split(' ').length, 5, `${name}: ${c}`);
   // no line fires on the hour: GitHub names the top of the hour as its busiest time, when runs are delayed or dropped
   for (const name of MINE) for (const c of crons(name)) assert.notEqual(c.split(' ')[0], '0', `${name}: ${c}`);
@@ -808,13 +1551,16 @@ test('the schedules are the ones the founders asked for', WORKFLOWS, () => {
   assert.ok(crons('vigie').includes('*/15 9-20 17 10 *'));
   assert.ok(crons('vigie').some((c) => /^\d+ \*\/3 \* \* \*$/.test(c)));
   for (const name of MINE) assert.match(workflow(name), /workflow_dispatch:/, `${name}: a button`);
-  // the plein job fires at 17:52 Paris in both clock regimes: after the week's fees reach the
-  // réservoir (17:50), before the buyback opens (18:00)
-  assert.deepEqual(crons('plein'), ['52 15 * * 6', '52 16 * * 6']);
+  // the plein order fires at 17:52 Paris in both clock regimes: after the week's fees reach the
+  // réservoir (17:50), before the buyback opens (18:00). The guard fires six minutes later, at 17:58.
+  assert.deepEqual(crons('plein'), ['52 15 * * 6', '52 16 * * 6', '58 15 * * 6', '58 16 * * 6']);
   const at = (iso) => { const p = paris(Date.parse(iso)); return p.h * 100 + p.min; };
   assert.equal(at('2026-10-24T15:52:00Z'), 1752); // Saturday 24 October, summer time
   assert.equal(at('2026-10-31T16:52:00Z'), 1752); // Saturday 31 October, winter time
   assert.equal(at('2026-10-31T15:52:00Z'), 1652); // the other line is an hour early that day
-  assert.match(workflow('plein'), /_gate\.mjs --hour 17 --until 18:30/);
+  assert.equal(at('2026-10-24T15:58:00Z'), 1758);
+  assert.equal(at('2026-10-31T16:58:00Z'), 1758);
+  const gates = [...workflow('plein').matchAll(/_gate\.mjs --hour 17 --until 18:30 --first-plein/g)];
+  assert.equal(gates.length, 2, 'both Saturday jobs read the first-plein floor');
   assert.match(workflow('audit'), /16:30 Paris/);
 });

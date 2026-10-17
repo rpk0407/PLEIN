@@ -1,0 +1,21 @@
+{
+  "_readme": "The settings the founders will choose on pump.fun's create form, written down before the coin exists. The time of the commit that merges this file is the pre-registration: node scripts/audit.mjs --ouverture reads the coin back against it. A value here is a setting, never an address: the creator is the wallets.creator of public/live.json (an address given with --creator at the time of the read is NOT pre-registered, and the ticket says so), and the launch reserves are the ones in pump.fun's Global account at the moment of the read. Sources: docs/moteur.md section 3 and docs/lancement.md, the creation settings. The audit refuses a file that declares anything else than these settings, so a changed value is a change of the plan: it goes through a pull request both founders approve.",
+  "version": 1,
+  "settings": {
+    "quote": "USDC",
+    "creator": "live.wallets.creator",
+    "tokenName": "Le Plein",
+    "tokenSymbol": "PLEIN",
+    "creatorBuy": 0,
+    "isHolderReward": false,
+    "isCashbackCoin": false,
+    "isMayhemMode": false,
+    "canEditCreatorFee": false,
+    "creatorFeeBps": 0,
+    "initialVirtualQuoteReserves": "global",
+    "feeSharing": "none",
+    "mintAuthority": "revoked",
+    "freezeAuthority": "revoked",
+    "supplyAtMost": "curve"
+  }
+}
