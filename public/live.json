@@ -2,7 +2,7 @@
   "_readme": "What changes: the contract at 15:30 on launch day, the wallets as they are created, the dashboard after each reading. Public addresses only, never keys; the page shows an address only if it is a well-formed Solana address (public/js/mint.js). Dashboard: null = not measured yet, shown as a dash; fill numbers from on-chain readings only and set asOf to the reading's time (ISO 8601). burned is 0 until the first burn. Voyant state is 'ok', 'warn' or 'pending'; write a label as a fact ('Création révoquée') only once state is 'ok'.",
   "contract": "",
   "wallets": {
-    "creator": "",
+    "creator": "3ujUWs8CBCAszwQpXuFq5ULcMCYs4VjGQm6vtGgkcfro",
     "reservoir": "",
     "aid": "",
     "team": "",
