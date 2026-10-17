@@ -3,11 +3,20 @@
 Website and data API for **$PLEIN**, a Solana memecoin whose weekly buyback share follows the
 official French diesel price. The site is a night petrol station ("La Station"): a lit totem with the
 diesel price, the buyback rate and the countdown to Saturday 18:00; a toll that shows where every
-centime of the 1 % fee goes; a dashboard; the Saturday ticket; *Mon Plein* (cheapest stations near a
-postcode, no wallet needed); *L'Atelier* (make and share totem cards); and the pump (Jupiter swap).
+centime of the pump.fun fees goes; a live dashboard read from the chain; the Saturday ticket; *Mon
+Plein* (cheapest stations near a postcode, no wallet needed); *L'Atelier* (make and share totem
+cards); the *carte de fidélité* (stamps worth nothing, in place of airdrops); and the pump (Jupiter
+swap).
 
-Static site in `public/`, two serverless endpoints in `api/`, no framework, no build step, **no
-dependencies** (Node ≥ 20 built-ins only). Site copy is French; code, comments and docs are English.
+Static site in `public/`, serverless endpoints in `api/`, scripts and GitHub Actions for the weekly
+routine, no framework, no build step, **no dependencies** (Node ≥ 20 built-ins only). Site copy is
+French; code, comments and docs are English.
+
+**The agents run the station; the two founders hold the keys.** The team in `.claude/agents/`
+(Opus for critical thinking, Sonnet for building and operating) reads, computes, simulates, drafts
+and proposes. Only the founders sign anything. How the two of them drive it:
+[`docs/salle-de-controle.md`](docs/salle-de-controle.md). Shapes shared by every part:
+[`docs/interfaces.md`](docs/interfaces.md). Goals: [`docs/objectifs.md`](docs/objectifs.md).
 
 Read [`docs/thesis.md`](docs/thesis.md) before changing what the site says or how it looks: it holds
 the reasoning (psychology, copy deck, visual system, the lines we don't cross), not just the layout.
@@ -35,6 +44,9 @@ the reasoning (psychology, copy deck, visual system, the lines we don't cross), 
      jury, adults only, with written rules. **The Saturday contest is off the site** until the lawyer
      has answered whether a prize for a post showing the $PLEIN mark counts as paid promotion; its
      draft rules (`public/reglement-concours.html`) are not linked from anywhere.
+   - **No airdrops.** Tokens sent to holders are tied to holding; tokens given for posts or tasks
+     are paid promotion. pump.fun's *Holder Rewards* stays off. The *carte de fidélité* replaces
+     them: stamps kept in the visitor's browser, worth nothing, tied to no purchase, and it says so.
    - No political symbol, party, union or movement; no fuel brand; no real person's face.
    - The food-aid partner is named only once the agreement is signed. 18+ only. No cookies, no trackers.
    - The formula changes only with four weeks' public notice.
@@ -45,9 +57,15 @@ the reasoning (psychology, copy deck, visual system, the lines we don't cross), 
 
 ## The mechanism
 
-- On the official pool, every buy and sell of $PLEIN pays a 1 % fee: 0.5 % to Jupiter, 0.5 % to the
-  creator ("la station"), as Jupiter Studio publishes it (Tier 2 until the first ticket shows it).
-  The station's share lands on the **creator wallet**, is claimed every week and moved into **le
+- $PLEIN trades on **pump.fun**, quoted in USDC (`launchpad` in `public/config.js`). Fees as
+  pump.fun publishes them on pump.fun/docs/fees (read 17 October 2026; Tier 2 until the first
+  ticket shows them): on the bonding curve, 1.25 % per trade = 0.95 % to pump.fun + 0.30 % to the
+  creator ("la station"). After migration to the PumpSwap pool, the creator share is tiered by
+  market cap: 0.95 % up to 300 k$, then down by steps to 0.05 % above 20 M$. pump.fun's own site and
+  app add a 0.45 % platform fee from 17 October 2026, which pump.fun says it does not charge through
+  other interfaces. The tables and the arithmetic live in `public/js/fees.js`; pump.fun changed them
+  once already (on launch day), so re-read the page before quoting a figure.
+- The station's share lands on the **creator wallet**, is claimed every week and moved into **le
   réservoir**, a multisig whose signers and threshold are published before opening. Never write that
   "nothing leaves without both signatures" for the fees: until they are claimed, they are not in it.
 - **Saturday split** (source of truth: `public/js/formula.js`, tested in `test/formula.test.mjs`):
@@ -60,8 +78,11 @@ the reasoning (psychology, copy deck, visual system, the lines we don't cross), 
 - **Saturday run sheet (Paris):** 17:45 price frozen · 17:50 the week's fees reach the multisig ·
   18:00–19:00 buyback in 12 slices · 19:00 burn · 19:05 ticket on the site, X and Telegram, each line
   with its Solscan transaction. A ticket prints every Saturday, even for an almost empty réservoir.
-- Launch: Saturday 17 October 2026, 18:00 Paris, on Jupiter Studio. The anti-sniper fee collected at
-  launch goes in full to buyback #1. Plein #1 is Saturday 24 October.
+- Launch: Saturday 17 October 2026, **15:30 Paris, on pump.fun** (decided that morning; it replaced
+  Jupiter Studio at 18:00). pump.fun has no anti-sniper fee: snipers and bundled buys are measured
+  in public at 16:30 (`npm run audit`). Plein #1 is Saturday 24 October at 18:00 (`firstPleinAt`);
+  there is no plein on launch day. The Jupiter Studio figures in `docs/thesis.md`,
+  `docs/playbook.md` and `docs/research-2026-10-16.md` are superseded.
 
 ## Layout
 
@@ -149,9 +170,13 @@ band, and `/api/stations` answers for 75011, 13001 and 69003. The Monday CI run 
 **Tier 2, built but unverified:**
 - Jupiter Plugin script URL and `init` options (`displayMode: 'integrated'`, `formProps.fixedMint`).
   Test in a real browser with a wallet on a preview deployment before launch.
-- Jupiter Studio economics: the 0.5 % creator share before and after graduation, the anti-sniper fee
-  going to the creator, and the **fee-claim path** (research suggests Studio pays creators from its
-  own vault). Test with a small amount.
+- pump.fun economics: the creator share on the curve and the pool tiers, the **fee-claim path**,
+  creator fee sharing (up to 10 wallets since January 2026) and whether a multisig can receive and
+  claim. Test with a throwaway coin and a tiny amount before trusting any of it.
+- Jupiter routing a pump.fun bonding-curve coin inside the Plugin (the station's pump), and
+  pump.fun's statement that its 0.45 % platform fee is not charged through third-party interfaces.
+- pump.fun account layouts and program addresses in `api/_pump.js`, as read from pump.fun's public
+  IDLs and live accounts on 17 October 2026.
 - **Liquidity lock** after migration: do not write "locked for good" anywhere until it is seen on-chain.
 - The official survey of 9 October 2026, €2.3283/L (quoted by Le Figaro and Selectra), now in
   `config.js`: confirm it against the ministry's weekly note.

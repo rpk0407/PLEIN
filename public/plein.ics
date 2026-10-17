@@ -24,11 +24,12 @@ END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
 UID:ouverture-2026-10-17@station-plein
-DTSTAMP:20261016T200000Z
-DTSTART;TZID=Europe/Paris:20261017T180000
-DTEND;TZID=Europe/Paris:20261017T183000
+DTSTAMP:20261017T010000Z
+SEQUENCE:1
+DTSTART;TZID=Europe/Paris:20261017T153000
+DTEND;TZID=Europe/Paris:20261017T160000
 SUMMARY:Ouverture de la Station $PLEIN
-DESCRIPTION:Le seul contrat officiel est celui publié sur le site de la station\, à partir de 18:00.
+DESCRIPTION:Le seul contrat officiel est celui publié sur le site de la station\, à partir de 15:30. Pas de plein ce jour-là : le premier plein est le samedi 24 octobre à 18:00.
 END:VEVENT
 BEGIN:VEVENT
 UID:plein-du-samedi@station-plein

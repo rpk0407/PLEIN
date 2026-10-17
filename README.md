@@ -27,10 +27,16 @@ On Vercel: import the repository, keep the framework preset on **Other**, no bui
 settings are in `vercel.json` (output `public/`, functions in `api/`). Every push to `main`
 redeploys in about a minute.
 
-## Launch day: Saturday 17 October 2026
+## Launch day: Saturday 17 October 2026, 15:30 on pump.fun
+
+The minute-by-minute run sheet is [`docs/lancement.md`](docs/lancement.md); the creation settings
+are argued in [`docs/moteur.md`](docs/moteur.md). In short:
 
 Before:
-- [ ] Repository private. Vercel project created; a preview deployment checked on a phone.
+- [ ] A throwaway test coin on pump.fun (unrelated name, tiny amount) to see where creator fees
+      land and how they are claimed.
+- [ ] Decide: repository public (free unlimited Actions) or private. Vercel project created; a
+      preview deployment checked on a phone.
 - [ ] The three draft pages (`fiche-plein.html`, `mentions-legales.html`, `reglement-concours.html`):
       every `[bracket]` filled, read by a lawyer, `noindex` removed.
 - [ ] `public/config.js`: `links.xHandle`, `links.telegram`, `siteUrl`; `official` = the latest weekly survey.
@@ -38,16 +44,18 @@ Before:
 - [ ] The pump tested with a real wallet on the preview deployment.
 - [ ] Production deployed with `contract` **empty** in `public/live.json`: the site shows the countdown.
 
-At 18:00:
-- [ ] The founders create the token on Jupiter Studio, in their own wallets.
-- [ ] Two people check the mint address on Jupiter Studio and on Solscan.
+At 15:30:
+- [ ] The founders create the coin on pump.fun, in their own wallet: quote USDC, Holder Rewards
+      **off**, charity **off**.
+- [ ] Two people check the mint address on pump.fun and on Solscan.
 - [ ] Paste it into `public/live.json` → `"contract"`, commit, push. Open pages show it within
       15 seconds, without a reload. Until then they read *Ouverture imminente*.
-- [ ] Check the home page, the copy button, the fiche and the Solscan link.
-- [ ] Add the public wallets to `live.json` as they are created: the creator wallet (where Jupiter
-      Studio pays the fees), the réservoir multisig, food aid, founders.
+- [ ] Check the home page, the copy button, the fiche, the Solscan and pump.fun links.
+- [ ] Add the public wallets to `live.json` as they are created: the creator wallet (where pump.fun
+      pays the creator fee), the réservoir multisig, food aid, founders.
 
-At 19:00: measure top-10 concentration and bundled buys, set the dashboard lights in `live.json`.
+At 16:30: the *audit* workflow runs `npm run audit` (creation-slot buys, early buyers, top 10,
+authorities); publish it and set the lights a human judges in `live.json`.
 
 ## Every week
 

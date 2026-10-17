@@ -1,0 +1,16 @@
+# Two founders, two keys: every change is approved by the founder who did not write it.
+# See docs/salle-de-controle.md for the branch rule that enforces it.
+#
+# TODAY, before the first merge: list BOTH founders on the line below, and in the branch rule turn
+# on "Require review from Code Owners". A bot (the Claude GitHub App included) is not a code owner,
+# so its approval can never count as the second key. Put the same second handle in
+# include_comments_by_actor in .github/workflows/claude.yml.
+#
+# GitHub does not count an author's approval of their own PR. With ONE owner listed, a PR written
+# by that owner could not satisfy "Require review from Code Owners" and would be stuck. So turn
+# that option on only once both handles are here; the check is in /lancement preflight.
+#
+# Replace SECOND_FOUNDER_HANDLE with the real GitHub handle (an unknown handle makes GitHub ignore
+# the whole line), delete the commented line, and keep a single active line.
+* @rpk0407
+# * @rpk0407 @SECOND_FOUNDER_HANDLE

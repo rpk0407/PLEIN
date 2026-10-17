@@ -10,6 +10,14 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "test": "node --test test/*.test.mjs",
-    "check:feed": "node scripts/check-feed.mjs"
+    "check:feed": "node scripts/check-feed.mjs",
+    "releve": "node scripts/releve.mjs",
+    "audit": "node scripts/audit.mjs",
+    "verify:ticket": "node scripts/verify-ticket.mjs",
+    "prix": "node scripts/official-price.mjs",
+    "vigie": "node scripts/vigie.mjs",
+    "totem": "node scripts/totem.mjs",
+    "plein": "node scripts/plein.mjs",
+    "ticket": "node scripts/ticket.mjs"
   }
 }

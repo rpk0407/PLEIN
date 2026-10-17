@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Station $PLEIN · Quand le gazole monte, $PLEIN rachète.</title>
-<meta name="description" content="Chaque samedi à 18 h, une part des frais de $PLEIN rachète et brûle des jetons. La part suit le prix officiel du gazole. Tout est publié. Rien n’est promis.">
+<meta name="description" content="Chaque samedi à 18 h, à partir du 24 octobre, une part des frais de $PLEIN rachète et brûle des jetons. La part suit le prix officiel du gazole. Tout est publié. Rien n’est promis.">
 <meta property="og:title" content="Station $PLEIN · Quand le gazole monte, $PLEIN rachète.">
-<meta property="og:description" content="Un prix qu’on subit, un rachat qu’on vérifie. Chaque samedi 18:00.">
+<meta property="og:description" content="Un prix qu’on subit, un rachat qu’on vérifie. Chaque samedi 18:00, dès le 24 octobre.">
 <!-- Before launch: make these absolute once the domain exists, e.g. https://<domain>/og.png, and add <meta property="og:url" content="https://<domain>/">. -->
 <meta property="og:image" content="/og.png">
 <meta property="og:image:width" content="1200">
@@ -73,7 +73,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
       <span style="color: #3A414C;">·</span>
       <span>Rachat <span style="color: #3CF08A; text-shadow: 0 0 10px rgba(60, 240, 138, 0.5);" data-official="rate">46,6&nbsp;%</span></span>
       <span style="color: #3A414C;">·</span>
-      <span><span data-post="Prochain plein">Ouverture</span> <span style="color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);">samedi 18:00</span></span>
+      <span><span data-bind="tickerLabel">Ouverture</span> <span style="color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);" data-bind="tickerWhen">samedi 15:30</span></span>
       <span style="color: #3A414C;">·</span>
       <span>Un plein de 50&nbsp;L = <span style="color: #FF3D2E;" data-live="fill50">116,42&nbsp;€</span></span>
       <span style="color: #3A414C;">·</span>
@@ -87,7 +87,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
       <span style="color: #3A414C;">·</span>
       <span>Rachat <span style="color: #3CF08A; text-shadow: 0 0 10px rgba(60, 240, 138, 0.5);" data-official="rate">46,6&nbsp;%</span></span>
       <span style="color: #3A414C;">·</span>
-      <span><span data-post="Prochain plein">Ouverture</span> <span style="color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);">samedi 18:00</span></span>
+      <span><span data-bind="tickerLabel">Ouverture</span> <span style="color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);" data-bind="tickerWhen">samedi 15:30</span></span>
       <span style="color: #3A414C;">·</span>
       <span>Un plein de 50&nbsp;L = <span style="color: #FF3D2E;" data-live="fill50">116,42&nbsp;€</span></span>
       <span style="color: #3A414C;">·</span>
@@ -104,21 +104,21 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
     <div style="flex: 1 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 26px;">
       <p style="margin: 0; display: flex; align-items: flex-start; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #A7AFB9;">
         <span aria-hidden="true" style="flex: none; width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; background: #3CF08A; box-shadow: 0 0 12px #3CF08A; animation: pouls 2.4s ease-in-out infinite;"></span>
-        <span data-post="Station $PLEIN · ouverte 24/7 · Solana">Station $PLEIN · ouverture samedi 18:00 · Solana</span>
+        <span data-post="Station $PLEIN · ouverte 24/7 · Solana">Station $PLEIN · ouverture samedi 15:30 · Solana</span>
       </p>
       <h1 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(54px, 7.4vw, 116px); line-height: 0.9; letter-spacing: -0.005em; text-transform: uppercase; text-wrap: balance;">Quand le gazole monte, <span style="color: #3CF08A; text-shadow: 0 0 36px rgba(60, 240, 138, 0.35);">$PLEIN rachète.</span></h1>
       <p style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: clamp(27px, 2.7vw, 38px); line-height: 1.12; color: #F1F4F6;">Un prix qu’on subit, un rachat qu’on vérifie.</p>
-      <p style="margin: 0; max-width: 590px; font-size: 19px; line-height: 1.55; color: #A7AFB9;">Chaque samedi à 18&nbsp;h, une part des frais rachète des $PLEIN et les brûle. Cette part suit le prix officiel du gazole&nbsp;: 20&nbsp;× le prix au litre, entre 30&nbsp;% et 60&nbsp;%. Tout est publié, ticket compris.</p>
+      <p style="margin: 0; max-width: 590px; font-size: 19px; line-height: 1.55; color: #A7AFB9;">Chaque samedi à 18&nbsp;h, à partir du <span data-bind="firstPleinDay">24&nbsp;octobre</span>, une part des frais rachète des $PLEIN et les brûle. Cette part suit le prix officiel du gazole&nbsp;: 20&nbsp;× le prix au litre, entre 30&nbsp;% et 60&nbsp;%. Tout est publié, ticket compris.</p>
       <div style="display: flex; flex-wrap: wrap; gap: 12px;">
         <button type="button" data-on-click="openPump" style="display: inline-flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 26px; border: 0; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 18px; cursor: pointer; box-shadow: 0 0 34px rgba(255, 167, 51, 0.30);">
           <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"></path><path d="M3 21h12"></path><path d="M6.5 8h5"></path><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg>
           Faire le plein
         </button>
-        <a href="#samedi" style="display: inline-flex; align-items: center; min-height: 54px; padding: 0 24px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #3A414C; color: #F1F4F6; font-weight: 600; font-size: 18px; text-decoration: none;">Voir un exemple de ticket</a>
+        <a href="#samedi" style="display: inline-flex; align-items: center; min-height: 54px; padding: 0 24px; box-sizing: border-box; border-radius: 12px; border: 1.5px solid #3A414C; color: #F1F4F6; font-weight: 600; font-size: 18px; text-decoration: none;"><span data-bind="ticketCta">Voir un exemple de ticket</span></a>
       </div>
       <div style="max-width: 590px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 12px 12px 12px 16px; border-radius: 12px; background: #0F1216; border: 1px solid #262C35;">
         <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939E;">Contrat officiel</span>
-        <span style="flex: 1 1 170px; min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #F1F4F6; overflow-wrap: anywhere;" data-ca>publié ici samedi à 18:00</span>
+        <span style="flex: 1 1 170px; min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #F1F4F6; overflow-wrap: anywhere;" data-ca>publié ici samedi à 15:30</span>
         <button type="button" data-on-click="copyCA" style="min-height: 44px; padding: 0 16px; border-radius: 9px; border: 1px solid #3A414C; background: #171B21; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer;"><span data-bind="caLabel">Copier</span></button>
         <span style="flex-basis: 100%; font-size: 14px; color: #8A939E;">Le seul. Tout autre est faux.</span>
       </div>
@@ -150,9 +150,9 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
             <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: clamp(46px, 13vw, 60px); line-height: 0.9; color: #3CF08A; text-shadow: 0 0 14px rgba(60, 240, 138, 0.55); animation: ledin 700ms 380ms both;" data-official="rateCompact">46,6%</span>
           </div>
           <div style="background: #030405; border: 1px solid #1E242C; border-radius: 9px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
-            <span style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; line-height: 1;">
+            <span style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; line-height: 1;">
               <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase;" data-countdown-label>Ouverture dans</span>
-              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A939E;">samedi 18:00</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A939E;" data-bind="countdownWhen">samedi 17 oct. 15:30</span>
             </span>
             <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: clamp(32px, 9.5vw, 40px); line-height: 1; color: #FFA733; text-shadow: 0 0 14px rgba(255, 167, 51, 0.55); font-variant-numeric: tabular-nums; animation: ledin 700ms 600ms both;"><span data-bind="countdown">—</span></span>
           </div>
@@ -177,26 +177,27 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; color: #FFFFFF;">Le péage</span>
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
       </span>
-      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">1&nbsp;% de péage. Voilà où va chaque centime.</h2>
-      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Sur la pool officielle, chaque achat et chaque vente de $PLEIN paie 1&nbsp;% de frais. Jupiter en garde la moitié. L’autre moitié revient à la station et remplit le réservoir, et le prix du gazole décide comment on le vide.</p>
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Un péage sur chaque échange. Voilà où va chaque centime.</h2>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Sur pump.fun, chaque achat et chaque vente de $PLEIN paie 1,25&nbsp;% de frais tant que la pool est sur la courbe&nbsp;: 0,95&nbsp;% pour pump.fun, 0,30&nbsp;% pour la station. La part de la station remplit le réservoir, et le prix du gazole décide comment on le vide.</p>
     </div>
 
     <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch;">
       <div style="flex: 1 1 380px; min-width: 0; box-sizing: border-box; padding: 28px; border-radius: 18px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 20px;">
-        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A939E;">1&nbsp;% sur chaque échange</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A939E;">1,25&nbsp;% sur chaque échange, sur la courbe</span>
         <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
           <div style="border-radius: 12px; background: #0B0E12; border: 1px solid #262C35; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0;">
             <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 8px; background: #030405; border: 1px solid #1E242C; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(60, 240, 138, 0.8));"><path d="M12 4v15"></path><path d="M6 13l6 6 6-6"></path></svg></span>
-            <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 46px; line-height: 1;">0,5&nbsp;%</span>
-            <span style="font-size: 15px; line-height: 1.4; color: #A7AFB9;">Jupiter, la plateforme</span>
+            <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 46px; line-height: 1;">0,95&nbsp;%</span>
+            <span style="font-size: 15px; line-height: 1.4; color: #A7AFB9;">pump.fun, la plateforme</span>
           </div>
           <div style="border-radius: 12px; background: rgba(255, 167, 51, 0.06); border: 1.5px solid #FFA733; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0;">
             <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 8px; background: #030405; border: 1px solid #1E242C; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" style="fill: none; stroke: #3CF08A; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(60, 240, 138, 0.8));"><path d="M12 4v15"></path><path d="M6 13l6 6 6-6"></path></svg></span>
-            <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 46px; line-height: 1; color: #FFA733;">0,5&nbsp;%</span>
+            <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 46px; line-height: 1; color: #FFA733;">0,30&nbsp;%</span>
             <span style="font-size: 15px; line-height: 1.4; color: #F1F4F6;">Station $PLEIN, le réservoir</span>
           </div>
         </div>
-        <p style="margin: 0; font-size: 16px; color: #A7AFB9;">C’est le partage annoncé par Jupiter Studio, avant comme après la cotation. Le ticket du samedi montre ce qui arrive vraiment. Chaque samedi, le réservoir se vide en trois parts.</p>
+        <p style="margin: 0; font-size: 16px; color: #A7AFB9;">C’est le partage que pump.fun publie (pump.fun/docs/fees, relevé le 17&nbsp;octobre 2026). Le ticket du samedi montre ce qui arrive vraiment. Chaque samedi, le réservoir se vide en trois parts.</p>
+        <p style="margin: 0; padding: 12px 14px; border-radius: 10px; border: 1px dashed #3A414C; font-size: 15px; color: #C9D0D8;" data-fee-platform><strong style="color: #F1F4F6;">Sur le site ou l’appli de pump.fun,</strong> chaque échange paie en plus 0,45&nbsp;% de frais de plateforme depuis le 17&nbsp;octobre (0,40&nbsp;% avec un code de parrainage). pump.fun indique ne pas les prélever via une autre interface. La pompe de cette page passe par Jupiter, qui prélève ses propres frais&nbsp;: d’après Jupiter, 0,50&nbsp;% sur un jeton de moins de 24&nbsp;h, puis 0,10&nbsp;%.</p>
         <p style="margin: auto 0 0; padding-top: 18px; border-top: 1px solid #262C35; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 28px; line-height: 1.2; color: #F1F4F6;">Quand le gazole monte, c’est notre part qui baisse.</p>
       </div>
 
@@ -236,6 +237,20 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
       </div>
     </div>
 
+    <div data-fee-lane style="box-sizing: border-box; padding: 28px; border-radius: 18px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px;">
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: 0.03em; text-transform: uppercase;">Après la migration sur PumpSwap</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFA733;" data-bind="feeLaneTag">Avant l’ouverture</span>
+      </div>
+      <p style="margin: 0; max-width: 760px; font-size: 16px; color: #A7AFB9;">Quand la courbe est pleine, la pool migre sur PumpSwap. La part de la station suit alors l’échelle que pump.fun publie, selon la capitalisation de la pool&nbsp;: <span data-bind="feeScale">0,30&nbsp;% sous 59&nbsp;k$, 0,95&nbsp;% de 59&nbsp;k$ à 300&nbsp;k$, puis moins par paliers, jusqu’à 0,05&nbsp;% au-delà de 20&nbsp;M$</span>. Un échange passé par une autre pool (pool PumpSwap non officielle, autre DEX) ne rapporte rien à la station.</p>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div role="img" aria-label="Part de la station par palier de capitalisation : 0,30 % sous 59 k$, 0,95 % de 59 k$ à 300 k$, puis moins par paliers, jusqu’à 0,05 % au-delà de 20 M$" data-fee-scale style="display: flex; align-items: flex-end; gap: 3px; height: 96px; padding-bottom: 2px; border-bottom: 2px solid #3A414C;"></div>
+        <div aria-hidden="true" style="display: flex; justify-content: space-between; gap: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;"><span>0&nbsp;$</span><span>capitalisation de la pool</span><span>20&nbsp;M$ et plus</span></div>
+      </div>
+      <p role="status" style="margin: 0; font-size: 17px; color: #F1F4F6;" data-bind="feeLaneNow">La pool ouvre samedi à 15:30, sur la courbe&nbsp;: 0,30&nbsp;% pour la station.</p>
+      <p style="margin: 0; font-size: 13px; color: #8A939E;" data-bind="feeLaneSource">Échelle des pools USDC, d’après pump.fun/docs/fees (relevée le 17&nbsp;octobre 2026). Le premier ticket montrera ce qui arrive vraiment.</p>
+    </div>
+
     <div style="display: flex; gap: 16px; align-items: flex-start; padding: 20px 22px; border-radius: 14px; background: #0F1216; border: 1px solid #262C35;">
       <span aria-hidden="true" style="flex: none; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #FFA733; color: #FFA733; display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 22px;">i</span>
       <p style="margin: 0; font-size: 17px; color: #C9D0D8;"><strong style="color: #F1F4F6;">1<sup>er</sup> novembre.</strong> Le gouvernement a annoncé une baisse du gazole à partir du 1<sup>er</sup> novembre. Si elle arrive, le taux de rachat baissera avec lui&nbsp;: c’est la règle. Ton plein, lui, coûtera moins cher.</p>
@@ -252,7 +267,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
       </span>
       <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Relevé sur la chaîne. Rien à croire, tout à vérifier.</h2>
-      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Chaque chiffre est relevé sur Solana par l’équipe, daté, et se vérifie sur Solscan. Les voyants, c’est notre contrôle technique, fait par nous-mêmes, en public.</p>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Le réservoir, les jetons brûlés, la courbe et quelques voyants sont relevés sur Solana, datés, et se vérifient sur Solscan. Le volume vient de DexScreener. Les voyants, c’est notre contrôle technique, fait par nous-mêmes, en public.</p>
     </div>
 
     <div style="position: relative; box-sizing: border-box; padding: clamp(20px, 3vw, 36px); border-radius: 34px; background: radial-gradient(ellipse 80% 70% at 50% 0%, #1A2028, #090B0E 72%); border: 1px solid #2C333D; box-shadow: inset 0 2px 40px rgba(0, 0, 0, 0.7), 0 40px 90px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column; gap: 30px;">
@@ -272,7 +287,8 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
             <circle cx="130" cy="150" r="4" style="fill: #0B0E12;"></circle>
           </svg>
           <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 38px; line-height: 1; font-variant-numeric: tabular-nums;"><span data-dash="reservoir">—</span>&nbsp;<span style="font-size: 22px; color: #A7AFB9;">USDC</span></span>
-          <span style="font-size: 14px; color: #A7AFB9; text-align: center;">Réservoir · frais depuis samedi dernier</span>
+          <span style="font-size: 14px; color: #A7AFB9; text-align: center;" data-bind="gaugeLabel">Réservoir · frais de la semaine</span>
+          <span style="font-size: 12.5px; color: #8A939E; text-align: center;" data-bind="gaugeNote" hidden></span>
         </div>
 
         <div style="flex: 0 1 330px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 16px;">
@@ -291,8 +307,8 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
           </div>
           <div style="width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 12px; border-radius: 10px; background: #030405; border: 1px solid #1E242C;">
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939E;">Rachat prévu samedi</span>
-            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 34px; line-height: 1.1; color: #3CF08A; text-shadow: 0 0 12px rgba(60, 240, 138, 0.5);">≈&nbsp;<span data-dash="planned">—</span>&nbsp;USDC</span>
-            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A7AFB9;"><span data-dash="plannedFormula">réservoir × 46,6&nbsp;%</span></span>
+            <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 34px; line-height: 1.1; color: #3CF08A; text-shadow: 0 0 12px rgba(60, 240, 138, 0.5);"><span data-if="plannedNumber" style="display: contents">≈&nbsp;<span data-dash="planned">—</span>&nbsp;USDC</span><span data-if="plannedStatus" hidden data-bind="plannedStatus"></span></span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #A7AFB9;"><span data-dash="plannedFormula">frais de la semaine × 46,6&nbsp;%</span></span>
           </div>
           <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 700; font-size: 20px; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.5);"><span data-countdown-label>Ouverture dans</span> <span data-bind="countdown">—</span></span>
         </div>
@@ -309,17 +325,28 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
             <circle cx="130" cy="150" r="4" style="fill: #0B0E12;"></circle>
           </svg>
           <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 38px; line-height: 1; font-variant-numeric: tabular-nums;"><span data-dash="volume">—</span>&nbsp;<span style="font-size: 22px; color: #A7AFB9;">$</span></span>
-          <span style="font-size: 14px; color: #A7AFB9; text-align: center;">Débit · volume des 24 dernières heures</span>
+          <span style="font-size: 14px; color: #A7AFB9; text-align: center;">Débit · volume des 24 dernières heures (DexScreener)</span>
         </div>
       </div>
 
+      <div data-curve style="display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border-radius: 14px; background: #030405; border: 1px solid #1E242C;">
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A939E;">La courbe pump.fun</span>
+          <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 34px; line-height: 1; color: #FFA733; text-shadow: 0 0 12px rgba(255, 167, 51, 0.5); font-variant-numeric: tabular-nums;"><span data-curve-value>—</span></span>
+        </div>
+        <div role="progressbar" aria-label="Progression de la courbe pump.fun" aria-valuemin="0" aria-valuemax="100" data-curve-track style="height: 14px; border-radius: 7px; background: #262C35; overflow: hidden;">
+          <div data-curve-bar style="height: 100%; width: 0%; border-radius: 7px; background: #FFA733; box-shadow: 0 0 14px rgba(255, 167, 51, 0.5); transition: width 400ms ease;"></div>
+        </div>
+        <span style="font-size: 14px; color: #A7AFB9;" data-curve-caption>À 100&nbsp;%, la pool migre sur PumpSwap</span>
+      </div>
+
       <ul data-voyants style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px;">
-        <li data-voyant="team" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"></path><circle cx="17" cy="9" r="2.6"></circle><path d="M15.5 14.2c2.4.2 4.2 1.8 4.8 4.8"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Jetons de l’équipe&nbsp;: 0&nbsp;%</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">vérifié à l’ouverture</span></span></li>
+        <li data-voyant="team" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="9" cy="8" r="3.2"></circle><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"></path><circle cx="17" cy="9" r="2.6"></circle><path d="M15.5 14.2c2.4.2 4.2 1.8 4.8 4.8"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Jetons de l’équipe</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">0&nbsp;% réservé · achat à la création publié à l’ouverture</span></span></li>
         <li data-voyant="mint" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><circle cx="12" cy="12" r="8"></circle><path d="M9 12h6M12 9v6"></path><path d="M5 19L19 5"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Autorité de création</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">vérifiée à l’ouverture</span></span></li>
         <li data-voyant="freeze" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"></path><path d="M5 20L20 5"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Autorité de gel</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">vérifiée à l’ouverture</span></span></li>
         <li data-voyant="lp" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Verrouillage de la liquidité</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">vérifié après la migration de la pool</span></span></li>
-        <li data-voyant="top10" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M5 20V11M10 20V4M15 20v-7M20 20v-4"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Top 10 des wallets</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">mesuré samedi à 19:00</span></span></li>
-        <li data-voyant="bundles" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"></path><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Achats groupés</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">mesuré samedi à 19:00</span></span></li>
+        <li data-voyant="top10" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M5 20V11M10 20V4M15 20v-7M20 20v-4"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Top 10 des wallets</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">mesuré à l’ouverture</span></span></li>
+        <li data-voyant="bundles" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #0B0E12; border: 1px solid #1E242C;"><span aria-hidden="true" data-voyant-light style="flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(138, 147, 158, 0.10);"><svg width="22" height="22" viewBox="0 0 24 24" style="fill: none; stroke: #8A939E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"></path><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"></path></svg></span><span style="display: flex; flex-direction: column; line-height: 1.3; min-width: 0;"><span data-voyant-label style="font-weight: 600; font-size: 16px;">Achats groupés</span><span data-voyant-detail style="font-size: 13px; color: #8A939E;">mesuré samedi à 16:30</span></span></li>
       </ul>
 
       <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 28px;">
@@ -328,10 +355,10 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
           <span style="display: flex; flex-direction: column; line-height: 1.3;">
             <span style="font-size: 11px;">Contrôle technique · SOL OS, l’outil de l’équipe</span>
             <span data-ct-verdict style="font-size: 22px; font-weight: 600;">En attente</span>
-            <span data-ct-note style="font-size: 11px; color: #A7AFB9;">premier contrôle samedi à 19:00</span>
+            <span data-ct-note style="font-size: 11px; color: #A7AFB9;">premier contrôle samedi à 16:30</span>
           </span>
         </div>
-        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E;" data-post="Relevé sur Solana par l’équipe · chaque chiffre se vérifie sur Solscan">Premier relevé samedi à 19:00 · chaque chiffre se vérifiera sur Solscan</p>
+        <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E;" data-post="Relevé sur Solana · le volume vient de DexScreener · le reste se vérifie sur Solscan">Premier relevé à l’ouverture · le volume viendra de DexScreener, le reste se vérifiera sur Solscan</p>
       </div>
     </div>
   </div>
@@ -346,7 +373,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill: none; stroke: #FFFFFF; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;"><path d="M7 17L17 7"></path><path d="M9 7h8v8"></path></svg>
       </span>
       <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; text-transform: uppercase; text-wrap: balance;">Samedi, 18:00. Le plein.</h2>
-      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Le même rituel chaque semaine, à la même heure, en public. Le ticket sort même quand le réservoir est vide.</p>
+      <p style="margin: 0; max-width: 640px; font-size: 19px; color: #A7AFB9;">Le même rituel chaque semaine, à la même heure, en public. Le ticket sort même quand le réservoir est vide. Premier plein samedi <span data-bind="firstPleinDay">24&nbsp;octobre</span>&nbsp;; pas de plein le jour de l’ouverture.</p>
     </div>
 
     <div style="display: flex; flex-wrap: wrap; gap: 48px 64px; align-items: flex-start;">
@@ -358,11 +385,11 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
           </li>
           <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0; border-bottom: 1px dashed #2C333D;">
             <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">17:50</span>
-            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Les frais rejoignent le coffre</span><span style="font-size: 15px; color: #A7AFB9;">Réclamés depuis le wallet créateur, publié, ils passent dans un coffre multisig dont les signataires sont publiés.</span></span>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Les frais rejoignent le coffre</span><span style="font-size: 15px; color: #A7AFB9;">Réclamés depuis le wallet créateur, ils passent dans un coffre multisig. Ses signataires seront publiés avant le premier plein.</span></span>
           </li>
           <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0; border-bottom: 1px dashed #2C333D;">
             <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">18:00</span>
-            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Rachat en 12 tranches</span><span style="font-size: 15px; color: #A7AFB9;">Une tranche toutes les 5 minutes, pour ne pas faire bondir le prix.</span></span>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 19px;">Rachat en 12 tranches</span><span style="font-size: 15px; color: #A7AFB9;">Une tranche toutes les 5 minutes, chacune avec sa transaction.</span></span>
           </li>
           <li style="display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 18px; padding: 20px 0; border-bottom: 1px dashed #2C333D;">
             <span style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 28px; line-height: 1.1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);">19:00</span>
@@ -380,6 +407,47 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
       </div>
 
       <div style="flex: 0 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 22px;">
+        <div data-if="ticketReal" hidden style="display: contents">
+          <div style="position: relative; transform: rotate(1.2deg);">
+            <div style="background: #F2EFE6; color: #17181B; font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 14px; padding: 26px 24px 18px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;">
+                <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 32px; line-height: 1;">STATION $PLEIN</span>
+                <span style="font-size: 12px; letter-spacing: 0.12em;">TICKET DE CAISSE · SOLANA</span>
+              </div>
+              <div style="border-top: 2px dashed #17181B;"></div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+                <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: 34px; line-height: 1;">PLEIN #<span data-tk="n">—</span></span>
+                <span data-tk="when">—</span>
+              </div>
+              <div style="border-top: 2px dashed #17181B;"></div>
+              <div style="display: flex; flex-direction: column; gap: 8px; font-variant-numeric: tabular-nums;">
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span>GAZOLE (DGEC)</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="price">—</span></div>
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span>TAUX DE RACHAT</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="rate">—</span></div>
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span>RÉSERVOIR</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="reservoir">—</span></div>
+                <div data-tk-show="carried" hidden style="display: flex; align-items: baseline; gap: 8px;"><span>DONT REPORTÉ</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="carried">—</span></div>
+                <div data-tk-show="carried" hidden style="display: flex; align-items: baseline; gap: 8px;"><span>FRAIS DE LA SEMAINE</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="fees">—</span></div>
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span>RACHAT</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="buyback">—</span></div>
+                <div data-tk-show="unspent" hidden style="display: flex; align-items: baseline; gap: 8px;"><span>RELIQUAT REPORTÉ</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="unspent">—</span></div>
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span>$PLEIN BRÛLÉS</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="burned">—</span></div>
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span>AIDE ALIMENTAIRE</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="aid">—</span></div>
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span>ÉQUIPE</span><span style="flex: 1; border-bottom: 2px dotted #8A8A80;"></span><span style="font-weight: 600;" data-tk="team">—</span></div>
+                <div data-tk-show="carriedDetail" data-tk="carriedDetail" hidden style="font-size: 12px; line-height: 1.4;"></div>
+              </div>
+              <div style="border-top: 2px dashed #17181B;"></div>
+              <div data-tk-tx style="display: flex; flex-direction: column; gap: 5px; font-size: 13px;"></div>
+              <template data-template="ticketTx"><div style="display: flex; justify-content: space-between; gap: 12px;"><span data-tk-label></span><a data-tk-link data-on-click="ticketLink" target="_blank" rel="noopener" style="color: #17181B;">solscan ↗</a></div></template>
+              <p data-tk-notes style="margin: 0; font-size: 12px; line-height: 1.4;"></p>
+              <div style="border-top: 2px dashed #17181B;"></div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font-size: 13px;">
+                <span style="font-weight: 600;">MERCI DE VOTRE VISITE</span>
+                <span>PROCHAIN PLEIN&nbsp;: SAMEDI 18:00</span>
+              </div>
+              <div data-tk-barcode aria-hidden="true"></div>
+            </div>
+            <div aria-hidden="true" style="height: 16px; background: #F2EFE6; clip-path: polygon(0 0, 100% 0, 100% 100%, 96% 0, 92% 100%, 88% 0, 84% 100%, 80% 0, 76% 100%, 72% 0, 68% 100%, 64% 0, 60% 100%, 56% 0, 52% 100%, 48% 0, 44% 100%, 40% 0, 36% 100%, 32% 0, 28% 100%, 24% 0, 20% 100%, 16% 0, 12% 100%, 8% 0, 4% 100%, 0 0);"></div>
+          </div>
+        </div>
+        <div data-if="ticketSample" style="display: contents">
         <div style="position: relative; transform: rotate(1.2deg);">
           <div style="background: #F2EFE6; color: #17181B; font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 14px; padding: 26px 24px 18px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55); display: flex; flex-direction: column; gap: 12px;">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;">
@@ -412,19 +480,53 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
               <span style="font-weight: 600;">MERCI DE VOTRE VISITE</span>
               <span>PROCHAIN PLEIN&nbsp;: SAMEDI 18:00</span>
             </div>
-            <div aria-hidden="true" style="display: flex; justify-content: center; gap: 3px; height: 46px; margin-top: 2px;"><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span></div>
+            <div aria-hidden="true" data-ticket-barcode style="display: flex; justify-content: center; gap: 3px; height: 46px; margin-top: 2px;"><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span><span style="width: 6px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 4px; background: #17181B;"></span><span style="width: 2px; background: #17181B;"></span><span style="width: 5px; background: #17181B;"></span><span style="width: 3px; background: #17181B;"></span></div>
           </div>
           <div aria-hidden="true" style="height: 16px; background: #F2EFE6; clip-path: polygon(0 0, 100% 0, 100% 100%, 96% 0, 92% 100%, 88% 0, 84% 100%, 80% 0, 76% 100%, 72% 0, 68% 100%, 64% 0, 60% 100%, 56% 0, 52% 100%, 48% 0, 44% 100%, 40% 0, 36% 100%, 32% 0, 28% 100%, 24% 0, 20% 100%, 16% 0, 12% 100%, 8% 0, 4% 100%, 0 0);"></div>
           <span style="position: absolute; top: -14px; right: -12px; padding: 2px 12px; background: #F2EFE6; border: 3px solid #D7261E; border-radius: 6px; transform: rotate(9deg); color: #D7261E; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: 0.08em;">EXEMPLE</span>
         </div>
+        </div>
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A939E;">Tous les tickets</span>
-          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
+          <div data-ticket-wall style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">
             <span style="display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 4px; border: 1.5px dashed #3A414C; color: #8A939E; font-family: 'IBM Plex Mono', monospace; font-size: 12px;"><strong style="font-size: 15px; color: #C9D0D8;">#1</strong><span>24 oct.</span><span>à venir</span></span>
             <span style="display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 4px; border: 1.5px dashed #3A414C; color: #8A939E; font-family: 'IBM Plex Mono', monospace; font-size: 12px;"><strong style="font-size: 15px; color: #C9D0D8;">#2</strong><span>31 oct.</span><span>à venir</span></span>
             <span style="display: flex; flex-direction: column; gap: 2px; padding: 12px; border-radius: 4px; border: 1.5px dashed #3A414C; color: #8A939E; font-family: 'IBM Plex Mono', monospace; font-size: 12px;"><strong style="font-size: 15px; color: #C9D0D8;">#3</strong><span>7 nov.</span><span>à venir</span></span>
           </div>
+          <template data-template="ticketTile"><button type="button" data-on-click="showTicket" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px; border-radius: 4px; border: 1.5px solid #3A414C; background: #171B21; color: #F1F4F6; font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: left; cursor: pointer;"><strong style="font-size: 15px;" data-tile="n"></strong><span data-tile="date"></span><span data-tile="state"></span></button></template>
+          <p data-if="ticketNone" style="margin: 0; font-size: 14px; color: #A7AFB9;">Le premier ticket s’imprime <span data-bind="firstTicketWhen">samedi 24 octobre à 19:05</span></p>
         </div>
+      </div>
+    </div>
+
+    <div id="carte" style="display: flex; flex-wrap: wrap; gap: 28px 48px; align-items: center; padding: clamp(20px, 3vw, 32px); border-radius: 18px; background: #0F1216; border: 1px solid #262C35;">
+      <div style="flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 16px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8A939E;">Carte de fidélité</span>
+        <h3 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; font-size: clamp(30px, 3.6vw, 44px); line-height: 1; text-transform: uppercase;">Ta carte de la station</h3>
+        <p style="margin: 0; font-size: 17px; color: #C9D0D8;">Un tampon par sorte de passage et par semaine. Dix tampons remplissent la carte.</p>
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;">
+          <li data-kind="plein" style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; padding: 10px 0; border-bottom: 1px solid #1E242C;"><span style="display: flex; flex-direction: column;"><span style="font-weight: 600;">Être là un samedi de plein</span><span style="font-size: 14px; color: #8A939E;">sur la page entre 18:00 et 19:05, à partir du <span data-bind="firstPleinDay">24 octobre</span></span></span><span data-kind-state style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;">pas cette semaine</span></li>
+          <li data-kind="monplein" style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; padding: 10px 0; border-bottom: 1px solid #1E242C;"><span style="display: flex; flex-direction: column;"><span style="font-weight: 600;">Chercher ton plein le moins cher</span><span style="font-size: 14px; color: #8A939E;">une recherche réussie dans Mon Plein</span></span><span data-kind-state style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;">pas cette semaine</span></li>
+          <li data-kind="totem" style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; padding: 10px 0; border-bottom: 1px solid #1E242C;"><span style="display: flex; flex-direction: column;"><span style="font-weight: 600;">Fabriquer un totem</span><span style="font-size: 14px; color: #8A939E;">un export PNG dans l’Atelier</span></span><span data-kind-state style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;">pas cette semaine</span></li>
+          <li data-kind="ticket" style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; padding: 10px 0;"><span style="display: flex; flex-direction: column;"><span style="font-weight: 600;">Ouvrir un ticket</span><span style="font-size: 14px; color: #8A939E;" data-bind="ticketKindHint">un clic sur un lien Solscan d’un vrai ticket, dès le premier</span></span><span data-kind-state style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;">pas cette semaine</span></li>
+        </ul>
+        <p data-if="carteFull" hidden role="status" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 26px; line-height: 1.2; color: #F1F4F6;">Dix tampons, et tu gagnes… rien. Comme partout, mais ici on te le dit.</p>
+        <p data-if="carteLoose" style="margin: 0; font-size: 14px; color: #8A939E;">Tant que tu n’as pas pris ta carte, tes tampons ne vivent que dans cette page&nbsp;: rien n’est écrit dans ton navigateur. Rien n’est envoyé, rien n’est à gagner, aucun achat ne compte.</p>
+        <p data-if="carteKept" hidden style="margin: 0; font-size: 14px; color: #8A939E;">Ta carte est gardée dans le stockage de ton navigateur, et nulle part ailleurs. Rien n’est envoyé, rien n’est à gagner, aucun achat ne compte.</p>
+        <p data-bind="carteNote" hidden role="status" style="margin: 0; font-size: 14px; color: #FFB95E;"></p>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <button type="button" data-if="carteLoose" data-on-click="takeCarte" style="min-height: 48px; padding: 0 20px; border: 1.5px solid #FFA733; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer;">Prendre ma carte</button>
+          <button type="button" data-if="carteKept" hidden data-on-click="dropCarte" style="min-height: 48px; padding: 0 20px; border: 1.5px solid #3A414C; border-radius: 12px; background: transparent; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 16px; cursor: pointer;">Jeter ma carte</button>
+        </div>
+      </div>
+      <div style="flex: 0 1 380px; min-width: 0; margin: 0 auto; width: 100%; box-sizing: border-box; padding: 20px; border-radius: 16px; background: linear-gradient(160deg, #1B2028, #12161B); border: 1px solid #2C333D; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+          <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: 0.04em; text-transform: uppercase;">Station $PLEIN</span>
+          <span role="status" style="font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; font-size: 26px; line-height: 1; color: #FFA733; text-shadow: 0 0 10px rgba(255, 167, 51, 0.45);"><span data-bind="carteCount">0</span>/10</span>
+        </div>
+        <div data-stamps aria-hidden="true" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px;"></div>
+        <template data-template="stamp"><span data-stamp style="aspect-ratio: 1; border-radius: 50%; box-sizing: border-box; border: 2px dashed #3A414C; display: flex; align-items: center; justify-content: center; color: #0B0C0E;"><svg width="55%" height="55%" viewBox="0 0 24 24" style="opacity: 0; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;"><path d="M4 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"></path><path d="M3 21h12"></path><path d="M6.5 8h5"></path><path d="M14 11h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"></path></svg></span></template>
+        <span data-if="carteCards" hidden style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;">Cartes remplies&nbsp;: <span data-bind="carteCards">0</span></span>
       </div>
     </div>
   </div>
@@ -647,7 +749,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
       </li>
       <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px; border-bottom: 1px solid #1E242C;">
         <span aria-hidden="true" style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); width: 30px; display: flex; flex-direction: column;"><span style="height: 20px; border-radius: 15px 15px 3px 3px; background: #D7261E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 14px;">6</span><span style="height: 26px; border-radius: 0 0 3px 3px; background: #F1F4F6;"></span></span>
-        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;">Tous nos wallets sont publics&nbsp;: réservoir, équipe, aide.</span>
+        <span style="flex: 1 1 420px; min-width: 0; font-weight: 600; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.35;" data-bind="walletsPromise">Tous nos wallets seront publics avant le premier plein&nbsp;: réservoir, équipe, aide.</span>
         <span style="flex: 0 1 320px; min-width: 0; font-size: 15px; color: #8A939E;">La liste est dans l’aire de repos.</span>
       </li>
       <li style="position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 28px; min-height: 58px; padding: 16px 0 16px 72px;">
@@ -695,7 +797,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         </details>
         <details style="border-bottom: 1px solid #262C35;">
           <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Qui touche quoi&nbsp;?</summary>
-          <p style="margin: 0 0 20px; color: #A7AFB9;">1&nbsp;% de frais sur chaque échange de la pool officielle&nbsp;: 0,5&nbsp;% pour Jupiter, 0,5&nbsp;% pour la station, selon les règles de Jupiter Studio. La part de la station se divise en trois&nbsp;: le rachat, 10&nbsp;% d’aide alimentaire, le reste pour l’équipe. Tout est public.</p>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">Tant que la pool est sur la courbe pump.fun, chaque échange paie 1,25&nbsp;% de frais&nbsp;: 0,95&nbsp;% pour pump.fun, 0,30&nbsp;% pour la station. Une fois la pool migrée sur PumpSwap, la part de la station suit l’échelle que pump.fun publie, selon la capitalisation de la pool&nbsp;: <span data-bind="feeScale">0,30&nbsp;% sous 59&nbsp;k$, 0,95&nbsp;% de 59&nbsp;k$ à 300&nbsp;k$, puis moins par paliers, jusqu’à 0,05&nbsp;% au-delà de 20&nbsp;M$</span>. Un échange passé par une autre pool (pool PumpSwap non officielle, autre DEX) ne rapporte rien à la station. Sur le site ou l’appli de pump.fun s’ajoutent 0,45&nbsp;% de frais de plateforme depuis le 17&nbsp;octobre&nbsp;; pump.fun indique ne pas les prélever via une autre interface. La pompe de cette page passe par Jupiter, qui prélève ses propres frais&nbsp;: d’après Jupiter, 0,50&nbsp;% sur un jeton de moins de 24&nbsp;h, puis 0,10&nbsp;%. La part de la station se divise en trois&nbsp;: le rachat, 10&nbsp;% d’aide alimentaire, le reste pour l’équipe. Tout est public.</p>
         </details>
         <details style="border-bottom: 1px solid #262C35;">
           <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Et si le gazole baisse&nbsp;?</summary>
@@ -703,7 +805,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         </details>
         <details style="border-bottom: 1px solid #262C35;">
           <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Comment vérifier&nbsp;?</summary>
-          <p style="margin: 0 0 20px; color: #A7AFB9;">Chaque ticket donne les liens Solscan du rachat et du burn. Les wallets sont publiés. Le tableau de bord reprend des relevés faits sur la chaîne, datés.</p>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">Chaque ticket donne les liens Solscan du rachat et du burn. Les wallets sont publiés dans la liste «&nbsp;Nos wallets&nbsp;», à mesure qu’ils existent&nbsp;; elle dit ce qui manque encore. Le tableau de bord reprend des relevés faits sur la chaîne, datés&nbsp;; seul le volume vient de DexScreener.</p>
         </details>
         <details style="border-bottom: 1px solid #262C35;">
           <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">C’est politique&nbsp;?</summary>
@@ -711,7 +813,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         </details>
         <details style="border-bottom: 1px solid #262C35;">
           <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Et l’aide alimentaire&nbsp;?</summary>
-          <p style="margin: 0 0 20px; color: #A7AFB9;">10&nbsp;% de la part de la station, chaque semaine, versés en euros à une association. Son nom est publié dès que la convention est signée, avec chaque reçu.</p>
+          <p style="margin: 0 0 20px; color: #A7AFB9;">10&nbsp;% de la part de la station, chaque semaine, versés en euros à une association. Son nom est publié dès que la convention est signée, avec chaque reçu. Tant que la convention n’est pas signée, ces 10&nbsp;% attendent dans le wallet aide, publié, et ne vont jamais à l’équipe.</p>
         </details>
         <details style="border-bottom: 1px solid #262C35;">
           <summary style="cursor: pointer; padding: 20px 0; font-weight: 600; font-size: 19px;">Quelqu’un m’a écrit en privé pour $PLEIN.</summary>
@@ -740,15 +842,17 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         <div style="box-sizing: border-box; padding: 22px; border-radius: 16px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column; gap: 4px;">
           <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 6px;">Nos wallets</span>
           <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Wallet créateur (frais)</span><span data-wallet="creator" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié à l’ouverture</span></span>
-          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Réservoir (multisig)</span><span data-wallet="reservoir" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié à l’ouverture</span></span>
-          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Aide alimentaire</span><span data-wallet="aid" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié à l’ouverture</span></span>
-          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Équipe · fondateur 1</span><span data-wallet="founder1" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié à l’ouverture</span></span>
-          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0;"><span>Équipe · fondateur 2</span><span data-wallet="founder2" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié à l’ouverture</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Réservoir (multisig)</span><span data-wallet="reservoir" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié avant le premier plein</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Aide alimentaire</span><span data-wallet="aid" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié avant le premier plein</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Équipe (versement du samedi)</span><span data-wallet="team" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié avant le premier plein</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0; border-bottom: 1px solid #1E242C;"><span>Fondateur 1 (wallet personnel)</span><span data-wallet="founder1" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié à l’ouverture</span></span>
+          <span style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 8px 0;"><span>Fondateur 2 (wallet personnel)</span><span data-wallet="founder2" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">publié à l’ouverture</span></span>
         </div>
 
         <nav aria-label="Liens officiels" style="box-sizing: border-box; padding: 10px 22px; border-radius: 16px; background: #0F1216; border: 1px solid #262C35; display: flex; flex-direction: column;">
           <a href="https://x.com" data-link="x" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span data-bind="xLabel">X · bientôt</span><span aria-hidden="true">↗</span></a>
           <a href="https://t.me" data-link="telegram" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span data-bind="telegramLabel">Telegram · bientôt</span><span aria-hidden="true">↗</span></a>
+          <a href="https://pump.fun" data-link="pumpfun" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span>pump.fun</span><span aria-hidden="true">↗</span></a>
           <a href="https://dexscreener.com/solana" data-link="dexscreener" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span>DexScreener</span><span aria-hidden="true">↗</span></a>
           <a href="https://solscan.io" data-link="solscan" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none; border-bottom: 1px solid #1E242C;"><span>Solscan</span><span aria-hidden="true">↗</span></a>
           <a href="https://jup.ag" data-link="jupiter" style="display: flex; align-items: center; justify-content: space-between; min-height: 48px; color: #F1F4F6; text-decoration: none;"><span>Jupiter</span><span aria-hidden="true">↗</span></a>
@@ -764,7 +868,7 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
       <span style="display: flex; align-items: center; gap: 12px;">
         <svg width="22" height="32" viewBox="0 0 26 38" aria-hidden="true"><rect x="1" y="1" width="24" height="31" rx="3" style="fill: #171B21; stroke: #3A414C; stroke-width: 1.5;"></rect><rect x="4" y="4" width="18" height="5" rx="1" style="fill: #F1F4F6;"></rect><rect x="4" y="11.5" width="18" height="5" rx="1" style="fill: #FF3D2E;"></rect><rect x="4" y="18.5" width="18" height="5" rx="1" style="fill: #3CF08A;"></rect><rect x="4" y="25.5" width="18" height="3.5" rx="1" style="fill: #FFA733;"></rect><rect x="10" y="32" width="6" height="6" style="fill: #3A414C;"></rect></svg>
         <span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: 0.03em;">Station $PLEIN</span>
-        <span style="font-size: 14px; color: #8A939E;"><span data-post="ouverte 24/7">ouverture samedi 18:00</span></span>
+        <span style="font-size: 14px; color: #8A939E;"><span data-post="ouverte 24/7">ouverture samedi 15:30</span></span>
       </span>
       <nav aria-label="Informations" style="display: flex; flex-wrap: wrap; gap: 0 22px;">
         <a href="/fiche-plein.html" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 15px; text-decoration: none;">Fiche $PLEIN</a>
@@ -797,15 +901,15 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
       </div>
       <div data-if="pumpClosed" style="display: contents">
         <div style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; border: 1.5px dashed #3A414C;">
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #FFA733;">La pompe ouvre samedi à 18:00</span>
-          <p style="margin: 0; font-size: 15px; color: #C9D0D8;">Le seul contrat officiel est celui publié ici, à partir de samedi 18:00. Tout contrat qui circule avant est faux.</p>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #FFA733;">La pompe ouvre samedi à 15:30</span>
+          <p style="margin: 0; font-size: 15px; color: #C9D0D8;">Le seul contrat officiel est celui publié ici, à partir de samedi 15:30. Tout contrat qui circule avant est faux.</p>
         </div>
       </div>
       <div data-if="pumpLive" hidden style="display: contents">
         <div id="jupiter-plugin" style="min-height: 460px; border-radius: 14px; overflow: hidden; background: #0B0E12; border: 1px solid #262C35;"></div>
       </div>
-      <p style="margin: 0; font-size: 14px; color: #A7AFB9;">La sortie est réglée sur le contrat officiel. Le site n’ajoute aucun frais&nbsp;: seul s’applique le 1&nbsp;% de la pool, dont 0,5&nbsp;% pour la station.</p>
-      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">Contrat&nbsp;: <span data-ca>publié ici samedi à 18:00</span></p>
+      <p style="margin: 0; font-size: 14px; color: #A7AFB9;">La sortie est réglée sur le contrat officiel. Le site n’ajoute aucun frais&nbsp;: s’appliquent les frais de pump.fun (<span data-bind="pumpFeeClause">1,25&nbsp;% sur la courbe, dont 0,30&nbsp;% pour la station</span>), ceux de Jupiter (d’après Jupiter, 0,50&nbsp;% sur un jeton de moins de 24&nbsp;h, puis 0,10&nbsp;%&nbsp;; vérifie le montant affiché avant de signer) et ceux du réseau Solana. pump.fun indique ne pas prélever ici ses 0,45&nbsp;% de plateforme, réservés à son site et à son appli. Selon la route choisie par Jupiter, un échange peut ne rien rapporter à la station.</p>
+      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">Contrat&nbsp;: <span data-ca>publié ici samedi à 15:30</span></p>
       <p style="margin: 0; padding-top: 14px; border-top: 1px solid #262C35; font-size: 14px; color: #F1F4F6;">N’achète que ce que tu peux perdre. Jamais l’argent de ton plein.</p>
     </div>
   </div>

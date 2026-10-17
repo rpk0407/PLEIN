@@ -108,6 +108,18 @@ td.vert { color: var(--led-vert); font-weight: 600; }
   thead th { font-size: 10.5px; letter-spacing: 0.04em; }
 }
 tr.actuel td { background: rgba(60, 240, 138, 0.06); }
+.tableau caption { caption-side: bottom; text-align: left; padding: 10px 14px; font-size: 14px; color: var(--brume); }
+
+/* a long table folded away; the whole summary line is the touch target */
+details.paliers { margin: 10px 0 22px; }
+details.paliers > summary {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; cursor: pointer;
+  border: 1px solid var(--trait); border-radius: 10px; background: var(--asphalte); font-weight: 600; list-style: none;
+}
+details.paliers > summary::-webkit-details-marker { display: none; }
+details.paliers > summary::before { content: '+'; flex: none; width: 1ch; color: var(--sodium); font: 600 18px/1 'IBM Plex Mono', monospace; }
+details.paliers[open] > summary::before { content: '\2212'; }
+details.paliers > .tableau { margin-top: 10px; }
 
 .horaire { list-style: none; padding: 0; margin: 10px 0 22px; display: grid; gap: 0; border-left: 2px solid var(--trait-fort); }
 .horaire li { display: grid; grid-template-columns: 76px 1fr; gap: 14px; margin: 0; padding: 7px 0 7px 16px; max-width: none; }

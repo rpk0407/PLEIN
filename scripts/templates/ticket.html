@@ -1,0 +1,109 @@
+<!doctype html>
+<!-- The weekly ticket as a 1080 x 1350 card for X and Telegram, filled by scripts/ticket.mjs (double braces: escaped text; triple braces: markup built by the script, namely the réservoir, buyback, aid and team rows, which grow when money is carried from an earlier week, left over, or paid out with a carried part). Same look as the ticket on the site (public/index.html): paper, monospace, dotted leaders, zigzag tear, and the buyback in LED green. Brand fonts are inlined by the script. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080">
+<title>Station $PLEIN · ticket n°&nbsp;{{n}}</title>
+<style>
+{{{fonts}}}
+html, body { margin: 0; background: #07090C; }
+.card { width: 1080px; height: 1350px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; background: radial-gradient(ellipse 70% 30% at 50% 0%, rgba(214, 230, 255, 0.12), transparent 70%), #07090C; }
+.printer { margin-top: 64px; width: 780px; box-sizing: border-box; padding: 22px 26px 24px; border-radius: 18px; background: linear-gradient(180deg, #1B2028, #12161B); border: 1px solid #2C333D; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.printer .status { display: flex; width: 100%; justify-content: space-between; align-items: center; font: 400 15px 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: #A7AFB9; }
+.printer .status b { font-weight: 400; color: #3CF08A; }
+.printer .slot { width: 92%; height: 9px; border-radius: 5px; background: #000; box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9); }
+.paper-wrap { position: relative; width: 640px; margin-top: -26px; display: flex; flex-direction: column; }
+.paper { background: #F2EFE6; color: #17181B; font-family: 'IBM Plex Mono', 'Courier New', monospace; padding: 44px 44px 26px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55); }
+/* a ticket with carried money, an unspent remainder or several notes is taller: tighten the spacing so the tear stays above the tagline */
+.card.dense .printer { margin-top: 40px; }
+.card.dense .paper { gap: 10px; padding: 36px 44px 22px; }
+.card.dense .rows { gap: 8px; }
+/* the tallest: carried money, a left-over, both transfers paying a carried part, and several notes */
+.card.tight .printer { margin-top: 24px; padding: 14px 26px 16px; gap: 10px; }
+.card.tight .paper { gap: 8px; padding: 30px 44px 18px; }
+.card.tight .rows { gap: 5px; font-size: 19px; }
+.card.tight .head .name { font-size: 48px; }
+.card.tight .title .plein { font-size: 44px; }
+.card.tight .bars { height: 34px; }
+.head { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.head .name { font: 800 60px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.head .sub { font-size: 15px; letter-spacing: 0.1em; }
+.cut { border-top: 2px dashed #17181B; }
+.title { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.title .plein { font: 800 56px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.title .when { font-size: 18px; }
+.rows { display: flex; flex-direction: column; gap: 14px; font-size: 20px; font-variant-numeric: tabular-nums; }
+.row { display: flex; align-items: baseline; gap: 10px; }
+.row i { flex: 1; border-bottom: 2px dotted #8A8A80; }
+.row b { font-weight: 600; }
+.row b.led { padding: 3px 12px 1px; border-radius: 4px; background: #030405; color: #3CF08A; font-family: 'Doto', 'IBM Plex Mono', monospace; font-weight: 900; text-shadow: 0 0 10px rgba(60, 240, 138, 0.55); }
+.src { margin-top: -6px; font-size: 13px; color: #5C5C55; }
+.txs { display: flex; flex-direction: column; gap: 8px; font-size: 16px; }
+.txs div { display: flex; justify-content: space-between; gap: 12px; }
+.notes { font-size: 14px; line-height: 1.4; }
+.notes p { margin: 0 0 4px; }
+.thanks { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.thanks b { font-size: 18px; font-weight: 600; }
+.thanks span { font-size: 16px; }
+.bars { display: flex; justify-content: center; align-items: stretch; gap: 3px; height: 60px; margin-top: 4px; }
+.bars span { background: #17181B; }
+.tear { height: 20px; margin-top: -1px; background: #F2EFE6; clip-path: polygon(0 0, 100% 0, 100% 100%, 97.5% 0, 95% 100%, 92.5% 0, 90% 100%, 87.5% 0, 85% 100%, 82.5% 0, 80% 100%, 77.5% 0, 75% 100%, 72.5% 0, 70% 100%, 67.5% 0, 65% 100%, 62.5% 0, 60% 100%, 57.5% 0, 55% 100%, 52.5% 0, 50% 100%, 47.5% 0, 45% 100%, 42.5% 0, 40% 100%, 37.5% 0, 35% 100%, 32.5% 0, 30% 100%, 27.5% 0, 25% 100%, 22.5% 0, 20% 100%, 17.5% 0, 15% 100%, 12.5% 0, 10% 100%, 7.5% 0, 5% 100%, 2.5% 0, 0 100%); }
+.line { position: absolute; left: 0; right: 0; bottom: 104px; text-align: center; font: italic 400 34px 'Instrument Serif', Georgia, serif; color: #F1F4F6; }
+.road { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; background: #0A0C0F; border-top: 2px solid rgba(241, 244, 246, 0.45); display: flex; align-items: center; }
+.road div { width: 100%; height: 5px; background: repeating-linear-gradient(90deg, rgba(241, 244, 246, 0.7) 0 60px, transparent 60px 128px); }
+</style>
+</head>
+<body>
+<div class="card{{{dense}}}">
+  <div class="printer">
+    <span class="status"><span>Station $PLEIN</span><b>● Ticket imprimé</b></span>
+    <span class="slot" aria-hidden="true"></span>
+  </div>
+
+  <div class="paper-wrap">
+    <div class="paper">
+      <div class="head">
+        <span class="name">STATION $PLEIN</span>
+        <span class="sub">TICKET DE CAISSE · SOLANA</span>
+      </div>
+      <div class="cut"></div>
+      <div class="title">
+        <span class="plein">PLEIN #{{n}}</span>
+        <span class="when">{{date}} · 18:00</span>
+      </div>
+      <div class="cut"></div>
+      <div class="rows">
+        <div class="row"><span>GAZOLE (DGEC)</span><i></i><b>{{price}}</b></div>
+        <div class="row"><span>TAUX DE RACHAT</span><i></i><b>{{rate}}</b></div>
+        {{{baseRows}}}
+        {{{buybackRows}}}
+        <div class="row"><span>$PLEIN BRÛLÉS</span><i></i><b>{{burned}}</b></div>
+        {{{aidRows}}}
+        {{{teamRows}}}
+      </div>
+      <div class="src">{{source}}</div>
+      <div class="cut"></div>
+      <div class="txs">
+        <div><span>TX RACHAT</span><span>{{txBuyback}}</span></div>
+        <div><span>TX BURN</span><span>{{txBurn}}</span></div>
+        <div><span>TX AIDE</span><span>{{txAid}}</span></div>
+        <div><span>TX ÉQUIPE</span><span>{{txTeam}}</span></div>
+        <div><span>LIENS</span><span>{{site}}</span></div>
+      </div>
+      {{{notes}}}
+      <div class="cut"></div>
+      <div class="thanks">
+        <b>MERCI DE VOTRE VISITE</b>
+        <span>PROCHAIN PLEIN&nbsp;: {{next}} · 18:00</span>
+      </div>
+      <div class="bars" aria-hidden="true"><span style="width:4px"></span><span style="width:2px"></span><span style="width:6px"></span><span style="width:2px"></span><span style="width:3px"></span><span style="width:5px"></span><span style="width:2px"></span><span style="width:4px"></span><span style="width:2px"></span><span style="width:6px"></span><span style="width:3px"></span><span style="width:2px"></span><span style="width:5px"></span><span style="width:2px"></span><span style="width:4px"></span><span style="width:3px"></span><span style="width:6px"></span><span style="width:2px"></span><span style="width:4px"></span><span style="width:2px"></span><span style="width:5px"></span><span style="width:3px"></span><span style="width:2px"></span><span style="width:6px"></span><span style="width:2px"></span><span style="width:4px"></span></div>
+    </div>
+    <div class="tear" aria-hidden="true"></div>
+  </div>
+
+  <span class="line">Un prix qu’on subit, un rachat qu’on vérifie.</span>
+  <div class="road" aria-hidden="true"><div></div></div>
+</div>
+</body>
+</html>
