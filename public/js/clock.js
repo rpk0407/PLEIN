@@ -47,3 +47,56 @@ export function formatCountdown(totalSeconds) {
   const s = total % 60;
   return `${d > 0 ? `${d}J ` : ''}${z(h)}:${z(m)}:${z(s)}`;
 }
+
+/**
+ * Where the countdown points once the station is open: the next Saturday 18:00, but never earlier
+ * than the first weekly plein. On opening day the evening's 18:00 is not a plein, so the countdown
+ * runs to the following Saturday. `firstPleinAt` is an instant in ms; NaN or missing means no floor.
+ */
+export function countdownTarget(now, firstPleinAt) {
+  const next = nextPleinAt(now);
+  return Number.isFinite(firstPleinAt) ? Math.max(next, firstPleinAt) : next;
+}
+
+/** The last Saturday 18:00 in Paris at or before `now`. */
+export function lastPleinAt(now) {
+  const p = paris(now);
+  const back = (p.dow - 6 + 7) % 7;
+  const at = parisInstant(p.y, p.m, p.d - back, 18, 0);
+  return at <= now ? at : parisInstant(p.y, p.m, p.d - back - 7, 18, 0);
+}
+
+/** Saturday 18:00 to the ticket at 19:05. */
+export const PLEIN_WINDOW_MS = 65 * 60 * 1000;
+
+/**
+ * { start, end } while a weekly plein is running, otherwise null. Saturdays before the first plein
+ * never count, so the state cannot trigger on opening day.
+ */
+export function pleinInProgress(now, firstPleinAt) {
+  const start = lastPleinAt(now);
+  if (Number.isFinite(firstPleinAt) && start < firstPleinAt) return null;
+  return now < start + PLEIN_WINDOW_MS ? { start, end: start + PLEIN_WINDOW_MS } : null;
+}
+
+const whenFormat = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'short',
+  hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+});
+
+/** French wording of an instant in Paris: { weekday: 'samedi', day: '24', month: 'oct.', hm: '18:00' }. */
+export function frenchWhen(time) {
+  const p = Object.fromEntries(whenFormat.formatToParts(new Date(time)).map((x) => [x.type, x.value]));
+  return { weekday: p.weekday, day: p.day, month: p.month, hm: `${p.hour}:${p.minute}` };
+}
+
+/** ISO 8601 week of the Paris date of an instant, e.g. "2026-W43". */
+export function isoWeek(time) {
+  const p = paris(time);
+  const date = new Date(Date.UTC(p.y, p.m - 1, p.d));
+  const weekday = date.getUTCDay() || 7; // Monday = 1 … Sunday = 7
+  date.setUTCDate(date.getUTCDate() + 4 - weekday); // the Thursday of this week decides the year
+  const yearStart = Date.UTC(date.getUTCFullYear(), 0, 1);
+  const week = Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
+  return `${date.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+}

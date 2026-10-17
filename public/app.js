@@ -4,11 +4,21 @@
 //   data-on-click="handler"  click                      data-on-input      input
 //   data-on-submit           form submit                data-post="…"     text once the station is open
 // Settings come from /config.js (set once). The contract, wallets and dashboard come from
-// /live.json, re-read while the page is open, so the contract appears at 18:00 without a reload.
+// /live.json, re-read while the page is open, so the contract appears at the opening without a
+// reload. Once open, the dashboard is read from /api/chain every minute; live.json is the fallback.
 import { buybackPct, fillCost, frNumber, teamPct } from './js/formula.js';
 import { isSolanaAddress } from './js/mint.js';
 import { NBSP as NB, typo } from './js/typo.js';
-import { formatCountdown, nextPleinAt } from './js/clock.js';
+import {
+  PLEIN_WINDOW_MS, countdownTarget, formatCountdown, frenchWhen, isoWeek, lastPleinAt, nextPleinAt, paris, pleinInProgress,
+} from './js/clock.js';
+import {
+  CURVE, TIERS, bandLabel, feeRow, formatCap, formatPct, pumpFeeClause, scaleSentence, weekFees, weekPlan,
+} from './js/fees.js';
+import {
+  carriedTotal, chainLights, hasReading, heldForNextPlein, readChain, readTicket, readTicketIndex, solscanTx,
+} from './js/readings.js';
+import { cardView, createKeeper } from './js/carte.js';
 
 const C = window.PLEIN_CONFIG || {};
 C.contract = '';
@@ -17,14 +27,49 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 const fr = (value, digits = 0) => frNumber(value, digits);
 
-const LAUNCH_AT = Date.parse(C.launchAt || '2026-10-17T18:00:00+02:00');
+const LAUNCH_AT = Date.parse(C.launchAt || '2026-10-17T15:30:00+02:00');
+// NaN (not configured) means no floor on the countdown
+const FIRST_PLEIN_AT = Date.parse(C.firstPleinAt || '');
+const LAUNCHPAD = C.launchpad || {};
+const QUOTE = LAUNCHPAD.quote === 'SOL' ? 'SOL' : 'USDC';
+const COIN_URL = typeof LAUNCHPAD.coinUrl === 'string' && LAUNCHPAD.coinUrl.startsWith('https://') ? LAUNCHPAD.coinUrl : '';
 const isOpen = () => Boolean(C.contract) && Date.now() >= LAUNCH_AT;
+/** "samedi 24 oct. 18:00" */
+function whenText(time) {
+  const w = frenchWhen(time);
+  return `${w.weekday} ${w.day} ${w.month} ${w.hm}`;
+}
+/** "samedi à 15:30" */
+function openingAt() {
+  const w = frenchWhen(LAUNCH_AT);
+  return `${w.weekday} à ${w.hm}`;
+}
+/** "samedi 15:30", for the ticker */
+function openingShort() {
+  const w = frenchWhen(LAUNCH_AT);
+  return `${w.weekday} ${w.hm}`;
+}
 const FUEL_LABEL = { gazole: 'Gazole', e10: 'SP95-E10', sp98: 'SP98' };
 const LEDS = {
   rouge: { hex: '#FF3D2E', glow: 'rgba(255, 61, 46, 0.6)' },
   vert: { hex: '#3CF08A', glow: 'rgba(60, 240, 138, 0.55)' },
   ambre: { hex: '#FFA733', glow: 'rgba(255, 167, 51, 0.55)' },
 };
+/**
+ * fetch with a deadline. A request that stalls (a mobile network handoff, say) is cut after ten
+ * seconds, so the busy flags of the polling loops are always released and the opening is never
+ * missed for want of a reload. Callers already keep the last state when a fetch throws.
+ */
+const FETCH_TIMEOUT_MS = 10000;
+function fetchWithin(url, options = {}, ms = FETCH_TIMEOUT_MS) {
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    return fetch(url, { ...options, signal: AbortSignal.timeout(ms) });
+  }
+  const controller = new AbortController(); // older browsers; aborting a finished request does nothing
+  setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal });
+}
+
 const CHIP_ON = { background: '#FFA733', color: '#0B0C0E', borderColor: '#FFA733' };
 const CHIP_OFF = { background: '#171B21', color: '#F1F4F6', borderColor: '#3A414C' };
 
@@ -75,28 +120,67 @@ async function copyText(text) {
 
 // ---------------------------------------------------------------- countdown (Europe/Paris)
 let lastOpen = null;
+let lastPassed = null; // whether the opening time has passed, contract or not
 let nextLiveAt = 0;
+let nextChainAt = 0;
+let nextTicketsAt = 0;
+let pleinWeek = '';
 function tick() {
   const now = Date.now();
   const open = isOpen();
-  if (open !== lastOpen) {
+  const passed = now >= LAUNCH_AT;
+  if (open !== lastOpen || passed !== lastPassed) {
     lastOpen = open;
+    lastPassed = passed;
     applyPhase();
   }
   let text;
   let label;
-  if (open) {
-    text = formatCountdown((nextPleinAt(now) - now) / 1000);
+  let when;
+  let ticker; // [label, value] shown in the ticker
+  const running = open ? pleinInProgress(now, FIRST_PLEIN_AT) : null; // never true on opening day
+  if (running) {
+    text = formatCountdown((running.end - now) / 1000);
+    label = 'Ticket dans';
+    when = 'plein en cours';
+    ticker = ['Plein', 'en cours'];
+    if (pleinWeek !== isoWeek(now)) {
+      pleinWeek = isoWeek(now);
+      stamp('plein', now);
+    }
+  } else if (open) {
+    const target = countdownTarget(now, FIRST_PLEIN_AT);
+    text = formatCountdown((target - now) / 1000);
     label = 'Plein dans';
+    when = whenText(target);
+    ticker = ['Prochain plein', when]; // on opening day it is a week away, so the date is named
   } else if (now < LAUNCH_AT) {
     text = formatCountdown((LAUNCH_AT - now) / 1000);
     label = 'Ouverture dans';
+    when = whenText(LAUNCH_AT);
+    ticker = ['Ouverture', openingShort()];
   } else {
     text = 'imminente';
     label = 'Ouverture';
+    when = whenText(LAUNCH_AT);
+    ticker = ['Ouverture', openingShort()];
   }
   setText('countdown', text);
+  setText('countdownWhen', when);
+  setText('tickerLabel', ticker[0]);
+  setText('tickerWhen', ticker[1]);
   $$('[data-countdown-label]').forEach((el) => { el.textContent = label; });
+  if (isoWeek(now) !== shownWeek) renderCarte(); // the card's "this week" marks turn over on Monday
+  if (open && now >= nextChainAt) {
+    nextChainAt = now + 60000;
+    loadChain();
+  }
+  if (now >= nextTicketsAt) {
+    // every minute while a plein runs or its ticket is awaited, every five minutes otherwise
+    const awaited = Boolean(running) || heldNow(now).reason === 'pending';
+    nextTicketsAt = now + (awaited ? 60000 : 300000);
+    loadTickets();
+  }
   if (now >= nextLiveAt) {
     // every 15 s from five minutes before the opening until the contract is out, then every minute
     const nearOpening = !open && now >= LAUNCH_AT - 5 * 60 * 1000;
@@ -112,7 +196,7 @@ async function loadLiveState() {
   if (liveBusy) return;
   liveBusy = true;
   try {
-    const res = await fetch('/live.json', { cache: 'no-store', headers: { accept: 'application/json' } });
+    const res = await fetchWithin('/live.json', { cache: 'no-store', headers: { accept: 'application/json' } });
     if (!res.ok) return;
     const text = await res.text();
     if (text === liveText) return;
@@ -129,6 +213,7 @@ async function loadLiveState() {
     C.wallets = Object.fromEntries(Object.entries(live.wallets || {}).filter(([, a]) => isSolanaAddress(a)));
     if (live.dashboard) C.dashboard = live.dashboard;
     lastOpen = isOpen();
+    lastPassed = Date.now() >= LAUNCH_AT;
     applyPhase();
     applyDashboard();
     renderCheck();
@@ -147,7 +232,7 @@ function applyPhase() {
     if (el.dataset.pre === undefined) el.dataset.pre = el.textContent;
     el.textContent = open ? el.dataset.post : el.dataset.pre;
   });
-  $$('[data-ca]').forEach((el) => { el.textContent = open ? C.contract : 'publié ici samedi à 18:00'; });
+  $$('[data-ca]').forEach((el) => { el.textContent = open ? C.contract : `publié ici ${openingAt()}`; });
   $$('[data-on-click="copyCA"]').forEach((btn) => {
     btn.disabled = !open;
     btn.style.opacity = open ? '1' : '0.45';
@@ -156,7 +241,8 @@ function applyPhase() {
   });
   setIf('pumpClosed', !open);
   setIf('pumpLive', open);
-  renderDashTag();
+  applyTotemAria();
+  applyDashboard(); // tag, curve gauge and fee lane depend on the phase too
 
   const links = C.links || {};
   if (links.xHandle) {
@@ -172,17 +258,28 @@ function applyPhase() {
     solscan: `https://solscan.io/token/${C.contract}`,
     jupiter: `https://jup.ag/swap/USDC-${C.contract}`,
   };
+  if (COIN_URL) tokenLinks.pumpfun = `${COIN_URL}${C.contract}`; // the contract passed isSolanaAddress, so it is safe in a path
   Object.entries(tokenLinks).forEach(([key, href]) => {
     $$(`[data-link="${key}"]`).forEach((a) => {
       if (a.dataset.hrefPre === undefined) a.dataset.hrefPre = a.getAttribute('href') || '';
       a.setAttribute('href', open ? href : a.dataset.hrefPre); // a withdrawn contract leaves no link behind
     });
   });
+  // Before the opening a missing wallet keeps the promise printed in the page (each says when it will
+  // be published). Once the opening time has passed, that promise would be stale, so it says so.
+  const passed = Date.now() >= LAUNCH_AT;
   $$('[data-wallet]').forEach((el) => {
     if (el.dataset.walletPre === undefined) el.dataset.walletPre = el.textContent;
-    el.textContent = (C.wallets || {})[el.dataset.wallet] || el.dataset.walletPre;
+    el.textContent = (C.wallets || {})[el.dataset.wallet] || (passed ? 'pas encore publié' : el.dataset.walletPre);
   });
+  // the commitment is worded as a promise until the wallets it names are all published
+  const walletsOut = PUBLIC_WALLETS.every((key) => (C.wallets || {})[key]);
+  setText('walletsPromise', walletsOut
+    ? 'Tous nos wallets sont publics : réservoir, équipe, aide.'
+    : 'Tous nos wallets seront publics avant le premier plein : réservoir, équipe, aide.');
 }
+/** The wallets the commitment "tous nos wallets sont publics" covers (the founders' personal wallets are listed apart). */
+const PUBLIC_WALLETS = ['creator', 'reservoir', 'aid', 'team'];
 
 // ---------------------------------------------------------------- official price, live price
 function applyOfficial() {
@@ -194,15 +291,20 @@ function applyOfficial() {
   $$('[data-official="rate"]').forEach((el) => put(el, `${fr(pct, 1)} %`));
   $$('[data-official="rateCompact"]').forEach((el) => { el.textContent = `${fr(pct, 1)}%`; });
   $$('[data-official="formula"]').forEach((el) => { el.textContent = `20${NB}×${NB}${fr(price, 3)}${NB}€ = ${fr(pct, 1)}${NB}%`; });
-  $$('[data-dash="plannedFormula"]').forEach((el) => { el.textContent = `réservoir${NB}×${NB}${fr(pct, 1)}${NB}%`; });
   $$('[data-official="weekLegend"]').forEach((el) => { el.textContent = `${fr(price, 3)} cette semaine`; });
   $$('[data-official-mark]').forEach((el) => {
     const min = Number(priceInput?.min) || 1.5;
     const max = Number(priceInput?.max) || 3.2;
     el.style.left = `${(((price - min) / (max - min)) * 100).toFixed(1)}%`;
   });
+  applyTotemAria();
+}
+function applyTotemAria() {
+  const price = C.official?.gazole;
+  if (!price) return;
+  const until = isOpen() ? 'au prochain plein' : `à l’ouverture, ${openingAt()}`;
   $$('[data-official-aria]').forEach((el) => {
-    el.setAttribute('aria-label', `Totem de la station : gazole ${fr(price, 3)} euros le litre au relevé officiel, rachat ${fr(pct, 1)} % au dernier relevé, et le compte à rebours jusqu’au prochain plein`);
+    el.setAttribute('aria-label', `Totem de la station : gazole ${fr(price, 3)} euros le litre au relevé officiel, rachat ${fr(buybackPct(price), 1)} % au dernier relevé, et le compte à rebours jusqu’${until}`);
   });
 }
 /** The ticker says "en direct" only once the live feed has answered; until then it shows the official survey. */
@@ -213,7 +315,7 @@ function showFuel(gazole, live) {
 }
 async function loadLive() {
   try {
-    const res = await fetch('/api/diesel', { headers: { accept: 'application/json' } });
+    const res = await fetchWithin('/api/diesel', { headers: { accept: 'application/json' } });
     if (!res.ok) return;
     const data = await res.json();
     if (data?.live?.gazole) showFuel(data.live.gazole, true);
@@ -236,8 +338,50 @@ const VOYANT_STYLE = {
 const dateFormat = new Intl.DateTimeFormat('fr-FR', {
   timeZone: 'Europe/Paris', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
 });
+/** The last /api/chain reading, once open; null until the endpoint has answered. */
+let chain = null;
+let chainBusy = false;
+/**
+ * A reading counts only for the contract the page shows (the endpoint reads its own copy of live.json),
+ * and only if it holds something actually read: an answer made of nulls falls back to live.json.
+ */
+const chainUsable = () => hasReading(chain) && isOpen() && chain.mint === C.contract;
+/**
+ * What the dashboard shows: the chain reading once there is one (a null in it stays a dash), live.json
+ * before that or if the endpoint never answers. The lights the chain cannot judge stay as live.json sets them.
+ */
+function dashboardView() {
+  const d = C.dashboard || {};
+  if (!chainUsable()) return d;
+  return {
+    asOf: chain.asOf,
+    reservoirUsdc: chain.reservoirUsdc,
+    unclaimedUsdc: chain.unclaimedUsdc ?? null, // creator vault, not yet claimed (Tier 2)
+    volume24hUsd: chain.volume24hUsd,
+    burned: chain.burned,
+    gaugeFullUsdc: d.gaugeFullUsdc,
+    voyants: { ...(d.voyants || {}), ...chainLights(chain) },
+    ct: d.ct,
+  };
+}
+async function loadChain() {
+  if (chainBusy) return;
+  chainBusy = true;
+  try {
+    const res = await fetchWithin('/api/chain', { headers: { accept: 'application/json' } });
+    if (!res.ok) return;
+    const reading = readChain(await res.json());
+    if (!reading) return;
+    chain = reading;
+    applyDashboard();
+  } catch {
+    // keep the last reading; before any, the dashboard keeps what live.json says
+  } finally {
+    chainBusy = false;
+  }
+}
 function renderDashTag() {
-  const asOf = Date.parse(C.dashboard?.asOf || '');
+  const asOf = Date.parse(dashboardView().asOf || '');
   let text = 'Les compteurs s’allument à l’ouverture';
   if (isOpen()) {
     if (Number.isFinite(asOf)) {
@@ -272,21 +416,33 @@ function renderOdometer(value) {
     nodes.push(cell);
   });
   odo.replaceChildren(...nodes);
-  odo.setAttribute('aria-label', known ? `Compteur : ${fr(Number(value), 0)} $PLEIN brûlés` : 'Compteur : pas encore relevé');
+  odo.setAttribute('aria-label', known ? `Compteur : ${fr(Math.floor(Number(value)), 0)} $PLEIN brûlés` : 'Compteur : pas encore relevé');
 }
 function applyDashboard() {
-  const d = C.dashboard || {};
+  const d = dashboardView();
   const dash = (key, text) => $$(`[data-dash="${key}"]`).forEach((el) => put(el, text));
-  // null means "not measured yet": a dash, never a zero
-  if (d.reservoirUsdc != null) {
-    dash('reservoir', fr(d.reservoirUsdc, 0));
-    $$('[data-needle="reservoir"]').forEach((el) => el.setAttribute('d', NEEDLE(d.reservoirUsdc / (d.gaugeFullUsdc || 5000))));
-    dash('planned', fr((d.reservoirUsdc * buybackPct(C.official?.gazole ?? state.price)) / 100, 0));
+  // null means "not measured yet": a dash, never a zero. The week's fees sit unclaimed in the creator
+  // vault until Saturday 17:50, so the gauge counts the multisig and the vault together, and says so;
+  // the planned buyback needs both sides read.
+  const fees = weekFees({ reservoir: d.reservoirUsdc, unclaimed: d.unclaimedUsdc });
+  const now = Date.now();
+  const held = heldNow(now);
+  const plan = weekPlan({ total: fees.total, complete: fees.complete, held: held.held, price: C.official?.gazole ?? state.price });
+  if (fees.total !== null) {
+    dash('reservoir', fr(fees.total, 0));
+    $$('[data-needle="reservoir"]').forEach((el) => el.setAttribute('d', NEEDLE(fees.total / (d.gaugeFullUsdc || 5000))));
   } else {
     dash('reservoir', '—');
-    dash('planned', '—');
     $$('[data-needle="reservoir"]').forEach((el) => el.setAttribute('d', NEEDLE(0)));
   }
+  renderPlanned(plan, held, isOpen() ? pleinInProgress(now, FIRST_PLEIN_AT) : null);
+  // the gauge counts everything the station holds, carried money included, and says how much of it is
+  const heldTotal = carriedTotal(held.held);
+  const heldNote = heldTotal > 0 ? `dont ${fr(heldTotal, 2)}${NB}USDC reportés des semaines précédentes` : '';
+  const gaugeNote = [fees.note, heldNote].filter(Boolean).join(' · ');
+  setText('gaugeLabel', fees.label);
+  setText('gaugeNote', gaugeNote);
+  $$('[data-bind="gaugeNote"]').forEach((el) => { el.hidden = !gaugeNote; });
   if (d.volume24hUsd != null) {
     const k = d.volume24hUsd / 1000;
     dash('volume', k >= 1 ? `${fr(k, 0)} k` : fr(d.volume24hUsd, 0));
@@ -311,6 +467,8 @@ function applyDashboard() {
     if (v.detail) put(detail, v.detail);
     detail.style.color = style.detail;
   });
+  renderCurve();
+  renderFeeLane();
   if (d.ct) {
     const ct = $('[data-ct]');
     if (ct) {
@@ -321,6 +479,320 @@ function applyDashboard() {
       put($('[data-ct-note]', ct), d.ct.note || '');
     }
   }
+}
+
+/**
+ * What the last plein left in the réservoir, from the latest published ticket (heldForNextPlein).
+ * Nothing before plein #1; unknown, never zero, while a plein has run and its ticket cannot be read.
+ */
+function heldNow(now) {
+  const last = lastPleinAt(now);
+  const ran = Number.isFinite(FIRST_PLEIN_AT) ? last >= FIRST_PLEIN_AT : last >= LAUNCH_AT;
+  const latestN = tickets.list.at(-1)?.n ?? null;
+  const latest = latestN === null ? null : tickets.cache.get(latestN) ?? null;
+  const indexRead = tickets.indexRead && (latestN === null || latest !== null);
+  return heldForNextPlein({ latest, indexRead, lastPlein: ran ? last : null });
+}
+/**
+ * "Rachat prévu samedi": the week's fees times the rate, plus the buyback an earlier week left unspent.
+ * While a plein runs the réservoir drains slice by slice, so no number is computed; it reads "en cours".
+ * When the carried money cannot be told, the number is a dash and the line under it says why.
+ */
+function renderPlanned(plan, held, running) {
+  const pct = buybackPct(C.official?.gazole ?? state.price);
+  const share = `frais de la semaine${NB}×${NB}${fr(pct, 1)}${NB}%`;
+  let status = '';
+  let formula = share;
+  if (running) {
+    status = 'en cours';
+    formula = `le ticket sort vers ${frenchWhen(running.end).hm}`;
+  } else if (held.reason === 'pending' || held.reason === 'missing') {
+    formula = 'en attente du ticket du dernier plein';
+  } else if (held.reason === 'unreadable') {
+    formula = 'reliquat du dernier ticket illisible';
+  } else if (plan.reason === 'below-held') {
+    formula = `réservoir sous le reliquat du dernier ticket${NB}: à vérifier`;
+  } else if (plan.reason === 'ok' && plan.heldBuyback > 0) {
+    formula = `${share} + ${fr(plan.heldBuyback, 2)}${NB}USDC reportés`;
+  }
+  $$('[data-dash="planned"]').forEach((el) => put(el, plan.reason === 'ok' ? fr(plan.planned, 0) : '—'));
+  $$('[data-dash="plannedFormula"]').forEach((el) => put(el, formula));
+  setText('plannedStatus', status);
+  setIf('plannedNumber', status === '');
+  setIf('plannedStatus', status !== '');
+}
+
+// ---------------------------------------------------------------- bonding-curve gauge and fee lane
+function renderCurve() {
+  const root = $('[data-curve]');
+  if (!root) return;
+  const reading = chainUsable() ? chain : null;
+  const done = reading?.complete === true;
+  const pct = done ? 100 : reading?.progressPct ?? null; // null = not read: a dash, an empty bar
+  put($('[data-curve-value]', root), pct === null ? '—' : `${done ? '100' : fr(pct, 1)} %`);
+  $('[data-curve-bar]', root).style.width = `${pct ?? 0}%`;
+  const track = $('[data-curve-track]', root);
+  if (pct === null) track.removeAttribute('aria-valuenow');
+  else track.setAttribute('aria-valuenow', String(Math.round(pct * 10) / 10));
+  put($('[data-curve-caption]', root), done ? 'Migrée sur PumpSwap' : 'À 100 %, la pool migre sur PumpSwap');
+}
+/** The station's share by band, one bar per band; the live band is lit once the pool has migrated. */
+function buildFeeScale() {
+  const holder = $('[data-fee-scale]');
+  if (!holder) return;
+  const tiers = TIERS[QUOTE];
+  const top = Math.max(...tiers.map((row) => row.creator));
+  holder.replaceChildren(...tiers.map((row) => {
+    const bar = document.createElement('span');
+    bar.title = typo(`${bandLabel(row, QUOTE)} : ${formatPct(row.creator)}`);
+    Object.assign(bar.style, {
+      flex: '1 1 0', minWidth: '0', height: `${Math.max(4, (row.creator / top) * 100).toFixed(1)}%`, borderRadius: '3px 3px 0 0', background: '#3A414C',
+    });
+    return bar;
+  }));
+  holder.setAttribute('aria-label', typo(`Part de la station par palier de capitalisation : ${scaleSentence(QUOTE)}`));
+  setText('feeScale', scaleSentence(QUOTE));
+  setText('feeLaneSource', `Échelle des pools ${QUOTE}, d’après pump.fun/docs/fees (relevée le 17 octobre 2026). Le premier ticket montrera ce qui arrive vraiment.`);
+}
+const PUMP_TOTAL_SUPPLY = 1e9; // every pump.fun coin is created with one billion tokens
+function renderFeeLane() {
+  const reading = chainUsable() ? chain : null;
+  // pump.fun sets the tier from the token's price times one billion (its documented rule), not from
+  // the circulating supply DexScreener's market cap uses, which weekly burns shrink. So the band is an
+  // estimate from DexScreener's price (Tier 2). The price is in dollars only: a SOL pair cannot place
+  // the band, and the lane says so.
+  const marketCap = QUOTE === 'USDC' && reading?.priceUsd != null ? reading.priceUsd * PUMP_TOTAL_SUPPLY : null;
+  const row = reading ? feeRow({ complete: reading.complete, marketCap, quote: QUOTE }) : null;
+  let tag;
+  let now;
+  if (!isOpen()) {
+    tag = 'Avant l’ouverture';
+    now = Date.now() >= LAUNCH_AT
+      ? 'La pool ouvre dès que le contrat est publié ici.'
+      : `La pool ouvre ${openingAt()}, sur la courbe : ${formatPct(CURVE.creator)} pour la station.`;
+  } else if (!reading || reading.complete === null) {
+    tag = 'En attente du premier relevé';
+    now = 'Palier en attente du premier relevé.';
+  } else if (reading.complete === false) {
+    tag = 'Sur la courbe';
+    now = `Pool sur la courbe : ${formatPct(CURVE.total)} par échange, dont ${formatPct(CURVE.creator)} pour la station.`;
+  } else if (row) {
+    tag = 'Migrée sur PumpSwap';
+    now = `Pool migrée, capitalisation ≈${NB}${formatCap(marketCap, QUOTE)} (prix DexScreener × 1 milliard de jetons) : palier probable ${bandLabel(row, QUOTE)}, ${formatPct(row.creator)} pour la station. Le ticket montre ce qui arrive vraiment.`;
+  } else {
+    tag = 'Migrée sur PumpSwap';
+    now = 'Pool migrée. Capitalisation non relevée : palier en attente.';
+  }
+  $$('[data-fee-scale] > span').forEach((bar, i) => {
+    const lit = row !== null && row.tier === i;
+    bar.style.background = lit ? '#FFA733' : '#3A414C';
+    bar.style.boxShadow = lit ? '0 0 12px rgba(255, 167, 51, 0.6)' : 'none';
+  });
+  setText('feeLaneTag', tag);
+  setText('feeLaneNow', now);
+  setText('pumpFeeClause', pumpFeeClause(reading?.complete ?? null)); // the pump's note follows the curve state
+}
+
+// ---------------------------------------------------------------- tickets (public/tickets/*.json)
+const tickets = { list: [], cache: new Map(), shown: null, indexRead: false };
+const DOW_SHORT = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
+const frPrice = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 3, maximumFractionDigits: 4 });
+const longDay = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', weekday: 'long', day: 'numeric', month: 'long' });
+const longDate = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: 'numeric', month: 'long' });
+const money = (value, unit) => (value === null ? '—' : `${fr(value, 2)} ${unit || ''}`.trim());
+const placeholderTile = $('[data-ticket-wall] > span')?.cloneNode(true); // the printed "à venir" tile, reused for the weeks to come
+/** The Saturday 18:00 of plein number n, from the first plein; null when no first plein is configured. */
+function pleinAtN(n) {
+  if (!Number.isFinite(FIRST_PLEIN_AT)) return null;
+  let at = FIRST_PLEIN_AT;
+  for (let i = 1; i < n; i += 1) at = nextPleinAt(at + 60000);
+  return at;
+}
+async function ensureTicket(n) {
+  if (tickets.cache.has(n)) return tickets.cache.get(n);
+  const entry = tickets.list.find((t) => t.n === n);
+  if (!entry) return null;
+  try {
+    const res = await fetchWithin(entry.path, { headers: { accept: 'application/json' } });
+    if (!res.ok) return null;
+    const ticket = readTicket(await res.json());
+    if (!ticket || ticket.n !== n) return null;
+    tickets.cache.set(n, ticket);
+    return ticket;
+  } catch {
+    return null;
+  }
+}
+const currentTicketN = () => tickets.shown ?? tickets.list.at(-1)?.n ?? null;
+async function loadTickets() {
+  try {
+    const res = await fetchWithin('/tickets/index.json', { cache: 'no-store', headers: { accept: 'application/json' } });
+    if (res.status === 404) tickets.list = []; // no wall yet: the printed sample stays, labelled
+    else if (res.ok) tickets.list = readTicketIndex(await res.json());
+    else return;
+  } catch {
+    return; // offline: keep what the page shows
+  }
+  tickets.indexRead = true;
+  // the latest ticket always (the planned buyback needs what it left), and the one on show
+  const latest = tickets.list.at(-1)?.n ?? null;
+  if (latest !== null) await ensureTicket(latest);
+  const n = currentTicketN();
+  if (n !== null && n !== latest) await ensureTicket(n);
+  renderTickets();
+  applyDashboard();
+}
+function fillTicket(t) {
+  const set = (key, text) => $$(`[data-tk="${key}"]`).forEach((el) => put(el, text));
+  const p = t.at === null ? null : paris(t.at);
+  const two = (x) => String(x).padStart(2, '0');
+  set('n', String(t.n));
+  set('when', p ? `${DOW_SHORT[p.dow]} ${two(p.d)}/${two(p.m)} · ${two(p.h)}:${two(p.min)}` : '—');
+  set('price', t.price === null ? '—' : `${frPrice.format(t.price)} €/L`);
+  set('rate', t.ratePct === null ? '—' : `${fr(t.ratePct, 1)} %`);
+  // The split is made on the week's fees; the réservoir also holds what earlier weeks left in it.
+  // Those rows show only when something was carried, so the lines add up like on the PNG ticket.
+  const carriedSum = carriedTotal(t.carried);
+  const showCarried = t.carried !== null && (carriedSum === null || carriedSum > 0);
+  const show = (name, on) => $$(`[data-tk-show="${name}"]`).forEach((el) => { el.hidden = !on; });
+  set('reservoir', money(t.reservoir, t.unit));
+  set('carried', carriedSum === null ? '—' : money(carriedSum, t.unit));
+  set('fees', money(t.fees, t.unit));
+  show('carried', showCarried);
+  const carriedDetail = carriedSum !== null && carriedSum > 0
+    ? `Reporté des semaines précédentes : aide ${money(t.carried.aid, t.unit)} · rachat ${money(t.carried.buyback, t.unit)} · équipe ${money(t.carried.team, t.unit)}.`
+    : '';
+  set('carriedDetail', carriedDetail);
+  show('carriedDetail', carriedDetail !== '');
+  set('buyback', money(t.buyback, t.unit));
+  set('unspent', money(t.unspent, t.unit));
+  show('unspent', t.unspent !== null && t.unspent > 0); // the buyback not made, carried into the next week
+  set('aid', money(t.aid, t.unit));
+  set('team', money(t.team, t.unit));
+  set('burned', t.burned === null ? '—' : fr(Math.floor(t.burned), 0));
+  // a share whose transfer is null is held, and says so; it never goes to the team in place of the aid
+  const held = (share, carried) => (share === null || carried === null ? null : Math.round((share + carried) * 100) / 100);
+  const heldLine = (label, transfer, amount, word) => {
+    if (transfer) return [label, transfer];
+    if (amount === null) return [label, null, '—'];
+    return amount > 0 ? [label, null, `${word} · cumul ${money(amount, t.unit)}`] : null;
+  };
+  const total = t.sliceCount;
+  const lines = [
+    ...t.slices.map((s, i) => [`RACHAT ${i + 1}/${total}`, s]),
+    ...(t.burn ? [['BURN', t.burn]] : []),
+    heldLine('DON', t.aidTransfer, held(t.aid, t.carried?.aid ?? null), 'retenu'),
+    heldLine('ÉQUIPE', t.teamTransfer, held(t.team, t.carried?.team ?? null), 'reportée'),
+    ...(t.claim ? [['FRAIS RÉCLAMÉS', t.claim]] : []),
+  ].filter(Boolean);
+  const holder = $('[data-tk-tx]');
+  const template = $('template[data-template="ticketTx"]');
+  holder.replaceChildren(...lines.map(([label, entry, status]) => {
+    const row = template.content.firstElementChild.cloneNode(true);
+    $('[data-tk-label]', row).textContent = `TX ${label}`;
+    const link = $('[data-tk-link]', row);
+    const href = entry ? solscanTx(entry.id) : null;
+    if (href) link.href = href;
+    else link.replaceWith(Object.assign(document.createElement('span'), { textContent: typo(status ?? '—') }));
+    return row;
+  }));
+  const notes = $('[data-tk-notes]');
+  put(notes, t.notes.join(' '));
+  notes.hidden = t.notes.length === 0;
+  const slot = $('[data-tk-barcode]');
+  const source = $('[data-ticket-barcode]');
+  if (slot && source && !slot.firstChild) slot.appendChild(source.cloneNode(true));
+}
+function renderWall(activeN) {
+  const wall = $('[data-ticket-wall]');
+  const template = $('template[data-template="ticketTile"]');
+  if (!wall || !template || !placeholderTile) return;
+  const nodes = tickets.list.slice(-6).map((entry) => {
+    const tile = template.content.firstElementChild.cloneNode(true);
+    const day = frenchWhen(Date.parse(`${entry.date}T12:00:00Z`));
+    tile.dataset.n = String(entry.n);
+    $('[data-tile="n"]', tile).textContent = `#${entry.n}`;
+    $('[data-tile="date"]', tile).textContent = `${day.day} ${day.month}`;
+    $('[data-tile="state"]', tile).textContent = entry.n === activeN ? 'affiché' : 'voir';
+    tile.setAttribute('aria-pressed', entry.n === activeN ? 'true' : 'false');
+    if (entry.n === activeN) tile.style.borderColor = '#FFA733';
+    return tile;
+  });
+  const next = (tickets.list.at(-1)?.n ?? 0) + 1;
+  const upcoming = Math.max(1, 3 - nodes.length);
+  for (let k = 0; k < upcoming; k += 1) {
+    const tile = placeholderTile.cloneNode(true);
+    const at = pleinAtN(next + k);
+    const [num, date] = tile.querySelectorAll('strong, span');
+    num.textContent = `#${next + k}`;
+    if (at === null) {
+      date.textContent = '';
+    } else {
+      const day = frenchWhen(at);
+      date.textContent = `${day.day} ${day.month}`;
+    }
+    nodes.push(tile);
+  }
+  wall.replaceChildren(...nodes);
+}
+function renderTickets() {
+  const n = currentTicketN();
+  const shown = n === null ? null : tickets.cache.get(n) ?? null;
+  setIf('ticketReal', Boolean(shown));
+  setIf('ticketSample', !shown); // the example stays, labelled, until a real ticket can be shown
+  setIf('ticketNone', tickets.list.length === 0);
+  setText('ticketCta', shown ? 'Voir le dernier ticket' : 'Voir un exemple de ticket');
+  setText('ticketKindHint', tickets.list.length ? 'un clic sur un lien Solscan d’un ticket' : 'un clic sur un lien Solscan d’un vrai ticket, dès le premier');
+  if (shown) fillTicket(shown);
+  renderWall(n);
+}
+
+// ---------------------------------------------------------------- loyalty card (browser only)
+const storage = (() => {
+  try { return window.localStorage; } catch { return null; }
+})();
+// Stamps live in memory. Nothing is written to the browser until the visitor presses "Prendre ma
+// carte" (that click is the first write); without storage the card lives for the visit.
+const keeper = createKeeper(storage);
+let carteNote = '';
+let shownWeek = '';
+function stamp(kind, now = Date.now()) {
+  if (keeper.stamp(kind, now) === 'added') renderCarte();
+}
+function buildStamps() {
+  const holder = $('[data-stamps]');
+  const template = $('template[data-template="stamp"]');
+  if (!holder || !template) return;
+  holder.replaceChildren(...Array.from({ length: 10 }, () => template.content.firstElementChild.cloneNode(true)));
+}
+function renderCarte() {
+  const now = Date.now();
+  shownWeek = isoWeek(now);
+  const view = cardView(keeper.card, now);
+  setIf('carteLoose', !keeper.taken);
+  setIf('carteKept', keeper.taken);
+  setText('carteNote', carteNote);
+  $$('[data-bind="carteNote"]').forEach((el) => { el.hidden = !carteNote; });
+  setText('carteCount', String(view.count));
+  setIf('carteFull', view.full);
+  setIf('carteCards', view.cardsFilled > 0);
+  setText('carteCards', String(view.cardsFilled));
+  $$('[data-stamps] > [data-stamp]').forEach((slot, i) => {
+    const on = i < view.count;
+    Object.assign(slot.style, {
+      background: on ? '#FFA733' : 'transparent',
+      borderStyle: on ? 'solid' : 'dashed',
+      borderColor: on ? '#FFA733' : '#3A414C',
+      boxShadow: on ? '0 0 14px rgba(255, 167, 51, 0.45)' : 'none',
+    });
+    $('svg', slot).style.opacity = on ? '1' : '0';
+  });
+  $$('[data-kind]').forEach((item) => {
+    const on = view.thisWeek[item.dataset.kind] === true;
+    const state = $('[data-kind-state]', item);
+    put(state, on ? 'tamponné cette semaine' : 'pas cette semaine');
+    state.style.color = on ? '#FFA733' : '#8A939E';
+  });
 }
 
 // ---------------------------------------------------------------- the toll: diesel slider
@@ -379,10 +851,11 @@ async function findStations(event) {
   }
   setText('resultsTag', 'Recherche…');
   try {
-    const res = await fetch(`/api/stations?cp=${state.cp}&fuel=${state.fuel}&tank=${state.tank}`, { headers: { accept: 'application/json' } });
+    const res = await fetchWithin(`/api/stations?cp=${state.cp}&fuel=${state.fuel}&tank=${state.tank}`, { headers: { accept: 'application/json' } });
     const data = await res.json();
     if (!res.ok || !data.stations?.length) throw new Error(data.error || 'empty');
     renderStations(data);
+    stamp('monplein');
   } catch {
     clearStations();
     setIf('hasResults', false);
@@ -616,6 +1089,7 @@ async function downloadPng() {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
+    stamp('totem');
   }, 'image/png');
 }
 function atelierLink() {
@@ -638,7 +1112,7 @@ function renderCheck() {
   if (bad) {
     bad.textContent = official
       ? 'Ce n’est PAS $PLEIN. Ne signe rien.'
-      : 'Le contrat officiel n’est pas encore publié. Tout contrat qui circule avant 18:00 est faux.';
+      : `Le contrat officiel n’est pas encore publié. Tout contrat qui circule avant ${frenchWhen(LAUNCH_AT).hm} est faux.`;
   }
 }
 
@@ -722,6 +1196,22 @@ const handlers = {
   onL2(event) { state.l2 = event.target.value.toUpperCase(); state.visitorCard = false; renderAtelier(); },
   onV2(event) { state.v2 = event.target.value; state.visitorCard = false; renderAtelier(); },
   downloadPng,
+  ticketLink() { stamp('ticket'); }, // a click on a real ticket's Solscan link; the link itself opens normally
+  takeCarte() {
+    // the visitor asked for the card: this is the first thing written to the browser
+    carteNote = keeper.take() ? '' : 'Ton navigateur refuse le stockage : la carte ne dure que le temps de cette visite.';
+    renderCarte();
+  },
+  dropCarte() {
+    keeper.discard();
+    carteNote = '';
+    renderCarte();
+  },
+  async showTicket(event, el) {
+    tickets.shown = Number(el.dataset.n);
+    await ensureTicket(tickets.shown);
+    renderTickets();
+  },
   async copyLink(event, el) {
     if (el.dataset.label === undefined) el.dataset.label = el.textContent;
     const ok = await copyText(atelierLink());
@@ -775,6 +1265,15 @@ applyDashboard();
 renderSplit();
 renderAtelier();
 renderCheck();
-tick(); // also applies the phase and starts reading /live.json
+buildFeeScale();
+buildStamps();
+renderCarte();
+renderTickets(); // the printed sample until a real ticket is read
+if (Number.isFinite(FIRST_PLEIN_AT)) {
+  const firstTicketAt = FIRST_PLEIN_AT + PLEIN_WINDOW_MS; // the ticket prints when the window closes
+  setText('firstTicketWhen', `${longDay.format(firstTicketAt)} à ${frenchWhen(firstTicketAt).hm}`);
+  setText('firstPleinDay', longDate.format(FIRST_PLEIN_AT));
+}
+tick(); // also applies the phase and starts reading /live.json, /api/chain and the tickets
 setInterval(tick, 1000);
 loadLive();

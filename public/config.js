@@ -1,11 +1,27 @@
 // Station $PLEIN · settings the team sets once and changes rarely.
 // What changes on launch day and every week (contract, wallets, dashboard) lives in
 // /live.json instead: the page re-reads that file while it is open, so visitors waiting on
-// the countdown see the contract appear at 18:00 without reloading.
+// the countdown see the contract appear at the opening without reloading. Once open, the
+// dashboard comes from /api/chain; live.json stays its fallback.
 window.PLEIN_CONFIG = {
-  // Saturday 17 October 2026, 18:00 Paris. Before this moment, or while live.json has no
-  // contract, the site shows its pre-opening state.
-  launchAt: '2026-10-17T18:00:00+02:00',
+  // Saturday 17 October 2026, 15:30 Paris, on pump.fun. Before this moment, or while live.json
+  // has no contract, the site shows its pre-opening state.
+  launchAt: '2026-10-17T15:30:00+02:00',
+
+  // The weekly plein is every Saturday at 18:00 Paris, starting one week after the launch: on
+  // launch day the countdown after opening points here, not to 18:00 the same evening.
+  firstPleinAt: '2026-10-24T18:00:00+02:00',
+
+  // Where $PLEIN trades. Fees as pump.fun publishes them on pump.fun/docs/fees (read on
+  // 17 October 2026); Tier 2 until the first ticket shows them on-chain. The tier tables and
+  // the arithmetic live in public/js/fees.js. The page's fee copy quotes the scale of the pair
+  // chosen here (public/index.html is written for USDC; the scale sentences follow this key).
+  launchpad: {
+    name: 'pump.fun',
+    // quote asset chosen at creation; must match what the founders pick on pump.fun
+    quote: 'USDC',
+    coinUrl: 'https://pump.fun/coin/',
+  },
 
   // Official weekly national average for diesel (ministry survey, DGEC), used for Saturday's
   // buyback rate: the latest survey published before Saturday 17:45. Update it every week and

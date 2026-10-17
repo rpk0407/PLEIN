@@ -29,26 +29,129 @@
 <main>
   <p class="kicker">Fiche $PLEIN · ce qui est promis, ce qui ne l’est pas</p>
   <h1>La fiche $PLEIN</h1>
-  <p class="chapo">Chaque samedi à 18:00, une part des frais de $PLEIN rachète des $PLEIN sur le marché et les brûle. Cette part suit le prix officiel du gazole. Voici la règle entière, et tout ce qui peut mal tourner.</p>
+  <p class="chapo">Chaque samedi à 18:00, à partir du <span data-first-plein-day>24 octobre 2026</span>, une part des frais de $PLEIN rachète des $PLEIN sur le marché et les brûle. Cette part suit le prix officiel du gazole. Voici la règle entière, et tout ce qui peut mal tourner.</p>
 
-  <div class="projet" role="note"><strong>Projet à compléter avant l’ouverture.</strong> Les passages <span class="todo">[entre crochets]</span> attendent une information que seule l’équipe peut donner, ou une vérification après la création du jeton. À faire relire par un avocat, au regard des règles MiCA sur la communication (loyale, claire, non trompeuse).</div>
+  <div class="projet" role="note"><strong>Projet à compléter.</strong> Les passages <span class="todo">[entre crochets]</span> attendent une information que seule l’équipe peut donner, ou une vérification faite sur la chaîne après la création du jeton. À faire relire par un avocat, au regard des règles MiCA sur la communication (loyale, claire, non trompeuse).</div>
 
   <h2><span class="borne">1</span>Ce que c’est</h2>
   <ul>
     <li><strong>Nom&nbsp;:</strong> Le Plein · <strong>symbole&nbsp;:</strong> PLEIN · <strong>réseau&nbsp;:</strong> Solana.</li>
-    <li><strong>Contrat officiel&nbsp;:</strong> <span class="mono" data-ca>publié ici samedi à 18:00</span>. Le seul. Tout autre est faux.</li>
-    <li><strong>Lancement&nbsp;:</strong> sur Jupiter Studio, le <span class="todo">[date et heure de création, lien Solscan]</span>.</li>
+    <li><strong>Contrat officiel&nbsp;:</strong> <span class="mono" data-ca>publié ici à l’ouverture</span>. Le seul. Tout autre est faux.</li>
+    <li><strong>Page du jeton&nbsp;:</strong> <span data-coin>publiée avec le contrat</span>.</li>
+    <li><strong>Lancement&nbsp;:</strong> sur <span data-launchpad="name">pump.fun</span>, le <span data-launch="when">samedi 17 octobre 2026 à 15:30</span> (heure de Paris). Création&nbsp;: <span class="todo">[lien Solscan de la transaction de création, publié au lancement]</span>.</li>
+    <li><strong>Actif de cotation&nbsp;:</strong> <span data-launchpad="quote">USDC</span>.</li>
     <li><strong>Émis par&nbsp;:</strong> <span class="todo">[raison sociale, forme, RCS]</span>, voir les <a href="/mentions-legales.html">mentions légales</a>.</li>
     <li><strong>Nombre de jetons&nbsp;:</strong> 1&nbsp;000&nbsp;000&nbsp;000, offre fixe <span class="todo">[à vérifier sur Solscan après création&nbsp;: autorité de création révoquée]</span>.</li>
-    <li><strong>Jetons réservés à l’équipe&nbsp;:</strong> 0&nbsp;%. Ni prévente, ni investisseurs. Le revenu de l’équipe, c’est sa part des frais, publiée chaque semaine.</li>
+    <li><strong>Jetons réservés à l’équipe&nbsp;:</strong> 0&nbsp;%. Ni prévente, ni investisseurs, ni allocation. Le revenu de l’équipe, c’est sa part des frais, publiée chaque semaine.</li>
+    <li><strong>Achat de l’équipe à la création&nbsp;:</strong> <span class="todo">[à décider avant l’ouverture&nbsp;: «&nbsp;Aucun.&nbsp;», ou le montant acheté sur la courbe avec sa transaction Solscan, publiés ici et sur le tableau de bord. Un achat n’est pas une réserve, mais il se publie]</span></li>
   </ul>
   <p><strong>Ce que $PLEIN ne donne pas&nbsp;:</strong> aucun dividende, aucun vote, aucun remboursement, aucune part de société, aucune créance sur l’équipe. Ce n’est pas un placement, ni une assurance contre le prix du carburant. Son prix peut tomber à zéro.</p>
 
   <h2><span class="borne">2</span>D’où viennent les frais</h2>
-  <p>Sur la pool officielle, chaque achat et chaque vente de $PLEIN paie 1&nbsp;% de frais&nbsp;: 0,5&nbsp;% pour Jupiter, 0,5&nbsp;% pour la station. C’est le partage annoncé par Jupiter Studio&nbsp;; le ticket du samedi montre ce qui arrive vraiment.</p>
-  <p>La part de la station arrive d’abord sur le <strong>wallet créateur</strong>, publié plus bas. Elle est réclamée chaque semaine et versée dans <strong>le réservoir</strong>, un coffre multisig, avant le plein.</p>
-  <p>Si Jupiter Studio verse bien au créateur les frais anti-sniper du lancement, ils iront en totalité au premier rachat <span class="todo">[montant publié après le lancement]</span>.</p>
-  <p class="doux">La pompe du site n’ajoute aucun frais&nbsp;: seul s’applique le 1&nbsp;% de la pool.</p>
+  <!-- Tier 2: the pump.fun figures in this section are as published on pump.fun/docs/fees, read on 17 October 2026
+       (page updated that day). The first ticket shows what really arrives. test/fiche.test.mjs pins the tier
+       tables to the published figures, so a typo here fails the build.
+       Tier 2, not from pump.fun: the Jupiter fee in the last paragraph (0,50 % under 24 h, then 0,10 %) is what
+       developers.jup.ag/docs/ultra/fees said on 17 October 2026; the Plugin's own page lists no figure. It stays
+       worded "d'après Jupiter" until a real quote from the Plugin shows it.
+       Tier 2 too: that a trade through the site's pump pays the station's creator share (it is said in the last
+       paragraph, and holds only if Jupiter routes through the curve or the canonical pool). A first real swap
+       settles it, and the bracket there says so. -->
+  <p>$PLEIN est lancé sur pump.fun. Les frais ci-dessous sont ceux que pump.fun publie (<a href="https://pump.fun/docs/fees" rel="noopener">pump.fun/docs/fees</a>, page consultée le 17&nbsp;octobre 2026). Ils sont fixés par pump.fun, pas par la station&nbsp;: pump.fun peut les changer. Le premier ticket du samedi montre ce qui arrive vraiment.</p>
+
+  <h3>Avant la migration&nbsp;: sur la courbe</h3>
+  <p>Chaque achat et chaque vente paie <strong>1,25&nbsp;%</strong> de frais&nbsp;: 0,30&nbsp;% pour la station (le créateur), 0,95&nbsp;% pour pump.fun, 0&nbsp;% pour la liquidité.</p>
+
+  <h3>Après la migration&nbsp;: sur PumpSwap</h3>
+  <p>Quand la courbe est remplie, le jeton migre vers une pool PumpSwap, dite canonique. pump.fun indique que cette migration coûte 0,015&nbsp;SOL. Dans cette pool, la part de la station dépend de la capitalisation du jeton&nbsp;; pump.fun et les fournisseurs de liquidité se partagent le reste.</p>
+
+  <div data-quote-table="USDC">
+    <p>Avec une paire USDC, la capitalisation se lit en dollars. La part de la station est de 0,30&nbsp;% sous 59&nbsp;000&nbsp;USD, de 0,95&nbsp;% de 59&nbsp;000 à 300&nbsp;000&nbsp;USD, puis baisse de palier en palier jusqu’à 0,05&nbsp;% au-delà de 20&nbsp;000&nbsp;000&nbsp;USD. Les frais totaux passent de 1,25&nbsp;% à 0,30&nbsp;%.</p>
+    <details class="paliers">
+      <summary>Voir les 25 paliers, en USD</summary>
+      <div class="tableau">
+        <table>
+          <caption>Part de chaque échange sur la pool canonique, selon la capitalisation. Source&nbsp;: pump.fun, 17&nbsp;octobre 2026.</caption>
+          <thead><tr><th scope="col">Capitalisation</th><th scope="col">Station</th><th scope="col">pump.fun + liquidité</th><th scope="col">Total</th></tr></thead>
+          <tbody>
+            <tr><td>Moins de 59&nbsp;000&nbsp;USD</td><td class="vert">0,30&nbsp;%</td><td>0,95&nbsp;%</td><td>1,25&nbsp;%</td></tr>
+            <tr><td>De 59&nbsp;000 à 300&nbsp;000&nbsp;USD</td><td class="vert">0,95&nbsp;%</td><td>0,25&nbsp;%</td><td>1,20&nbsp;%</td></tr>
+            <tr><td>De 300&nbsp;000 à 500&nbsp;000&nbsp;USD</td><td class="vert">0,90&nbsp;%</td><td>0,25&nbsp;%</td><td>1,15&nbsp;%</td></tr>
+            <tr><td>De 500&nbsp;000 à 700&nbsp;000&nbsp;USD</td><td class="vert">0,85&nbsp;%</td><td>0,25&nbsp;%</td><td>1,10&nbsp;%</td></tr>
+            <tr><td>De 700&nbsp;000 à 900&nbsp;000&nbsp;USD</td><td class="vert">0,80&nbsp;%</td><td>0,25&nbsp;%</td><td>1,05&nbsp;%</td></tr>
+            <tr><td>De 900&nbsp;000 à 2&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,75&nbsp;%</td><td>0,25&nbsp;%</td><td>1,00&nbsp;%</td></tr>
+            <tr><td>De 2&nbsp;000&nbsp;000 à 3&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,70&nbsp;%</td><td>0,25&nbsp;%</td><td>0,95&nbsp;%</td></tr>
+            <tr><td>De 3&nbsp;000&nbsp;000 à 4&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,65&nbsp;%</td><td>0,25&nbsp;%</td><td>0,90&nbsp;%</td></tr>
+            <tr><td>De 4&nbsp;000&nbsp;000 à 5&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,60&nbsp;%</td><td>0,25&nbsp;%</td><td>0,85&nbsp;%</td></tr>
+            <tr><td>De 5&nbsp;000&nbsp;000 à 6&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,55&nbsp;%</td><td>0,25&nbsp;%</td><td>0,80&nbsp;%</td></tr>
+            <tr><td>De 6&nbsp;000&nbsp;000 à 7&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,50&nbsp;%</td><td>0,25&nbsp;%</td><td>0,75&nbsp;%</td></tr>
+            <tr><td>De 7&nbsp;000&nbsp;000 à 8&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,45&nbsp;%</td><td>0,25&nbsp;%</td><td>0,70&nbsp;%</td></tr>
+            <tr><td>De 8&nbsp;000&nbsp;000 à 9&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,40&nbsp;%</td><td>0,25&nbsp;%</td><td>0,65&nbsp;%</td></tr>
+            <tr><td>De 9&nbsp;000&nbsp;000 à 10&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,35&nbsp;%</td><td>0,25&nbsp;%</td><td>0,60&nbsp;%</td></tr>
+            <tr><td>De 10&nbsp;000&nbsp;000 à 11&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,30&nbsp;%</td><td>0,25&nbsp;%</td><td>0,55&nbsp;%</td></tr>
+            <tr><td>De 11&nbsp;000&nbsp;000 à 12&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,28&nbsp;%</td><td>0,25&nbsp;%</td><td>0,53&nbsp;%</td></tr>
+            <tr><td>De 12&nbsp;000&nbsp;000 à 13&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,25&nbsp;%</td><td>0,25&nbsp;%</td><td>0,50&nbsp;%</td></tr>
+            <tr><td>De 13&nbsp;000&nbsp;000 à 14&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,23&nbsp;%</td><td>0,25&nbsp;%</td><td>0,48&nbsp;%</td></tr>
+            <tr><td>De 14&nbsp;000&nbsp;000 à 15&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,20&nbsp;%</td><td>0,25&nbsp;%</td><td>0,45&nbsp;%</td></tr>
+            <tr><td>De 15&nbsp;000&nbsp;000 à 16&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,18&nbsp;%</td><td>0,25&nbsp;%</td><td>0,43&nbsp;%</td></tr>
+            <tr><td>De 16&nbsp;000&nbsp;000 à 17&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,15&nbsp;%</td><td>0,25&nbsp;%</td><td>0,40&nbsp;%</td></tr>
+            <tr><td>De 17&nbsp;000&nbsp;000 à 18&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,13&nbsp;%</td><td>0,25&nbsp;%</td><td>0,38&nbsp;%</td></tr>
+            <tr><td>De 18&nbsp;000&nbsp;000 à 19&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,10&nbsp;%</td><td>0,25&nbsp;%</td><td>0,35&nbsp;%</td></tr>
+            <tr><td>De 19&nbsp;000&nbsp;000 à 20&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,08&nbsp;%</td><td>0,25&nbsp;%</td><td>0,33&nbsp;%</td></tr>
+            <tr><td>Plus de 20&nbsp;000&nbsp;000&nbsp;USD</td><td class="vert">0,05&nbsp;%</td><td>0,25&nbsp;%</td><td>0,30&nbsp;%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+  <div data-quote-table="SOL" hidden>
+    <p>Avec une paire SOL, la capitalisation se lit en SOL. La part de la station est de 0,30&nbsp;% sous 420&nbsp;SOL, de 0,95&nbsp;% de 420 à 1&nbsp;470&nbsp;SOL, puis baisse de palier en palier jusqu’à 0,05&nbsp;% au-delà de 98&nbsp;240&nbsp;SOL. Les frais totaux passent de 1,25&nbsp;% à 0,30&nbsp;%.</p>
+    <details class="paliers">
+      <summary>Voir les 25 paliers, en SOL</summary>
+      <div class="tableau">
+        <table>
+          <caption>Part de chaque échange sur la pool canonique, selon la capitalisation. Source&nbsp;: pump.fun, 17&nbsp;octobre 2026.</caption>
+          <thead><tr><th scope="col">Capitalisation</th><th scope="col">Station</th><th scope="col">pump.fun + liquidité</th><th scope="col">Total</th></tr></thead>
+          <tbody>
+            <tr><td>Moins de 420&nbsp;SOL</td><td class="vert">0,30&nbsp;%</td><td>0,95&nbsp;%</td><td>1,25&nbsp;%</td></tr>
+            <tr><td>De 420 à 1&nbsp;470&nbsp;SOL</td><td class="vert">0,95&nbsp;%</td><td>0,25&nbsp;%</td><td>1,20&nbsp;%</td></tr>
+            <tr><td>De 1&nbsp;470 à 2&nbsp;460&nbsp;SOL</td><td class="vert">0,90&nbsp;%</td><td>0,25&nbsp;%</td><td>1,15&nbsp;%</td></tr>
+            <tr><td>De 2&nbsp;460 à 3&nbsp;440&nbsp;SOL</td><td class="vert">0,85&nbsp;%</td><td>0,25&nbsp;%</td><td>1,10&nbsp;%</td></tr>
+            <tr><td>De 3&nbsp;440 à 4&nbsp;420&nbsp;SOL</td><td class="vert">0,80&nbsp;%</td><td>0,25&nbsp;%</td><td>1,05&nbsp;%</td></tr>
+            <tr><td>De 4&nbsp;420 à 9&nbsp;820&nbsp;SOL</td><td class="vert">0,75&nbsp;%</td><td>0,25&nbsp;%</td><td>1,00&nbsp;%</td></tr>
+            <tr><td>De 9&nbsp;820 à 14&nbsp;740&nbsp;SOL</td><td class="vert">0,70&nbsp;%</td><td>0,25&nbsp;%</td><td>0,95&nbsp;%</td></tr>
+            <tr><td>De 14&nbsp;740 à 19&nbsp;650&nbsp;SOL</td><td class="vert">0,65&nbsp;%</td><td>0,25&nbsp;%</td><td>0,90&nbsp;%</td></tr>
+            <tr><td>De 19&nbsp;650 à 24&nbsp;560&nbsp;SOL</td><td class="vert">0,60&nbsp;%</td><td>0,25&nbsp;%</td><td>0,85&nbsp;%</td></tr>
+            <tr><td>De 24&nbsp;560 à 29&nbsp;470&nbsp;SOL</td><td class="vert">0,55&nbsp;%</td><td>0,25&nbsp;%</td><td>0,80&nbsp;%</td></tr>
+            <tr><td>De 29&nbsp;470 à 34&nbsp;380&nbsp;SOL</td><td class="vert">0,50&nbsp;%</td><td>0,25&nbsp;%</td><td>0,75&nbsp;%</td></tr>
+            <tr><td>De 34&nbsp;380 à 39&nbsp;300&nbsp;SOL</td><td class="vert">0,45&nbsp;%</td><td>0,25&nbsp;%</td><td>0,70&nbsp;%</td></tr>
+            <tr><td>De 39&nbsp;300 à 44&nbsp;210&nbsp;SOL</td><td class="vert">0,40&nbsp;%</td><td>0,25&nbsp;%</td><td>0,65&nbsp;%</td></tr>
+            <tr><td>De 44&nbsp;210 à 49&nbsp;120&nbsp;SOL</td><td class="vert">0,35&nbsp;%</td><td>0,25&nbsp;%</td><td>0,60&nbsp;%</td></tr>
+            <tr><td>De 49&nbsp;120 à 54&nbsp;030&nbsp;SOL</td><td class="vert">0,30&nbsp;%</td><td>0,25&nbsp;%</td><td>0,55&nbsp;%</td></tr>
+            <tr><td>De 54&nbsp;030 à 58&nbsp;940&nbsp;SOL</td><td class="vert">0,275&nbsp;%</td><td>0,25&nbsp;%</td><td>0,525&nbsp;%</td></tr>
+            <tr><td>De 58&nbsp;940 à 63&nbsp;860&nbsp;SOL</td><td class="vert">0,25&nbsp;%</td><td>0,25&nbsp;%</td><td>0,50&nbsp;%</td></tr>
+            <tr><td>De 63&nbsp;860 à 68&nbsp;770&nbsp;SOL</td><td class="vert">0,225&nbsp;%</td><td>0,25&nbsp;%</td><td>0,475&nbsp;%</td></tr>
+            <tr><td>De 68&nbsp;770 à 73&nbsp;681&nbsp;SOL</td><td class="vert">0,20&nbsp;%</td><td>0,25&nbsp;%</td><td>0,45&nbsp;%</td></tr>
+            <tr><td>De 73&nbsp;681 à 78&nbsp;590&nbsp;SOL</td><td class="vert">0,175&nbsp;%</td><td>0,25&nbsp;%</td><td>0,425&nbsp;%</td></tr>
+            <tr><td>De 78&nbsp;590 à 83&nbsp;500&nbsp;SOL</td><td class="vert">0,15&nbsp;%</td><td>0,25&nbsp;%</td><td>0,40&nbsp;%</td></tr>
+            <tr><td>De 83&nbsp;500 à 88&nbsp;400&nbsp;SOL</td><td class="vert">0,125&nbsp;%</td><td>0,25&nbsp;%</td><td>0,375&nbsp;%</td></tr>
+            <tr><td>De 88&nbsp;400 à 93&nbsp;330&nbsp;SOL</td><td class="vert">0,10&nbsp;%</td><td>0,25&nbsp;%</td><td>0,35&nbsp;%</td></tr>
+            <tr><td>De 93&nbsp;330 à 98&nbsp;240&nbsp;SOL</td><td class="vert">0,075&nbsp;%</td><td>0,25&nbsp;%</td><td>0,325&nbsp;%</td></tr>
+            <tr><td>Plus de 98&nbsp;240&nbsp;SOL</td><td class="vert">0,05&nbsp;%</td><td>0,25&nbsp;%</td><td>0,30&nbsp;%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+  <p>Hors pool canonique, la part du créateur est de 0&nbsp;% (0,05&nbsp;% pour pump.fun, 0,25&nbsp;% pour la liquidité)&nbsp;: si quelqu’un ouvre une autre pool pour $PLEIN, rien n’en revient à la station.</p>
+
+  <h3>Sur le site et l’appli de pump.fun</h3>
+  <p>Depuis le 17&nbsp;octobre 2026, un échange passé par le site web ou l’appli mobile de pump.fun paie en plus des <strong>frais de plateforme de 0,45&nbsp;%</strong> (0,40&nbsp;% avec un code de parrainage). pump.fun indique ne pas les prélever sur Terminal ni sur les interfaces tierces. Le rachat ne dépend pas d’eux&nbsp;: il se calcule sur ce qui arrive vraiment dans le réservoir.</p>
+
+  <h3>Le chemin de la part de la station</h3>
+  <p>Elle s’accumule au nom du <strong>wallet créateur</strong>, publié plus bas. Elle est réclamée chaque semaine et versée dans <strong>le réservoir</strong>, un coffre multisig, avant le plein. Tant qu’elle n’est pas réclamée, elle n’est pas dans le coffre. <span class="todo">[mécanique de réclamation de pump.fun à confirmer avec un premier montant réel]</span></p>
+  <p>pump.fun propose aussi de reverser les frais du créateur aux détenteurs (Holder Rewards) ou à une œuvre caritative. $PLEIN n’utilise ni l’un ni l’autre. L’aide alimentaire suit la règle du samedi, plus bas.</p>
+  <p class="doux">La pompe du site passe par Jupiter, pas par l’appli de pump.fun. Le site ne prend aucune commission en plus&nbsp;: la pompe est réglée sans frais de parrainage. S’appliquent les frais de la courbe ou de la pool canonique (dont la part de la station, comme pour tout échange), ceux de Jupiter (d’après Jupiter&nbsp;: 0,50&nbsp;% sur un jeton de moins de 24&nbsp;h, puis 0,10&nbsp;%) et ceux du réseau Solana. <span class="todo">[à confirmer par un premier échange réel&nbsp;: le frais de Jupiter affiché avant la signature, et si la pompe compte pour pump.fun comme une interface tierce]</span></p>
 
   <h2><span class="borne">3</span>La règle du samedi</h2>
   <div class="encart">
@@ -60,10 +163,13 @@
     <li><strong>L’aide alimentaire&nbsp;:</strong> 10&nbsp;%, fixes, versés en euros à une association. Son nom est publié dès que la convention est signée, avec chaque reçu. Sans partenaire, ces 10&nbsp;% attendent dans un wallet publié et ne vont jamais à l’équipe.</li>
     <li><strong>L’équipe&nbsp;:</strong> le reste. Quand le gazole monte, c’est la part de l’équipe qui baisse.</li>
   </ul>
-  <p>Cette semaine&nbsp;: <strong data-official="formula">20&nbsp;× 2,328&nbsp;€ = 46,6&nbsp;%</strong>, équipe <strong data-official="team">43,4&nbsp;%</strong>. <span class="doux" data-official="source">Relevé hebdomadaire officiel du 9 octobre 2026</span>.</p>
+  <!-- Tier 2: 2,3283 €/L comes from press reports of the 9 October survey (Le Figaro, Selectra), not yet read in the
+       ministry's own note (NPG-2026.10.09). Remove the bracket below in the same change that replaces the Tier 2
+       comment on `official` in config.js with "checked against NPG-2026.10.09 on <date> by <who>". -->
+  <p>Au dernier relevé publié&nbsp;: <strong data-official="formula">20&nbsp;× 2,328&nbsp;€ = 46,6&nbsp;%</strong>, équipe <strong data-official="team">43,4&nbsp;%</strong>. <span class="doux" data-official="source">Relevé hebdomadaire officiel du 9 octobre 2026</span>. <span class="todo">[à vérifier sur la note hebdomadaire du ministère (NPG-2026.10.09)&nbsp;: ce chiffre est pour l’instant repris de la presse]</span></p>
   <div class="tableau">
     <table>
-      <caption class="doux" style="caption-side: bottom; text-align: left; padding: 10px 14px; font-size: 14px;">Part du réservoir, selon le prix officiel du gazole.</caption>
+      <caption>Part du réservoir, selon le prix officiel du gazole.</caption>
       <thead><tr><th scope="col">Gazole</th><th scope="col">Rachat et burn</th><th scope="col">Aide alimentaire</th><th scope="col">Équipe</th></tr></thead>
       <tbody>
         <tr><td>1,50&nbsp;€/L</td><td class="vert">30&nbsp;% (plancher)</td><td>10&nbsp;%</td><td>60&nbsp;%</td></tr>
@@ -77,6 +183,7 @@
   <p class="doux">Exemple de ticket, à 2,356&nbsp;€/L&nbsp;: un réservoir de 3&nbsp;412,00&nbsp;USDC donne 1&nbsp;607,05 au rachat, 341,20 à l’aide alimentaire et 1&nbsp;463,75 à l’équipe. C’est un exemple, pas une prévision.</p>
 
   <h3>Le déroulé, chaque samedi</h3>
+  <p>Le premier plein a lieu le <span data-first-plein>samedi 24 octobre 2026 à 18:00</span>, une semaine après l’ouverture. Les frais perçus depuis l’ouverture l’alimentent.</p>
   <ol class="horaire">
     <li><time>17:45</time><span>le prix officiel est figé.</span></li>
     <li><time>17:50</time><span>les frais de la semaine rejoignent le coffre multisig.</span></li>
@@ -90,12 +197,12 @@
   <p>Les wallets sont publics. Chaque rachat et chaque burn renvoie vers sa transaction&nbsp;; chaque don, vers son reçu.</p>
   <ul class="wallets">
     <li><span class="role">Wallet créateur (frais)</span><span class="mono" data-wallet="creator">publié à l’ouverture</span></li>
-    <li><span class="role">Le réservoir (multisig)</span><span class="mono" data-wallet="reservoir">publié à l’ouverture</span></li>
-    <li><span class="role">Aide alimentaire</span><span class="mono" data-wallet="aid">publié à l’ouverture</span></li>
+    <li><span class="role">Le réservoir (multisig)</span><span class="mono" data-wallet="reservoir">publié avant le premier plein</span></li>
+    <li><span class="role">Aide alimentaire</span><span class="mono" data-wallet="aid">publié avant le premier plein</span></li>
     <li><span class="role">Fondateur 1</span><span class="mono" data-wallet="founder1">publié à l’ouverture</span></li>
     <li><span class="role">Fondateur 2</span><span class="mono" data-wallet="founder2">publié à l’ouverture</span></li>
   </ul>
-  <p class="doux">Les signataires du multisig&nbsp;: <span class="todo">[outil, signataires et seuil, publiés avant l’ouverture]</span>. Liquidité après la cotation&nbsp;: <span class="todo">[verrouillage réel de la liquidité, vérifié sur la chaîne après la migration, avec le lien]</span>.</p>
+  <p class="doux">Les signataires du multisig&nbsp;: <span class="todo">[outil, signataires et seuil, publiés avant le premier plein]</span>. Liquidité après la migration&nbsp;: <span class="todo">[verrouillage réel de la liquidité, vérifié sur la chaîne après la migration, avec le lien]</span>.</p>
 
   <h2><span class="borne">5</span>Les sept lignes continues</h2>
   <ol>
@@ -108,16 +215,28 @@
     <li>Aucun mouvement, parti, syndicat ni marque.</li>
   </ol>
 
-  <h2><span class="borne">6</span>Ce qui peut mal tourner</h2>
+  <h2><span class="borne">6</span>La carte de fidélité</h2>
+  <p>La station propose une carte à tamponner, pour le plaisir. <strong>Elle ne vaut rien et ne promet rien&nbsp;:</strong> ni jeton, ni airdrop, ni cadeau, ni avantage, ni tirage au sort. Aucun airdrop n’est prévu.</p>
+  <ul>
+    <li><strong>Elle reste dans ton navigateur.</strong> Elle est écrite dans le stockage local de ton navigateur, jamais envoyée à la station ni à personne, et liée à aucun wallet ni à aucune identité. Vider les données du site l’efface&nbsp;; un autre navigateur ou un autre appareil a sa propre carte.</li>
+    <li><strong>Un tampon par type de geste et par semaine.</strong> Il y en a quatre&nbsp;: être sur la page un samedi de plein, faire une recherche dans Mon Plein, exporter un totem de l’Atelier, ouvrir la transaction d’un vrai ticket. Dix tampons remplissent la carte. Une carte pleine ne gagne rien, et la carte le dit.</li>
+    <li><strong>Elle ne dépend d’aucun achat.</strong> Il n’y a rien à acheter ni à détenir pour la remplir, pas même un wallet.</li>
+  </ul>
+
+  <h2><span class="borne">7</span>Ce qui peut mal tourner</h2>
   <ul>
     <li><strong>Le prix peut tomber à zéro.</strong> Le rachat ne garantit aucun prix. Il dépense des frais, il ne crée pas de valeur.</li>
     <li><strong>Sans échanges, pas de rachat.</strong> Les frais viennent du volume. Si le volume s’effondre, le rachat devient minuscule.</li>
     <li><strong>Le gazole qui baisse fait baisser le rachat.</strong> La part du rachat suit le prix dans les deux sens, jusqu’au plancher de 30&nbsp;%.</li>
+    <li><strong>pump.fun peut changer ses frais.</strong> Il l’a fait&nbsp;: depuis le 17&nbsp;octobre 2026, il ajoute des frais de plateforme sur son site et son appli. Rien ne l’empêche de modifier encore ses frais, ses paliers ou ses règles, sans préavis. Le rachat se calcule sur ce qui arrive vraiment dans le réservoir.</li>
+    <li><strong>La part de la station baisse quand la capitalisation monte.</strong> Passé le palier le plus généreux, chaque palier rapporte moins à la station, à volume égal.</li>
+    <li><strong>La courbe peut ne jamais se remplir.</strong> Tant qu’elle n’est pas remplie, le jeton ne migre pas vers PumpSwap et les paliers ne s’appliquent pas. La migration n’est pas garantie.</li>
+    <li><strong>Snipers et achats groupés.</strong> À la création d’un jeton sur pump.fun, les achats automatisés (snipers) et groupés (bundles) sont courants&nbsp;: ils peuvent prendre une part de l’offre dès les premières secondes. Ils sont mesurés en public une heure après le lancement, sur le tableau de bord (voyant «&nbsp;Achats groupés&nbsp;»). La mesure décrit&nbsp;; elle n’empêche rien.</li>
     <li><strong>La liquidité peut manquer.</strong> Vendre beaucoup d’un coup peut faire chuter le prix.</li>
-    <li><strong>Les outils peuvent tomber.</strong> Solana, Jupiter ou le pool de liquidité peuvent connaître une panne ou une faille.</li>
-    <li><strong>Les imitations existent.</strong> De faux contrats circulent dès les premières minutes. Vérifie l’adresse ici, et nulle part ailleurs.</li>
+    <li><strong>Les outils peuvent tomber.</strong> Solana, pump.fun, Jupiter ou la pool de liquidité peuvent connaître une panne ou une faille.</li>
+    <li><strong>Les imitations existent.</strong> Sur pump.fun, n’importe qui peut créer en quelques secondes un jeton au même nom, et de faux contrats circulent dès les premières minutes. Vérifie l’adresse ici, et nulle part ailleurs.</li>
     <li><strong>Les règles peuvent changer.</strong> La formule, avec quatre semaines de préavis. La loi, sans préavis&nbsp;: la réglementation des crypto-actifs évolue en France et dans l’Union européenne.</li>
-    <li><strong>Les clés peuvent se perdre.</strong> Si le coffre exige plusieurs signatures et que l’une manque, ses fonds restent bloqués. Le seuil et la procédure de secours sont publiés avant l’ouverture <span class="todo">[à décider]</span>.</li>
+    <li><strong>Les clés peuvent se perdre.</strong> Si le coffre exige plusieurs signatures et que l’une manque, ses fonds restent bloqués. Le seuil et la procédure de secours sont publiés avant le premier plein <span class="todo">[à décider]</span>.</li>
   </ul>
   <p class="doux">Rien ici n’est un conseil en investissement. Réservé aux majeurs.</p>
 

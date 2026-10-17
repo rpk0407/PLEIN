@@ -8,3 +8,9 @@ node_modules/
 *.key
 *keypair*.json
 id.json
+
+# printed tickets and purchase orders (made by npm run plein and npm run ticket)
+out/
+
+# private notes (lawyer questions, anything not for the public repo)
+docs/private/
