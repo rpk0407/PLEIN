@@ -8,3 +8,5 @@
 *.woff2 binary
 *.pdf binary
 *.zip binary
+# Calendar files keep CRLF, as RFC 5545 requires.
+*.ics text eol=crlf
