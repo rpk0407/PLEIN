@@ -988,18 +988,17 @@ test('the order never goes through a shell line, env or a with: input; the log o
 
 test('only humans on the list can start it: the Claude App token and the workflow\'s own token are refused', WORKFLOW, () => {
   const jobIf = yml.match(/^ {4}if: (.+)$/m)?.[1];
-  assert.equal(jobIf, `github.event.sender.type == 'User' && contains(fromJSON('["rpk0407","SECOND_FOUNDER_HANDLE"]'), github.actor)`);
+  assert.equal(jobIf, `github.event.sender.type == 'User' && contains(fromJSON('["rpk0407","axel9lg"]'), github.actor)`);
   const handles = JSON.parse(jobIf.match(/fromJSON\('(\[[^']*\])'\)/)[1]);
   assert.equal(handles.length, 2);
   assert.equal(handles[0], 'rpk0407');
-  assert.ok(handles[1].includes('_'), 'the placeholder holds an underscore, which no GitHub login can: it matches nobody until the handle is filled in');
+  assert.equal(handles[1], 'axel9lg', 'the second founder');
   // the same founders as claude.yml's list of trusted commenters, when that file is in the tree
   const claudeYml = join(root, '.github', 'workflows', 'claude.yml');
   if (existsSync(claudeYml)) {
     const theirs = readFileSync(claudeYml, 'utf8').match(/include_comments_by_actor: "([^"]+)"/)?.[1].split(',') ?? [];
     for (const handle of handles) assert.ok(theirs.includes(handle), `${handle} is a founder in claude.yml too`);
   }
-  assert.match(yml, /TODAY, before the first merge: replace SECOND_FOUNDER_HANDLE/);
   // the rule as GitHub evaluates it: a human, on the list, any letter case
   const runs = (type, actor) => type === 'User' && handles.some((h) => h.toLowerCase() === actor.toLowerCase());
   assert.equal(runs('User', 'rpk0407'), true);
@@ -1246,5 +1245,5 @@ test('docs/telegram.md sends the ops token to Vercel only, starts the test with 
   assert.match(doc, new RegExp(`${CLAUDE_STEP_MINUTES} minutes`));
   assert.doesNotMatch(doc, /\(30 minutes\)/);
   // the allowed accounts
-  assert.match(doc, /SECOND_FOUNDER_HANDLE/);
+  assert.match(doc, /axel9lg/);
 });

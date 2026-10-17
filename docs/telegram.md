@@ -139,9 +139,8 @@ Before you start, four things must already be true: `api/standard.js` is deploye
 `main`; `.github/workflows/standard.yml` is on `main` (pushing a workflow file needs a token with the
 `workflow` scope, so it ships in its own pull request); and `@claude` works (the Claude GitHub App is
 installed and `CLAUDE_CODE_OAUTH_TOKEN` is set, see `salle-de-controle.md`, "Free setup of each
-secret"). The fourth: in `standard.yml`, the job's list holds both founders' GitHub handles. Replace
-`SECOND_FOUNDER_HANDLE` with the second founder's handle, the same one as in `claude.yml` and in
-`.github/CODEOWNERS`. Also turn on branch protection and code-owner review on `main` first: the
+secret"). The fourth: in `standard.yml`, the job's list holds both founders' GitHub handles, `rpk0407` and
+`axel9lg`, the same as in `claude.yml` and in `.github/CODEOWNERS`. Also turn on branch protection and code-owner review on `main` first: the
 dispatch token below can write to the repository, and protection is what stops it from touching `main`.
 
 ### 1. The ops bot (phone)
@@ -318,7 +317,7 @@ including the way back with a stand-in for Telegram.
 | "GitHub ne trouve pas le dépôt (404)" | `GITHUB_REPO` is wrong, or the token was not given this repository | Fix the name; edit the token's repository access |
 | « Reçu » then « Attention : la réponse ne reviendra pas ici » | `TELEGRAM_OPS_BOT_TOKEN` is missing in Vercel, or the site's address is not a public name | Add the variable, redeploy; use the production address in step 9 |
 | "Reçu" but no run in Actions | `standard.yml` is not on the default branch yet, or Actions is disabled | Merge the workflow; Settings, Actions, General |
-| "Reçu", a run appears but is skipped | The dispatch token's owner is not on the job's list: `SECOND_FOUNDER_HANDLE` is still in the file, or the token was made by another account | Put the real handle in `standard.yml`, or make the token as one of the two founders |
+| "Reçu", a run appears but is skipped | The dispatch token's owner is not on the job's list (`rpk0407`, `axel9lg`): the token was made by another account | Make the token as one of the two founders |
 | A run starts and fails at "Carry out the order" | The Claude GitHub App is not installed on the repository, or `CLAUDE_CODE_OAUTH_TOKEN` is missing or expired | `salle-de-controle.md`, setup of `@claude` |
 | The run ends, nothing arrives in the group, and the last step says "Outcome not delivered (…)" | The number is the site's answer: 401 the proof is refused (the webhook secret changed during the run), 410 the proof expired (the run waited over two hours), 400 the report was malformed, 429 too many reports for this order, 502 Telegram refused the message (the bot left the group), 503 `TELEGRAM_OPS_BOT_TOKEN` or `GITHUB_REPO` missing in Vercel | Fix the cause; the order's work is on its branch anyway |
 | The last step says "nothing sent" | The order did not come through the switchboard (a dispatch made by hand or by another token) so it has no proof | Expected; send the order from the group |

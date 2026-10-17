@@ -106,10 +106,9 @@ Vercel's free Hobby plan says non-commercial use (Tier 2: read its fair-use page
 username, role **Write** (or Owner of an organization). They accept from the e-mail or the GitHub app.
 **It worked when** they can open a PR from the app and press Approve.
 
-**Then tell the agent their handle**, e.g. « The second founder is @their-handle. » Three things use it:
-the second line of `.github/CODEOWNERS` (replace the commented line, keep one active line), the
-`include_comments_by_actor` list in `.github/workflows/claude.yml` (replace `SECOND_FOUNDER_HANDLE`),
-and the branch rule's code-owner review in [`salle-de-controle.md`](salle-de-controle.md) (turn it on
+**Done 17 October: the second founder is `axel9lg`.** His handle is in `.github/CODEOWNERS`
+(`* @rpk0407 @axel9lg`), in the `include_comments_by_actor` list of `.github/workflows/claude.yml`
+and in the founders list of `.github/workflows/standard.yml`. Still to do: the branch rule's code-owner review in [`salle-de-controle.md`](salle-de-controle.md) (turn it on
 only after both handles are in the file). These are files that change what agents may do, so the PR
 waits for a founder's explicit yes.
 
