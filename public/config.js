@@ -49,7 +49,7 @@ window.PLEIN_CONFIG = {
     referralFeeBps: 0,
   },
 
-  // Public address of the site once it has a domain, e.g. 'https://stationplein.fr'.
-  // Printed on the PNG cards made in L'Atelier.
-  siteUrl: '',
+  // Public address of the site (Vercel, live since 17 October 2026). Change it if the site moves to
+  // its own domain. Printed on the PNG cards made in L'Atelier.
+  siteUrl: 'https://station-plein.vercel.app',
 };

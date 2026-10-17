@@ -1,0 +1,12 @@
+# Keep LF in every working copy, on Windows too: the tests and the guard read files with 
+.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.woff2 binary
+*.pdf binary
+*.zip binary
+# Calendar files keep CRLF, as RFC 5545 requires.
+*.ics text eol=crlf

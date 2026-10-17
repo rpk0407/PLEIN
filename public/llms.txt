@@ -18,6 +18,7 @@
 - Price used: the latest weekly national average published by the ministry (DGEC) before Saturday 17:45 (Paris time).
 - The formula changes only after four weeks of public notice.
 - There is no plein on launch day. Plein #1 is Saturday 24 October 2026 at 18:00 (Paris time).
+- The station's only site is https://station-plein.vercel.app. A lookalike address is not the station.
 - Full text, fees, wallets and risks: /fiche-plein.html. If this file and the fiche disagree, the fiche wins. If the fiche and the chain disagree, the chain wins.
 
 ## Data (read-only JSON)
@@ -56,6 +57,7 @@
 - Prix retenu : la dernière moyenne nationale hebdomadaire publiée par le ministère (DGEC) avant le samedi 17:45 (heure de Paris).
 - La formule ne change qu’après quatre semaines de préavis public.
 - Il n’y a pas de plein le jour du lancement. Le plein n° 1 a lieu le samedi 24 octobre 2026 à 18:00 (heure de Paris).
+- Le seul site de la station est https://station-plein.vercel.app. Une adresse qui lui ressemble n’est pas la station.
 - Le texte complet, les frais, les wallets et les risques : /fiche-plein.html. Si ce fichier et la fiche se contredisent, la fiche l’emporte. Si la fiche et la chaîne se contredisent, la chaîne l’emporte.
 
 ## Données (JSON en lecture seule)
