@@ -37,6 +37,10 @@ dependencies, the critic gate, and the metric it moves. Reject any task that mov
   `docs/interfaces.md`, `docs/registre-tier2.md`), `economiste` (`docs/moteur.md`).
 - Anything user-facing, money-adjacent, or touching `api/`, workflows, addresses, the formula or
   public copy goes through skill `critique` (or its `--quick` form) before it is proposed as a PR.
+- Orders typed in PLEIN Control (the founders' phone console) are handled by `/console`. In step 1,
+  when `ArtifactData` is available, count the orders whose status is `nouveau` so the "now" list
+  includes what a founder already asked for; in this step, run `/console` for them. `/console status`
+  alone refreshes the console's station card.
 - `/lancement`, `/plein` and `/post` can only be started by a founder typing them (they touch money
   and public words, so Claude cannot load them on its own). Name them in the report with the step
   to type; do not try to run them yourself, and do the underlying reads with the agents instead.

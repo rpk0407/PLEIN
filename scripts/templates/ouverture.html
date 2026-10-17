@@ -1,0 +1,98 @@
+<!doctype html>
+<!-- The opening ticket as a 1080 x 1350 plate for X and Telegram, filled by renderOuvertureHtml in scripts/audit.mjs (double braces: escaped text, among them the footer, which says whether the creator wallet was in the repository before the creation; triple braces: markup built by the script, namely the fonts, one row per declared setting and the optional limits). It is not a weekly ticket and carries no plein number: the opening is not a plein. Same look as the weekly ticket (scripts/templates/ticket.html): paper, monospace, dotted leaders, zigzag tear. Every setting shows OK, ÉCART or ? (not read, or nothing to compare with), as words, so no symbol font is needed. Addresses are shortened; the site holds the whole address. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080">
+<title>Station $PLEIN · ticket d’ouverture</title>
+<style>
+{{{fonts}}}
+html, body { margin: 0; background: #07090C; }
+.card { width: 1080px; height: 1350px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; background: radial-gradient(ellipse 70% 30% at 50% 0%, rgba(214, 230, 255, 0.12), transparent 70%), #07090C; }
+.printer { margin-top: 32px; width: 900px; box-sizing: border-box; padding: 16px 26px 16px; border-radius: 18px; background: linear-gradient(180deg, #1B2028, #12161B); border: 1px solid #2C333D; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.printer .status { display: flex; width: 100%; justify-content: space-between; align-items: center; font: 400 15px 'IBM Plex Mono', monospace; letter-spacing: 0.14em; text-transform: uppercase; color: #A7AFB9; }
+.printer .status b { font-weight: 400; color: #3CF08A; }
+.card.fail .printer .status b { color: #FF5A4D; }
+.card.incomplete .printer .status b { color: #FFB72E; }
+.printer .slot { width: 92%; height: 9px; border-radius: 5px; background: #000; box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.9); }
+.paper-wrap { position: relative; width: 800px; margin-top: -20px; display: flex; flex-direction: column; }
+.paper { background: #F2EFE6; color: #17181B; font-family: 'IBM Plex Mono', 'Courier New', monospace; padding: 28px 46px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55); }
+.head { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.head .name { font: 800 60px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.head .sub { font-size: 16px; letter-spacing: 0.1em; }
+.cut { border-top: 2px dashed #17181B; }
+.title { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.title .plate { font: 800 54px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.title .when { font-size: 18px; }
+.meta { display: flex; flex-direction: column; gap: 6px; font-size: 16px; font-variant-numeric: tabular-nums; }
+.meta div { display: flex; justify-content: space-between; gap: 12px; }
+.rows { display: flex; flex-direction: column; gap: 6px; font-size: 18px; font-variant-numeric: tabular-nums; }
+.row { display: flex; align-items: baseline; gap: 8px; }
+.row i { flex: 1; border-bottom: 2px dotted #8A8A80; min-width: 12px; }
+.row b { font-weight: 600; text-align: right; }
+.row .mark { flex: none; width: 72px; box-sizing: border-box; padding: 2px 0; text-align: center; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; border-radius: 3px; background: #17181B; color: #3CF08A; }
+.row.fail .mark { background: #B3261E; color: #F2EFE6; }
+.row.unread .mark { background: #8A8A80; color: #17181B; }
+.row.info .mark { background: transparent; color: #5C5C55; border: 1px solid #8A8A80; }
+.row.fail b { color: #B3261E; }
+.verdict { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.verdict b { font: 800 40px/1.05 'Barlow Condensed', 'Arial Narrow', sans-serif; letter-spacing: 0.02em; }
+.card.ok .verdict b { color: #0C7A3F; }
+.card.fail .verdict b { color: #B3261E; }
+.card.incomplete .verdict b { color: #8A5A00; }
+.verdict span { font-size: 17px; }
+.notes { font-size: 13px; line-height: 1.35; color: #3D3D38; }
+.notes p { margin: 0 0 3px; }
+.foot { font-size: 13px; text-align: center; color: #5C5C55; }
+.bars { display: flex; justify-content: center; align-items: stretch; gap: 3px; height: 40px; margin-top: 4px; }
+.bars span { background: #17181B; }
+.tear { height: 20px; margin-top: -1px; background: #F2EFE6; clip-path: polygon(0 0, 100% 0, 100% 100%, 97.5% 0, 95% 100%, 92.5% 0, 90% 100%, 87.5% 0, 85% 100%, 82.5% 0, 80% 100%, 77.5% 0, 75% 100%, 72.5% 0, 70% 100%, 67.5% 0, 65% 100%, 62.5% 0, 60% 100%, 57.5% 0, 55% 100%, 52.5% 0, 50% 100%, 47.5% 0, 45% 100%, 42.5% 0, 40% 100%, 37.5% 0, 35% 100%, 32.5% 0, 30% 100%, 27.5% 0, 25% 100%, 22.5% 0, 20% 100%, 17.5% 0, 15% 100%, 12.5% 0, 10% 100%, 7.5% 0, 5% 100%, 2.5% 0, 0 100%); }
+.line { margin-top: 14px; text-align: center; font: italic 400 32px 'Instrument Serif', Georgia, serif; color: #F1F4F6; }
+.road { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; background: #0A0C0F; border-top: 2px solid rgba(241, 244, 246, 0.45); display: flex; align-items: center; }
+.road div { width: 100%; height: 5px; background: repeating-linear-gradient(90deg, rgba(241, 244, 246, 0.7) 0 60px, transparent 60px 128px); }
+</style>
+</head>
+<body>
+<div class="card {{state}}">
+  <div class="printer">
+    <span class="status"><span>Station $PLEIN</span><b>● {{status}}</b></span>
+    <span class="slot" aria-hidden="true"></span>
+  </div>
+
+  <div class="paper-wrap">
+    <div class="paper">
+      <div class="head">
+        <span class="name">STATION $PLEIN</span>
+        <span class="sub">TICKET D’OUVERTURE · SOLANA</span>
+      </div>
+      <div class="cut"></div>
+      <div class="title">
+        <span class="plate">OUVERTURE</span>
+        <span class="when">{{when}}</span>
+      </div>
+      <div class="meta">
+        <div><span>CONTRAT</span><span>{{mint}}</span></div>
+        <div><span>COURBE PUMP.FUN</span><span>{{curve}}</span></div>
+        <div><span>CRÉATION · LECTURE</span><span>slot {{creationSlot}} · slot {{slot}}</span></div>
+      </div>
+      <div class="cut"></div>
+      <div class="rows">
+        {{{rows}}}
+      </div>
+      <div class="cut"></div>
+      <div class="verdict">
+        <b>{{verdict}}</b>
+        <span>{{verdictSub}}</span>
+      </div>
+      {{{notes}}}
+      <div class="foot">{{footer}}</div>
+      <div class="bars" aria-hidden="true"><span style="width:4px"></span><span style="width:2px"></span><span style="width:6px"></span><span style="width:2px"></span><span style="width:3px"></span><span style="width:5px"></span><span style="width:2px"></span><span style="width:4px"></span><span style="width:2px"></span><span style="width:6px"></span><span style="width:3px"></span><span style="width:2px"></span><span style="width:5px"></span><span style="width:2px"></span><span style="width:4px"></span><span style="width:3px"></span><span style="width:6px"></span><span style="width:2px"></span><span style="width:4px"></span><span style="width:2px"></span><span style="width:5px"></span><span style="width:3px"></span><span style="width:2px"></span><span style="width:6px"></span><span style="width:2px"></span><span style="width:4px"></span></div>
+    </div>
+    <div class="tear" aria-hidden="true"></div>
+  </div>
+
+  <span class="line">Ce qu’on a annoncé, relu sur la chaîne.</span>
+  <div class="road" aria-hidden="true"><div></div></div>
+</div>
+</body>
+</html>

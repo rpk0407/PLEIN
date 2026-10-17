@@ -379,95 +379,26 @@ const looseSpaces = (text) => text.normalize('NFC').replace(/[\s\u00a0\u202f]+/g
 // ---------------------------------------------------------------- pump.fun accounts read by the launch gate
 
 /**
- * The fee-sharing config of a coin. It lives under the fee program (pump_fees), not under the pump
- * program: api/_pump.js `sharingConfigAddress` derives it under the pump program, which is wrong
- * (reported; until it is fixed the gate derives its own). Checked on 17 October 2026 against a
- * mainnet coin: this derivation gives the account that is owned by the fee program and equals the
- * coin's curve creator; the pump-program derivation gives an address that does not exist.
+ * The fee-sharing config of a coin: api/_pump.js `sharingConfigAddress`, which derives it under the
+ * fee program (pump_fees), not under the pump program. Checked on 17 October 2026 against a mainnet
+ * coin: the derivation gives the account that is owned by the fee program and equals the coin's
+ * curve creator; the pump-program derivation gives an address that does not exist.
  */
 export async function feeSharingAddress(mint) {
-  const [{ findProgramAddress }, { FEE_PROGRAM }] = [await import('../api/_solana.js'), await import('../api/_pump.js')];
-  return findProgramAddress(['sharing-config', { address: mint }], FEE_PROGRAM).address;
+  return (await import('../api/_pump.js')).sharingConfigAddress(mint);
 }
 
-const SHARING_CONFIG_DISCRIMINATOR = [216, 74, 9, 0, 56, 140, 93, 75];
-
 /**
- * pump_fees SharingConfig account (idl/pump_fees.json, read 17 October 2026; decoded to the byte on
- * a live mainnet account the same day): discriminator, bump u8, version u8, status u8 (0 paused, 1
- * active), mint, admin, admin_revoked bool, then a vector of { address, share_bps u16 }. Throws on
- * anything that does not fit. Tier 2: the layout can grow.
+ * pump_fees SharingConfig account and the Token-2022 TokenMetadata extension: the decoders live in
+ * api/_pump.js (scripts/audit.mjs reads the same accounts), and these are the async forms the gate
+ * and its tests use. See there for the layouts and what is Tier 2.
  */
 export async function parseSharingConfig(bytes) {
-  const { b58encode } = await import('../api/_solana.js');
-  if (bytes.length < 80 || SHARING_CONFIG_DISCRIMINATOR.some((b, i) => bytes[i] !== b)) throw new Error('not a fee-sharing config account');
-  const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const count = v.getUint32(76, true);
-  if (count > 64 || 80 + count * 34 > bytes.length) throw new Error('fee-sharing config: the list of shareholders does not fit the account');
-  const shareholders = [];
-  for (let i = 0; i < count; i += 1) {
-    const at = 80 + i * 34;
-    shareholders.push({ address: b58encode(bytes.subarray(at, at + 32)), shareBps: v.getUint16(at + 32, true) });
-  }
-  return {
-    bump: bytes[8],
-    version: bytes[9],
-    status: bytes[10] === 1 ? 'active' : bytes[10] === 0 ? 'paused' : `unknown (${bytes[10]})`,
-    mint: b58encode(bytes.subarray(11, 43)),
-    admin: b58encode(bytes.subarray(43, 75)),
-    adminRevoked: bytes[75] !== 0,
-    shareholders,
-  };
+  return (await import('../api/_pump.js')).parseSharingConfig(bytes);
 }
 
-const TOKEN_METADATA_EXTENSION = 19;
-
-/**
- * The Token-2022 TokenMetadata extension of a pump.fun mint: update authority (null when none),
- * the mint it names, and the name, symbol and uri. These are what a clone copies and what stays
- * on the coin. Returns null when the mint carries no such extension (a classic mint, or a Token-2022
- * mint without it). Throws when the extension is there and cannot be decoded. Tier 2: the layout is
- * Token-2022's TokenMetadata (update authority, mint, three length-prefixed strings, extra pairs);
- * it was decoded on a live pump.fun mint on 17 October 2026.
- */
 export async function parseTokenMetadata(bytes) {
-  const { b58encode } = await import('../api/_solana.js');
-  if (bytes.length <= 166 || bytes[165] !== 1) return null;
-  const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  for (let at = 166; at + 4 <= bytes.length;) {
-    const type = v.getUint16(at, true);
-    const length = v.getUint16(at + 2, true);
-    if (type === 0) break;
-    if (at + 4 + length > bytes.length) {
-      if (type === TOKEN_METADATA_EXTENSION) throw new Error('TokenMetadata: the entry is cut short');
-      break;
-    }
-    if (type === TOKEN_METADATA_EXTENSION) {
-      const body = bytes.subarray(at + 4, at + 4 + length);
-      if (body.length < 64) throw new Error('TokenMetadata: shorter than its fixed part');
-      const view = new DataView(body.buffer, body.byteOffset, body.byteLength);
-      const decoder = new TextDecoder('utf-8', { fatal: true });
-      let cursor = 64;
-      const text = (label) => {
-        if (cursor + 4 > body.length) throw new Error(`TokenMetadata: ${label} is cut short`);
-        const size = view.getUint32(cursor, true);
-        if (cursor + 4 + size > body.length) throw new Error(`TokenMetadata: ${label} is cut short`);
-        const value = decoder.decode(body.subarray(cursor + 4, cursor + 4 + size));
-        cursor += 4 + size;
-        return value;
-      };
-      const none = body.subarray(0, 32).every((b) => b === 0);
-      return {
-        updateAuthority: none ? null : b58encode(body.subarray(0, 32)),
-        mint: b58encode(body.subarray(32, 64)),
-        name: text('name'),
-        symbol: text('symbol'),
-        uri: text('uri'),
-      };
-    }
-    at += 4 + length;
-  }
-  return null;
+  return (await import('../api/_pump.js')).parseTokenMetadata(bytes);
 }
 
 // ---------------------------------------------------------------- the registry
@@ -1077,7 +1008,7 @@ export function createTools(ctx = {}) {
         const people = (x) => `${x.shareholders.length} bénéficiaire${x.shareholders.length === 1 ? '' : 's'} (${x.shareholders.map((h) => `${h.address} ${h.shareBps / 100} %`).join(', ')}), état ${x.status}, administrateur ${x.adminRevoked ? 'révoqué' : x.admin}`;
         if (!sharingAccount) {
           line('feeSharing', 'Partage des frais', 'aucun compte de partage', `aucun compte de partage au slot ${first.slot}`, 'pass', sharingAddress, first.slot,
-            'Tier 2: that no account means no sharing. The account is derived under the fee program (pump_fees); api/_pump.js derives it under the pump program, which is wrong');
+            'Tier 2: that no account means no sharing. The account is derived under the fee program (pump_fees), as api/_pump.js sharingConfigAddress does');
         } else if (sharing) {
           line('feeSharing', 'Partage des frais', 'aucun compte de partage', `compte de partage présent : ${people(sharing)}`, 'fail', sharingAddress, first.slot,
             'fee sharing is configured: the creator fee no longer accrues to one wallet and the ticket split would not match (docs/moteur.md section 3)');

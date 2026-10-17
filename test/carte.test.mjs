@@ -2,8 +2,12 @@
 // card wins nothing, and a broken or missing storage never breaks the page.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
-  SLOTS, STORAGE_KEY, addStamp, cardTaken, cardView, createKeeper, discardCard, emptyCard, isFull, parseCard, readCard, writeCard,
+  SLOTS, STORAGE_KEY, addStamp, cardTaken, cardView, createKeeper, discardCard, emptyCard, hasCard, isFull, parseCard, readCard,
+  returnCard, takeCard, writeCard,
 } from '../public/js/carte.js';
 
 const at = (iso) => Date.parse(iso);
@@ -214,6 +218,61 @@ test('a browser that refuses storage never breaks the card: it lives for the vis
     assert.equal(keeper.taken, false);
     assert.equal(keeper.card.stamps.length, 1, 'the stamp is still there for this visit');
     assert.equal(keeper.discard(), false);
+  }
+});
+
+test('hasCard, takeCard and returnCard: asking writes nothing, taking is the first write, handing back leaves nothing', () => {
+  const s = recordingStorage();
+  assert.equal(hasCard(s), false);
+  assert.deepEqual(s.writes, [], 'asking writes nothing');
+  assert.equal(takeCard(s), true);
+  assert.deepEqual(s.writes, [['set', STORAGE_KEY]], 'taking the card is the first write');
+  assert.equal(hasCard(s), true);
+  assert.deepEqual(JSON.parse(s.mem.get(STORAGE_KEY)), emptyCard(), 'a card just taken is an empty card');
+  assert.equal(returnCard(s), true);
+  assert.equal(hasCard(s), false);
+  assert.equal(s.mem.size, 0, 'handing the card back leaves nothing behind');
+  assert.deepEqual(s.writes, [['set', STORAGE_KEY], ['remove', STORAGE_KEY]]);
+  assert.equal(takeCard(null), false);
+  assert.equal(returnCard(null), false);
+  assert.equal(takeCard({ setItem() { throw new Error('QuotaExceededError'); } }), false);
+});
+
+test('a whole visit without taking the card writes nothing: search, export, ticket link, a Saturday on the page', () => {
+  const s = recordingStorage();
+  const keeper = createKeeper(s);
+  for (const [kind, when] of [['monplein', '2026-10-24T10:00:00+02:00'], ['totem', '2026-10-24T10:05:00+02:00'],
+    ['ticket', '2026-10-24T19:10:00+02:00'], ['plein', '2026-10-24T18:30:00+02:00']]) {
+    assert.equal(keeper.stamp(kind, at(when)), 'added', kind);
+  }
+  assert.equal(keeper.card.stamps.length, 4);
+  assert.deepEqual(s.writes, []);
+  assert.equal(s.mem.size, 0);
+  assert.equal(hasCard(s), false, 'no card exists in the browser');
+  // and after taking it and handing it back, the browser is as it was
+  keeper.take();
+  keeper.discard();
+  assert.equal(s.mem.size, 0);
+  assert.equal(hasCard(s), false);
+});
+
+test('in the shipped site, the card key is the only thing ever written to the browser, and only by carte.js', () => {
+  const root = fileURLToPath(new URL('../public', import.meta.url));
+  const files = [];
+  (function walk(dir) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (/\.(js|html)$/.test(entry.name)) files.push(path);
+    }
+  }(root));
+  assert.ok(files.length > 10, 'the walk found the site');
+  for (const path of files) {
+    const rel = relative(root, path).split(sep).join('/');
+    const text = readFileSync(path, 'utf8');
+    assert.ok(!/document\.cookie|sessionStorage|indexedDB|caches\.open/.test(text), `${rel}: no cookie, session storage or cache`);
+    assert.equal(/\bsetItem\b/.test(text), rel === 'js/carte.js', `${rel}: setItem lives in carte.js and nowhere else`);
+    assert.ok(!/\bremoveItem\b/.test(text) || rel === 'js/carte.js', `${rel}: removeItem too`);
   }
 });
 

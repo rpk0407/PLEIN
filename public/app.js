@@ -19,6 +19,9 @@ import {
   carriedTotal, chainLights, hasReading, heldForNextPlein, readChain, readTicket, readTicketIndex, solscanTx,
 } from './js/readings.js';
 import { cardView, createKeeper } from './js/carte.js';
+import {
+  MIN_GAP_MS, PLATE_LEAD, RETRY_MS, UNVERIFIED_NOTE, pumpStateFor, quoteEndpoint, routeLine, testRoute,
+} from './js/route.js';
 
 const C = window.PLEIN_CONFIG || {};
 C.contract = '';
@@ -239,8 +242,7 @@ function applyPhase() {
     btn.style.cursor = open ? 'pointer' : 'not-allowed';
     btn.title = open ? 'Copier l’adresse officielle' : 'L’adresse sera publiée ici à l’ouverture';
   });
-  setIf('pumpClosed', !open);
-  setIf('pumpLive', open);
+  syncPump(); // closed, checking, waiting plate or swap widget: follows the phase and the route test
   applyTotemAria();
   applyDashboard(); // tag, curve gauge and fee lane depend on the phase too
 
@@ -751,8 +753,9 @@ function renderTickets() {
 const storage = (() => {
   try { return window.localStorage; } catch { return null; }
 })();
-// Stamps live in memory. Nothing is written to the browser until the visitor presses "Prendre ma
-// carte" (that click is the first write); without storage the card lives for the visit.
+// Stamps live in memory. Nothing is written to the browser until the visitor presses "Prendre une
+// carte" (that click is the first write); "Rendre la carte" erases it. Without storage the card
+// lives for the visit.
 const keeper = createKeeper(storage);
 let carteNote = '';
 let shownWeek = '';
@@ -1117,7 +1120,16 @@ function renderCheck() {
 }
 
 // ---------------------------------------------------------------- the pump (Jupiter Plugin)
+// Pressing "Faire le plein" first asks Jupiter whether it has a route into the official mint for
+// 10 USDC (public/js/route.js). A route sets up the swap widget and prints the route line under it.
+// Jupiter saying there is no route shows the plate instead: a link to the coin's pump.fun page, and
+// a new try every minute while the panel is open. Not being able to ask (rate limit, timeout, network)
+// takes nothing away: the widget is set up under a line that says the route was not checked, with the
+// same link, and the check goes on every minute. The panels are data-if="pumpClosed | pumpChecking |
+// pumpWaiting | pumpLive". state: 'idle' nothing asked yet, 'checking' the first answer is awaited,
+// 'waiting' no route (or no widget), 'route' Jupiter has one, 'unverified' Jupiter could not say.
 let pluginRequested = false;
+const pumpTest = { state: 'idle', mint: '', run: 0, timer: 0, result: null, endedAt: 0 };
 function mountPlugin() {
   if (pluginRequested || !isOpen()) return;
   pluginRequested = true;
@@ -1133,7 +1145,83 @@ function mountPlugin() {
     }
     window.Jupiter?.init({ displayMode: 'integrated', integratedTargetId: 'jupiter-plugin', formProps });
   };
+  script.onerror = () => {
+    // the widget's script did not load (network, an extension): an empty box would look broken, so the
+    // plate says it and the next try sets the script up again
+    script.remove();
+    pluginRequested = false;
+    pumpTest.state = 'waiting';
+    pumpTest.result = { state: 'widget', reason: 'script', at: Date.now() };
+    renderPump();
+    clearTimeout(pumpTest.timer); // one pending try at a time: a retry may already be waiting
+    pumpTest.timer = 0;
+    const pump = $('#pump');
+    if (pump && !pump.hidden) pumpTest.timer = setTimeout(checkRoute, RETRY_MS);
+  };
   document.head.appendChild(script);
+}
+function renderPump() {
+  const open = isOpen();
+  const { state, result } = pumpTest;
+  setIf('pumpClosed', !open);
+  setIf('pumpChecking', open && (state === 'idle' || state === 'checking'));
+  setIf('pumpWaiting', open && state === 'waiting');
+  setIf('pumpLive', open && (state === 'route' || state === 'unverified'));
+  setIf('pumpUnverified', open && state === 'unverified');
+  if (open && state === 'waiting' && result) {
+    setText('pumpWaitingLead', PLATE_LEAD[result.state] ?? PLATE_LEAD.unreachable);
+    setText('pumpWaitingNote', `Dernière vérification à ${frenchWhen(result.at).hm}. Nouvel essai chaque minute tant que cette fenêtre est ouverte.`);
+  }
+  if (open && state === 'unverified') setText('pumpRoute', UNVERIFIED_NOTE);
+  if (open && state === 'route' && result) {
+    const reading = chainUsable() ? chain : null;
+    setText('pumpRoute', routeLine({
+      labels: result.labels, canonical: result.canonical, complete: reading?.complete ?? null, attributed: tickets.list.length === 0, at: result.at,
+    }));
+  }
+}
+/** The pump follows the phase: a panel open at the opening starts its test; a corrected contract restarts it. */
+function syncPump() {
+  const pump = $('#pump');
+  const watching = isOpen() && pump && !pump.hidden;
+  if (watching && (pumpTest.state === 'idle' || pumpTest.mint !== C.contract)) void checkRoute();
+  else renderPump();
+}
+async function checkRoute() {
+  clearTimeout(pumpTest.timer);
+  pumpTest.timer = 0;
+  const pump = $('#pump');
+  if (!isOpen() || !pump || pump.hidden) {
+    renderPump();
+    return;
+  }
+  if (pumpTest.mint !== C.contract) Object.assign(pumpTest, { mint: C.contract, state: 'idle', result: null });
+  if (pumpTest.state === 'route') {
+    renderPump(); // found: Jupiter is not asked again
+    return;
+  }
+  const sinceLast = Date.now() - pumpTest.endedAt;
+  if ((pumpTest.state === 'waiting' || pumpTest.state === 'unverified') && sinceLast < MIN_GAP_MS) {
+    // opened and closed in a hurry: stay inside the free endpoint's rate limit
+    pumpTest.timer = setTimeout(checkRoute, MIN_GAP_MS - sinceLast);
+    renderPump();
+    return;
+  }
+  const run = (pumpTest.run += 1);
+  if (pumpTest.state === 'idle') pumpTest.state = 'checking';
+  renderPump();
+  const jup = C.jupiter || {};
+  const result = await testRoute({ outputMint: pumpTest.mint, inputMint: jup.inputMint, endpoint: quoteEndpoint(jup.quoteUrl) });
+  if (run !== pumpTest.run) return; // the panel was closed, or the contract changed, while Jupiter answered
+  pumpTest.endedAt = Date.now();
+  pumpTest.result = result;
+  // A route, or an answer that says nothing about the route (rate limit, timeout, network), sets the
+  // widget up: the plugin's own form says what it finds. Only Jupiter's word that there is no route
+  // shows the plate. Either way the check goes on every minute, until a route is confirmed.
+  pumpTest.state = pumpStateFor(result.state);
+  renderPump(); // the widget's box is on screen before the widget is set up in it
+  if (pumpTest.state !== 'waiting') mountPlugin();
+  if (pumpTest.state !== 'route') pumpTest.timer = setTimeout(checkRoute, RETRY_MS);
 }
 let lastFocus = null;
 function openPump() {
@@ -1141,13 +1229,17 @@ function openPump() {
   if (!pump) return;
   lastFocus = document.activeElement;
   pump.hidden = false;
-  mountPlugin();
+  void checkRoute();
   $('[data-on-click="closePump"]', pump)?.focus();
 }
 function closePump() {
   const pump = $('#pump');
   if (!pump) return;
   pump.hidden = true;
+  pumpTest.run += 1; // an answer still on its way is dropped
+  clearTimeout(pumpTest.timer);
+  pumpTest.timer = 0;
+  if (pumpTest.state === 'checking') pumpTest.state = 'idle';
   lastFocus?.focus?.();
 }
 

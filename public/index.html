@@ -512,11 +512,12 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
         </ul>
         <p data-if="carteFull" hidden role="status" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-size: 26px; line-height: 1.2; color: #F1F4F6;">Dix tampons, et tu gagnes… rien. Comme partout, mais ici on te le dit.</p>
         <p data-if="carteLoose" style="margin: 0; font-size: 14px; color: #8A939E;">Tant que tu n’as pas pris ta carte, tes tampons ne vivent que dans cette page&nbsp;: rien n’est écrit dans ton navigateur. Rien n’est envoyé, rien n’est à gagner, aucun achat ne compte.</p>
-        <p data-if="carteKept" hidden style="margin: 0; font-size: 14px; color: #8A939E;">Ta carte est gardée dans le stockage de ton navigateur, et nulle part ailleurs. Rien n’est envoyé, rien n’est à gagner, aucun achat ne compte.</p>
+        <p data-if="carteKept" hidden style="margin: 0; font-size: 14px; color: #8A939E;">Ta carte est gardée dans le stockage de ton navigateur, et nulle part ailleurs. Rien n’est envoyé, rien n’est à gagner, aucun achat ne compte. Rendre la carte l’efface de ton navigateur.</p>
+        <p data-carte-promise style="margin: 0; font-size: 16px; font-weight: 600; color: #F1F4F6;">La carte ne vaut rien et ne sera jamais convertie en jetons.</p>
         <p data-bind="carteNote" hidden role="status" style="margin: 0; font-size: 14px; color: #FFB95E;"></p>
         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-          <button type="button" data-if="carteLoose" data-on-click="takeCarte" style="min-height: 48px; padding: 0 20px; border: 1.5px solid #FFA733; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer;">Prendre ma carte</button>
-          <button type="button" data-if="carteKept" hidden data-on-click="dropCarte" style="min-height: 48px; padding: 0 20px; border: 1.5px solid #3A414C; border-radius: 12px; background: transparent; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 16px; cursor: pointer;">Jeter ma carte</button>
+          <button type="button" data-if="carteLoose" data-on-click="takeCarte" style="min-height: 48px; padding: 0 20px; border: 1.5px solid #FFA733; border-radius: 12px; background: #FFA733; color: #0B0C0E; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer;">Prendre une carte</button>
+          <button type="button" data-if="carteKept" hidden data-on-click="dropCarte" style="min-height: 48px; padding: 0 20px; border: 1.5px solid #3A414C; border-radius: 12px; background: transparent; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 16px; cursor: pointer;">Rendre la carte</button>
         </div>
       </div>
       <div style="flex: 0 1 380px; min-width: 0; margin: 0 auto; width: 100%; box-sizing: border-box; padding: 20px; border-radius: 16px; background: linear-gradient(160deg, #1B2028, #12161B); border: 1px solid #2C333D; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; gap: 16px;">
@@ -905,8 +906,24 @@ a{color:#FFA733}a:hover{color:#F1F4F6}
           <p style="margin: 0; font-size: 15px; color: #C9D0D8;">Le seul contrat officiel est celui publié ici, à partir de samedi 15:30. Tout contrat qui circule avant est faux.</p>
         </div>
       </div>
+      <div data-if="pumpChecking" hidden style="display: contents">
+        <div role="status" style="display: flex; flex-direction: column; gap: 10px; padding: 18px; border-radius: 14px; border: 1.5px dashed #3A414C;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #FFA733;">La pompe vérifie sa route</span>
+          <p style="margin: 0; font-size: 15px; color: #C9D0D8;">Jupiter dit s’il a une route pour $PLEIN. Quelques secondes.</p>
+        </div>
+      </div>
+      <div data-if="pumpWaiting" hidden style="display: contents">
+        <div style="display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 14px; border: 1.5px dashed #3A414C;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #FFA733;">La pompe attend Jupiter</span>
+          <p style="margin: 0; font-size: 15px; color: #C9D0D8;"><strong data-bind="pumpWaitingLead" style="color: #F1F4F6;">Jupiter ne dessert pas encore $PLEIN.</strong> Sur la page pump.fun du jeton, pump.fun ajoute 0,45&nbsp;% de frais de plateforme&nbsp;; la part de la station ne change pas (d’après pump.fun).</p>
+          <a href="https://pump.fun" data-link="pumpfun" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border: 1.5px solid #FFA733; border-radius: 12px; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: 16px; text-decoration: none;">Ouvrir $PLEIN sur pump.fun <span aria-hidden="true">↗</span></a>
+          <p role="status" data-bind="pumpWaitingNote" style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A939E;">Nouvel essai chaque minute tant que cette fenêtre est ouverte.</p>
+        </div>
+      </div>
       <div data-if="pumpLive" hidden style="display: contents">
         <div id="jupiter-plugin" style="min-height: 460px; border-radius: 14px; overflow: hidden; background: #0B0E12; border: 1px solid #262C35;"></div>
+        <p data-bind="pumpRoute" style="margin: 0; font-size: 13px; color: #A7AFB9;"></p>
+        <a data-if="pumpUnverified" hidden href="https://pump.fun" data-link="pumpfun" target="_blank" rel="noopener" style="align-self: flex-start; color: #F1F4F6; font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 14px; text-underline-offset: 3px;">Ouvrir $PLEIN sur pump.fun <span aria-hidden="true">↗</span></a>
       </div>
       <p style="margin: 0; font-size: 14px; color: #A7AFB9;">La sortie est réglée sur le contrat officiel. Le site n’ajoute aucun frais&nbsp;: s’appliquent les frais de pump.fun (<span data-bind="pumpFeeClause">1,25&nbsp;% sur la courbe, dont 0,30&nbsp;% pour la station</span>), ceux de Jupiter (d’après Jupiter, 0,50&nbsp;% sur un jeton de moins de 24&nbsp;h, puis 0,10&nbsp;%&nbsp;; vérifie le montant affiché avant de signer) et ceux du réseau Solana. pump.fun indique ne pas prélever ici ses 0,45&nbsp;% de plateforme, réservés à son site et à son appli. Selon la route choisie par Jupiter, un échange peut ne rien rapporter à la station.</p>
       <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #8A939E; overflow-wrap: anywhere;">Contrat&nbsp;: <span data-ca>publié ici samedi à 15:30</span></p>

@@ -29,7 +29,9 @@ SEQUENCE:1
 DTSTART;TZID=Europe/Paris:20261017T153000
 DTEND;TZID=Europe/Paris:20261017T160000
 SUMMARY:Ouverture de la Station $PLEIN
-DESCRIPTION:Le seul contrat officiel est celui publié sur le site de la station\, à partir de 15:30. Pas de plein ce jour-là : le premier plein est le samedi 24 octobre à 18:00.
+DESCRIPTION:Le seul contrat officiel est celui publié sur le site de la st
+ ation\, à partir de 15:30. Pas de plein ce jour-là : le premier plein e
+ st le samedi 24 octobre à 18:00.
 END:VEVENT
 BEGIN:VEVENT
 UID:plein-du-samedi@station-plein
@@ -38,7 +40,8 @@ DTSTART;TZID=Europe/Paris:20261024T180000
 DTEND;TZID=Europe/Paris:20261024T190500
 RRULE:FREQ=WEEKLY;BYDAY=SA
 SUMMARY:Le plein du samedi · $PLEIN
-DESCRIPTION:Rachat en 12 tranches de 18:00 à 19:00\, burn à 19:00\, ticket à 19:05.
+DESCRIPTION:Rachat en 12 tranches de 18:00 à 19:00\, burn à 19:00\, ticke
+ t à 19:05.
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Le plein commence dans 15 minutes

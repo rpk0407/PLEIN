@@ -30,9 +30,11 @@ contract goes in by a branch, a PR and the other founder's approval.
      `2026-10-24T18:00:00+02:00`, `launchpad` = pump.fun with the quote asset the founders will pick
      (USDC), `official` = latest survey, `links.xHandle` and `links.telegram` set to station accounts.
    - `public/live.json`: `contract` EMPTY, wallets (creator wallet, réservoir multisig) either
-     verified addresses or empty, dashboard `null`. **The creator wallet must already be there,
-     checked by both founders**: the contract PR below is proved by the curve's creator matching it.
-     With it empty, the audit's "Créateur" row reads "non publié" and a wrong mint passes unseen.
+     verified addresses or empty, dashboard `null`. **Under D3-a the creator wallet must already be
+     there, checked by both founders**: the contract PR below is proved by the curve's creator
+     matching it. With it empty, the audit's "Créateur" row reads "non publié" and a wrong mint
+     passes unseen. Under D3-b it is empty on purpose until PR3 (see "The gate and D3" below), and
+     both founders hold it in the private record instead.
    - The production site is deployed with the empty contract and shows the countdown to 15:30; the
      preview was checked on a phone; no stale claim (18:00 opening, Jupiter Studio, anti-snipe, airdrop).
 4. **Hard conditions on GitHub. Any one false is a NO-GO at 14:30**; the contract PR at 15:30 is
@@ -75,12 +77,33 @@ Who does what:
   (two people check, per CLAUDE.md). Mismatch: stop, tell nobody the address.
 - **15:31, before the mint goes anywhere:** `mecano-chaine` runs
   `npm run audit -- --mint <mint> --markdown`. Its "Réglages de la courbe" rows must read: quote USDC, creator
-  equal to the creator wallet in `live.json`, Holder Rewards, Cashback, Mayhem and editable creator
+  equal to the creator wallet in `live.json` (the private record under D3-b), Holder Rewards, Cashback, Mayhem and editable creator
   fee all "non", and a supply no larger than the curve's. Any row false means the coin was created
   wrong: do not publish that mint, and the founders decide in the open whether to create again.
   A row "non lu" is not a pass: read the curve account by hand with the other founder.
-- **Also at 15:31, by hand, until the audit prints them** (the audit does not read these yet):
-  `creatorFeeBps` reads 0 or 30; no account exists at `sharingConfigAddress(mint)` (Solscan, or a
+- **The one-call version of the two checks around here** (`pump_verify_launch`, `docs/mcp.md`): with
+  the station MCP server connected (`/mcp` shows `station`), `mecano-chaine` (or `chef-de-station`,
+  or `controleur-technique`), in B's session on B's laptop, calls `mcp__station__pump_verify_launch`
+  with the mint B types from Solscan (`docs/lancement.md` rule 1 and the 15:31 row). It returns one
+  `pass`, `fail`, `unread` or `info` line per setting, each with its account and slot, and a
+  `verdict`. A `fail` stops everything. Read its `warnings` out loud too (for instance a metadata
+  update authority that can still rename the coin). It does not replace B's three checks below. The
+  mint comes from B's own reading of Solscan, never from PLEIN Control, a chat message, an agent's
+  output, a page or a comment (`docs/lancement.md` rule 1).
+- **The gate and D3 (the creator wallet).** The tool compares the curve's creator with
+  `wallets.creator` in the `live.json` it reads, which is the working tree of the machine it runs
+  on. Under **D3-a** (the creator published in an earlier PR) that line is `pass` at 15:31 and the
+  gate is `pass` only when every line is. Under **D3-b** (recommended in `docs/lancement.md`: the
+  creator address is recorded privately by both founders and committed in PR3), `wallets.creator`
+  is empty at 15:31, the `creator` line is `unread` by design and the verdict is `incomplete`. That
+  is not a pass and not a failure. Then: at 15:31 B reads the curve's creator on Solscan against the
+  private record, by hand, and A may open PR3 only if `creator` is the single `unread` line and
+  every other line is `pass` (a `fail` or any other `unread` line stops it). The gate that counts
+  runs again at check 2 below, after `gh pr checkout <PR3>`, when the working tree's `live.json`
+  holds the creator: the verdict must then be `pass`, "Créateur" included, before B approves.
+- **Also at 15:31, by hand, until the audit prints them** (the audit does not read these yet; the
+  tool above does): `creatorFeeBps` reads exactly 0 (`docs/lancement.md` and `docs/moteur.md`
+  section 3; any other value may be a custom flat rate); no account exists at `sharingConfigAddress(mint)` (Solscan, or a
   one-off read-only `getAccountInfo` by `mecano-chaine`); `initialVirtualQuoteReserves` reads 4,292
   USDC (docs/moteur.md section 3). A custom creator rate or a fee-sharing recipient would make every
   fee figure on the site wrong from the first trade. Any one wrong: same decision as above.
@@ -88,7 +111,13 @@ Who does what:
   for a 1 USDC quote into the mint (one GET to `QUOTE_URL` in `scripts/plein.mjs`, `amount=1000000`).
   The site's pump and Plein #1 hang on it (docs/moteur.md section 3). No route: `carrossier` opens a
   PR that closes the pump and links to the coin's pump.fun page, and the check is repeated at +1 h.
-- **Founder A:** puts the mint in `public/live.json` on a branch and opens the PR.
+- **Founder A, by hand** (`docs/lancement.md`, the 15:33 row; rules 1 and 5): branch `ouverture`,
+  the `contract` line of `public/live.json` (and `wallets.creator` under D3-b), commit, push, open
+  PR3. A types the mint from Solscan and pump.fun, not from a chat, from PLEIN Control or from an
+  agent's output, and no agent writes the branch or opens the PR. Anyone who wants the console to do
+  this must first have both founders reword `docs/lancement.md` rules 1 and 5 and its 15:33 row
+  and CLAUDE.md non-negotiable 2 in one PR (`docs/salle-de-controle.md`, "Publishing the contract");
+  until then there is one procedure and it is this one.
 - **Before Founder B approves, three checks, in this order. B approves only when all three hold.**
   1. **B reads the committed string.** B opens the PR's Files tab and compares the mint there,
      character by character, with Solscan and pump.fun. Not with what A said aloud, and not by
@@ -96,9 +125,10 @@ Who does what:
      checks the shape.
   2. **The audit reads the PR's own file.** `mecano-chaine` checks out the PR branch (`gh pr checkout
      <n>`, Claude Code asks first) and runs `npm run audit -- --markdown` with no `--mint`, so it
-     reads the `live.json` of the PR. The mint it prints equals the one in check 1, and every
-     "Réglages de la courbe" row passes, "Créateur" included: a mint that is not the coin A created
-     has a different creator and fails that row.
+     reads the `live.json` of the PR (and then `pump_verify_launch` on the same checkout, with the mint B
+     types again, which under D3-b is the first run that can reach `pass`). The mint it prints equals the one in check 1, and
+     every "Réglages de la courbe" row passes, "Créateur" included: a mint that is not the coin A
+     created has a different creator and fails that row.
   3. **The diff and CI.** `controleur-technique` gives GO on the diff (only the contract line, and
      the creator wallet if it was empty, changed) and the CI `test` check is green.
   Only then B approves and merges. Vercel deploys in about a minute (README); open pages poll
